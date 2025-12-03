@@ -9,7 +9,9 @@ const {
   foundText = 'Mi hai trovato!'
 } = Astro.props;
 
-const baseUrl = import.meta.env.BASE_URL;
+const baseUrl = import.meta.env.BASE_URL.endsWith('/') 
+  ? import.meta.env.BASE_URL 
+  : import.meta.env.BASE_URL + '/';
 ---
 
 <div id="spotlight-container" class="spotlight-container">
@@ -17,7 +19,7 @@ const baseUrl = import.meta.env.BASE_URL;
   <p class="found-text" aria-hidden="true">{foundText}</p>
   
   <div class="bat-logo" id="bat-logo">
-    <img src={`${baseUrl}images/bat-logo.svg`} alt="Bat Signal" />
+    <img src={`${baseUrl}images/bat-logo.svg`} alt="Bat Signal" loading="eager" />
   </div>
   
   <div class="spotlight" id="spotlight"></div>
@@ -182,18 +184,20 @@ const baseUrl = import.meta.env.BASE_URL;
     }
 
     private positionLogo() {
-      const padding = 100;
+      const padding = 150;
       const logoWidth = Math.min(150, window.innerWidth * 0.15);
       const logoHeight = logoWidth * 0.35;
       
-      const maxX = window.innerWidth - logoWidth - padding;
-      const maxY = window.innerHeight - logoHeight - padding;
+      const availableWidth = window.innerWidth - logoWidth - (padding * 2);
+      const availableHeight = window.innerHeight - logoHeight - (padding * 2);
       
-      this.logoPosition.x = padding + Math.random() * (maxX - padding);
-      this.logoPosition.y = padding + Math.random() * (maxY - padding);
+      this.logoPosition.x = padding + (Math.random() * availableWidth);
+      this.logoPosition.y = padding + (Math.random() * availableHeight);
       
       this.batLogo.style.left = `${this.logoPosition.x}px`;
       this.batLogo.style.top = `${this.logoPosition.y}px`;
+      
+      console.log('Logo positioned at:', this.logoPosition);
     }
 
     private createFogParticles() {
