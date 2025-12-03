@@ -74,6 +74,8 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
     background: var(--color-bg-primary);
     z-index: calc(var(--z-audio) + 100);
     transition: opacity 0.5s ease, visibility 0.5s ease;
+    overflow: hidden;
+    touch-action: none;
   }
 
   .audio-gate.hidden {
@@ -253,6 +255,14 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
     startWithAudio() {
       this.isMuted = false;
       this.hideGate();
+      
+      // Unlock BOTH audio elements on user interaction (required for iOS/mobile)
+      // Play and immediately pause found audio to unlock it
+      this.foundAudio.play().then(() => {
+        this.foundAudio.pause();
+        this.foundAudio.currentTime = 0;
+      }).catch(() => {});
+      
       this.playAmbient();
       this.updateUI();
     }
