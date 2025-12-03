@@ -238,6 +238,7 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
       
       this.isMuted = true;
       this.isReady = false; // Prevent found sound before user interaction
+      this.isUnlocking = false; // Track if we're in the middle of unlocking audio
       this.hasFoundLogo = false; // Prevent multiple found sounds
       this.crossfadeInterval = null;
       
@@ -305,30 +306,42 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
 
     startWithAudio() {
       this.isMuted = false;
-      this.isReady = true; // Now ready to play found sound
+      this.isUnlocking = true; // Mark that we're unlocking
       this.hideGate();
       
       // Unlock ALL audio elements on user interaction (required for iOS/mobile)
       // Set volume to 0 during unlock to prevent hearing it
-      const originalFoundVolume = this.foundAudio.volume;
-      const originalAmbient2Volume = this.ambientAudio2.volume;
+      const originalFoundVolume = effectVolume;
       
       this.foundAudio.volume = 0;
+      this.ambientAudio2.volume = 0;
+      
+      let unlockCount = 0;
+      const checkUnlockComplete = () => {
+        unlockCount++;
+        if (unlockCount >= 2) {
+          // Both audio elements unlocked, now safe to play found sound
+          this.isUnlocking = false;
+          this.isReady = true;
+        }
+      };
+      
       this.foundAudio.play().then(() => {
         this.foundAudio.pause();
         this.foundAudio.currentTime = 0;
-        this.foundAudio.volume = originalFoundVolume; // Restore volume
+        this.foundAudio.volume = originalFoundVolume;
+        checkUnlockComplete();
       }).catch(() => {
         this.foundAudio.volume = originalFoundVolume;
+        checkUnlockComplete();
       });
       
-      this.ambientAudio2.volume = 0;
       this.ambientAudio2.play().then(() => {
         this.ambientAudio2.pause();
         this.ambientAudio2.currentTime = 0;
-        this.ambientAudio2.volume = originalAmbient2Volume;
+        checkUnlockComplete();
       }).catch(() => {
-        this.ambientAudio2.volume = originalAmbient2Volume;
+        checkUnlockComplete();
       });
       
       this.playAmbient();
@@ -369,8 +382,8 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
     }
 
     playFoundSound() {
-      // Only play if: not muted, ready (user made choice), and not already played
-      if (this.isMuted || !this.isReady || this.hasFoundLogo) return;
+      // Only play if: not muted, ready (unlock complete), not unlocking, and not already played
+      if (this.isMuted || !this.isReady || this.isUnlocking || this.hasFoundLogo) return;
       
       this.hasFoundLogo = true; // Prevent playing again
       
