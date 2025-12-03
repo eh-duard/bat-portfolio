@@ -2,10 +2,14 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SpotlightSearch from '../components/SpotlightSearch.astro';
 import AudioController from '../components/AudioController.astro';
+import Navigation from '../components/Navigation.astro';
 ---
 
 <BaseLayout title="Bat Portfolio" description="Portfolio di uno sviluppatore fullstack">
   <main id="app">
+    <!-- Navigation (shows after intro) -->
+    <Navigation currentLang="it" />
+
     <!-- Spotlight Search Intro -->
     <SpotlightSearch searchText="Cercami" foundText="Mi hai trovato!" />
 
