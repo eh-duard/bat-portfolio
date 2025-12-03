@@ -3,6 +3,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import SpotlightSearch from '../components/SpotlightSearch.astro';
 import AudioController from '../components/AudioController.astro';
 import Navigation from '../components/Navigation.astro';
+import Hero from '../components/sections/Hero.astro';
+import About from '../components/sections/About.astro';
+import Skills from '../components/sections/Skills.astro';
+import Projects from '../components/sections/Projects.astro';
+import Contact from '../components/sections/Contact.astro';
 ---
 
 <BaseLayout title="Bat Portfolio" description="Portfolio di uno sviluppatore fullstack">
@@ -11,17 +16,18 @@ import Navigation from '../components/Navigation.astro';
     <Navigation currentLang="it" />
 
     <!-- Spotlight Search Intro -->
-    <SpotlightSearch searchText="Cercami" foundText="Mi hai trovato!" />
+    <SpotlightSearch />
 
     <!-- Audio Controller -->
     <AudioController />
 
     <!-- Main Content (hidden until intro complete) -->
     <div id="content" class="content-wrapper" aria-hidden="true">
-      <section class="hero">
-        <h1>Benvenuto</h1>
-        <p>Portfolio in costruzione...</p>
-      </section>
+      <Hero />
+      <About />
+      <Skills />
+      <Projects />
+      <Contact />
     </div>
   </main>
 </BaseLayout>
@@ -36,20 +42,5 @@ import Navigation from '../components/Navigation.astro';
   .content-wrapper.visible {
     opacity: 1;
     visibility: visible;
-  }
-
-  .hero {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: var(--space-xl);
-  }
-
-  .hero h1 {
-    color: var(--color-accent);
-    margin-bottom: var(--space-md);
   }
 </style>
