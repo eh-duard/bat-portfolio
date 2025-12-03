@@ -309,15 +309,27 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
       this.hideGate();
       
       // Unlock ALL audio elements on user interaction (required for iOS/mobile)
+      // Set volume to 0 during unlock to prevent hearing it
+      const originalFoundVolume = this.foundAudio.volume;
+      const originalAmbient2Volume = this.ambientAudio2.volume;
+      
+      this.foundAudio.volume = 0;
       this.foundAudio.play().then(() => {
         this.foundAudio.pause();
         this.foundAudio.currentTime = 0;
-      }).catch(() => {});
+        this.foundAudio.volume = originalFoundVolume; // Restore volume
+      }).catch(() => {
+        this.foundAudio.volume = originalFoundVolume;
+      });
       
+      this.ambientAudio2.volume = 0;
       this.ambientAudio2.play().then(() => {
         this.ambientAudio2.pause();
         this.ambientAudio2.currentTime = 0;
-      }).catch(() => {});
+        this.ambientAudio2.volume = originalAmbient2Volume;
+      }).catch(() => {
+        this.ambientAudio2.volume = originalAmbient2Volume;
+      });
       
       this.playAmbient();
       this.updateUI();
