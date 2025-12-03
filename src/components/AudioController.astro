@@ -237,6 +237,8 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
       this.foundAudio = document.getElementById('found-audio');
       
       this.isMuted = true;
+      this.isReady = false; // Prevent found sound before user interaction
+      this.hasFoundLogo = false; // Prevent multiple found sounds
       this.crossfadeInterval = null;
       
       this.ambientAudio.volume = ambientVolume;
@@ -303,6 +305,7 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
 
     startWithAudio() {
       this.isMuted = false;
+      this.isReady = true; // Now ready to play found sound
       this.hideGate();
       
       // Unlock ALL audio elements on user interaction (required for iOS/mobile)
@@ -322,6 +325,7 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
 
     startWithoutAudio() {
       this.isMuted = true;
+      this.isReady = true;
       this.hideGate();
       this.updateUI();
     }
@@ -353,7 +357,10 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
     }
 
     playFoundSound() {
-      if (this.isMuted) return;
+      // Only play if: not muted, ready (user made choice), and not already played
+      if (this.isMuted || !this.isReady || this.hasFoundLogo) return;
+      
+      this.hasFoundLogo = true; // Prevent playing again
       
       // Stop ambient immediately
       this.ambientAudio.pause();
