@@ -303,9 +303,10 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
       document.addEventListener('mousemove', (e) => this.handleMouseMove(e));
       
       // Mobile - touchstart, touchmove, touchend
-      document.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: false });
-      document.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
-      document.addEventListener('touchend', () => this.handleTouchEnd());
+      // Only attach to container, not document, to allow audio gate interaction
+      this.container.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: false });
+      this.container.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
+      this.container.addEventListener('touchend', () => this.handleTouchEnd());
       
       this.batLogo.addEventListener('click', () => this.handleLogoClick());
     }
@@ -321,7 +322,14 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
 
     private handleTouchStart(e: TouchEvent) {
       if (this.isFound) return;
-      e.preventDefault(); // Prevent scroll
+      
+      // Check if audio gate is still visible - don't block touch
+      const audioGate = document.getElementById('audio-gate');
+      if (audioGate && !audioGate.classList.contains('hidden')) {
+        return; // Let touch through to audio gate
+      }
+      
+      e.preventDefault(); // Prevent scroll only after audio choice
       
       const touch = e.touches[0];
       this.spotlight.style.opacity = '1';
@@ -333,6 +341,13 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
 
     private handleTouchMove(e: TouchEvent) {
       if (this.isFound) return;
+      
+      // Check if audio gate is still visible
+      const audioGate = document.getElementById('audio-gate');
+      if (audioGate && !audioGate.classList.contains('hidden')) {
+        return;
+      }
+      
       e.preventDefault(); // Prevent scroll
       
       const touch = e.touches[0];
