@@ -2,11 +2,13 @@
 interface Props {
   searchText?: string;
   foundText?: string;
+  hintText?: string;
 }
 
 const { 
   searchText = 'Cercami',
-  foundText = 'Mi hai trovato!'
+  foundText = 'Mi hai trovato!',
+  hintText = 'Trascina il dito per cercare'
 } = Astro.props;
 
 const baseUrl = import.meta.env.BASE_URL.endsWith('/') 
@@ -15,9 +17,9 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
 ---
 
 <div id="spotlight-container" class="spotlight-container">
-  <p class="search-text">{searchText}</p>
-  <p class="found-text" aria-hidden="true">{foundText}</p>
-  <p class="mobile-hint">Trascina il dito per cercare</p>
+  <p class="search-text" data-i18n="intro.search">{searchText}</p>
+  <p class="found-text" aria-hidden="true" data-i18n="intro.found">{foundText}</p>
+  <p class="mobile-hint" data-i18n="intro.hint">{hintText}</p>
   
   <div class="bat-logo" id="bat-logo">
     <img src={`${baseUrl}images/bat-logo.svg`} alt="Bat Signal" loading="eager" />
