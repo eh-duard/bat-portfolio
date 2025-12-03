@@ -32,7 +32,8 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
   .spotlight-container {
     position: fixed;
     inset: 0;
-    background: var(--color-bg-primary);
+    /* Force dark background regardless of theme - spotlight needs dark to work */
+    background: #0a0a0a;
     overflow: hidden;
     cursor: none;
     z-index: var(--z-spotlight);
@@ -59,7 +60,8 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
     transform: translate(-50%, -50%);
     font-family: var(--font-display);
     font-size: clamp(1.5rem, 5vw, 3rem);
-    color: var(--color-accent);
+    /* Force gold color for spotlight screen */
+    color: #ffd700;
     text-transform: uppercase;
     letter-spacing: 0.3em;
     pointer-events: none;
@@ -146,7 +148,8 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
     transform: translateX(-50%);
     font-family: var(--font-display);
     font-size: 0.875rem;
-    color: var(--color-text-muted);
+    /* Force muted color for spotlight screen */
+    color: #6b7280;
     text-align: center;
     opacity: 0;
     animation: fadeInHint 0.5s ease 2s forwards;
