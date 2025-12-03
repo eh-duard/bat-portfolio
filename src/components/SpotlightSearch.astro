@@ -1,0 +1,321 @@
+---
+interface Props {
+  searchText?: string;
+  foundText?: string;
+}
+
+const { 
+  searchText = 'Cercami',
+  foundText = 'Mi hai trovato!'
+} = Astro.props;
+
+const baseUrl = import.meta.env.BASE_URL;
+---
+
+<div id="spotlight-container" class="spotlight-container">
+  <p class="search-text">{searchText}</p>
+  <p class="found-text" aria-hidden="true">{foundText}</p>
+  
+  <div class="bat-logo" id="bat-logo">
+    <img src={`${baseUrl}images/bat-logo.svg`} alt="Bat Signal" />
+  </div>
+  
+  <div class="spotlight" id="spotlight"></div>
+  
+  <canvas id="fog-canvas"></canvas>
+</div>
+
+<style>
+  .spotlight-container {
+    position: fixed;
+    inset: 0;
+    background: var(--color-bg-primary);
+    overflow: hidden;
+    cursor: none;
+    z-index: var(--z-spotlight);
+  }
+
+  .spotlight-container.found {
+    cursor: default;
+  }
+
+  .spotlight-container.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 1s ease, visibility 1s ease;
+  }
+
+  .search-text,
+  .found-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 5vw, 3rem);
+    color: var(--color-accent);
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    pointer-events: none;
+    z-index: 2;
+    text-align: center;
+  }
+
+  .search-text {
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  .found-text {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .spotlight-container.found .search-text {
+    opacity: 0;
+  }
+
+  .spotlight-container.found .found-text {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  .bat-logo {
+    position: absolute;
+    width: clamp(80px, 15vw, 150px);
+    height: auto;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1;
+    filter: drop-shadow(0 0 20px var(--color-accent));
+    transition: opacity 0.3s ease;
+  }
+
+  .bat-logo img {
+    width: 100%;
+    height: auto;
+    filter: invert(1) brightness(0.15);
+  }
+
+  .bat-logo.revealed {
+    pointer-events: auto;
+    cursor: pointer;
+  }
+
+  .bat-logo.revealed img {
+    filter: invert(83%) sepia(56%) saturate(1066%) hue-rotate(359deg) brightness(103%) contrast(104%);
+  }
+
+  .spotlight {
+    position: fixed;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 3;
+    background: radial-gradient(
+      circle,
+      rgba(255, 215, 0, 0.15) 0%,
+      rgba(255, 215, 0, 0.08) 30%,
+      rgba(255, 215, 0, 0.02) 60%,
+      transparent 70%
+    );
+    transform: translate(-50%, -50%);
+    mix-blend-mode: screen;
+  }
+
+  #fog-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.4;
+    z-index: 0;
+  }
+</style>
+
+<script>
+  class SpotlightSearch {
+    private container: HTMLElement;
+    private spotlight: HTMLElement;
+    private batLogo: HTMLElement;
+    private canvas: HTMLCanvasElement;
+    private ctx: CanvasRenderingContext2D;
+    private logoPosition: { x: number; y: number };
+    private isFound: boolean = false;
+    private fogParticles: Array<{ x: number; y: number; vx: number; vy: number; size: number; opacity: number }> = [];
+
+    constructor() {
+      this.container = document.getElementById('spotlight-container')!;
+      this.spotlight = document.getElementById('spotlight')!;
+      this.batLogo = document.getElementById('bat-logo')!;
+      this.canvas = document.getElementById('fog-canvas') as HTMLCanvasElement;
+      this.ctx = this.canvas.getContext('2d')!;
+      
+      this.logoPosition = { x: 0, y: 0 };
+      
+      this.init();
+    }
+
+    private init() {
+      this.setupCanvas();
+      this.positionLogo();
+      this.createFogParticles();
+      this.bindEvents();
+      this.animateFog();
+    }
+
+    private setupCanvas() {
+      const resize = () => {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+      };
+      resize();
+      window.addEventListener('resize', resize);
+    }
+
+    private positionLogo() {
+      const padding = 100;
+      const logoWidth = Math.min(150, window.innerWidth * 0.15);
+      const logoHeight = logoWidth * 0.35;
+      
+      const maxX = window.innerWidth - logoWidth - padding;
+      const maxY = window.innerHeight - logoHeight - padding;
+      
+      this.logoPosition.x = padding + Math.random() * (maxX - padding);
+      this.logoPosition.y = padding + Math.random() * (maxY - padding);
+      
+      this.batLogo.style.left = `${this.logoPosition.x}px`;
+      this.batLogo.style.top = `${this.logoPosition.y}px`;
+    }
+
+    private createFogParticles() {
+      const particleCount = 50;
+      for (let i = 0; i < particleCount; i++) {
+        this.fogParticles.push({
+          x: Math.random() * window.innerWidth,
+          y: Math.random() * window.innerHeight,
+          vx: (Math.random() - 0.5) * 0.5,
+          vy: (Math.random() - 0.5) * 0.3,
+          size: Math.random() * 100 + 50,
+          opacity: Math.random() * 0.3 + 0.1
+        });
+      }
+    }
+
+    private animateFog() {
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      
+      this.fogParticles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        
+        if (p.x < -p.size) p.x = this.canvas.width + p.size;
+        if (p.x > this.canvas.width + p.size) p.x = -p.size;
+        if (p.y < -p.size) p.y = this.canvas.height + p.size;
+        if (p.y > this.canvas.height + p.size) p.y = -p.size;
+        
+        const gradient = this.ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size);
+        gradient.addColorStop(0, `rgba(42, 42, 74, ${p.opacity})`);
+        gradient.addColorStop(1, 'transparent');
+        
+        this.ctx.fillStyle = gradient;
+        this.ctx.fillRect(p.x - p.size, p.y - p.size, p.size * 2, p.size * 2);
+      });
+      
+      if (!this.isFound) {
+        requestAnimationFrame(() => this.animateFog());
+      }
+    }
+
+    private bindEvents() {
+      document.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+      document.addEventListener('touchmove', (e) => this.handleTouchMove(e));
+      this.batLogo.addEventListener('click', () => this.handleLogoClick());
+    }
+
+    private handleMouseMove(e: MouseEvent) {
+      if (this.isFound) return;
+      
+      this.spotlight.style.left = `${e.clientX}px`;
+      this.spotlight.style.top = `${e.clientY}px`;
+      
+      this.checkLogoVisibility(e.clientX, e.clientY);
+    }
+
+    private handleTouchMove(e: TouchEvent) {
+      if (this.isFound) return;
+      
+      const touch = e.touches[0];
+      this.spotlight.style.left = `${touch.clientX}px`;
+      this.spotlight.style.top = `${touch.clientY}px`;
+      
+      this.checkLogoVisibility(touch.clientX, touch.clientY);
+    }
+
+    private checkLogoVisibility(mouseX: number, mouseY: number) {
+      const logoWidth = this.batLogo.offsetWidth;
+      const logoHeight = this.batLogo.offsetHeight;
+      const logoCenterX = this.logoPosition.x + logoWidth / 2;
+      const logoCenterY = this.logoPosition.y + logoHeight / 2;
+      
+      const distance = Math.sqrt(
+        Math.pow(mouseX - logoCenterX, 2) + 
+        Math.pow(mouseY - logoCenterY, 2)
+      );
+      
+      const revealDistance = 120;
+      
+      if (distance < revealDistance) {
+        const opacity = 1 - (distance / revealDistance);
+        this.batLogo.style.opacity = String(Math.max(0, opacity));
+        
+        if (opacity > 0.5) {
+          this.batLogo.classList.add('revealed');
+        }
+      } else {
+        this.batLogo.style.opacity = '0';
+        this.batLogo.classList.remove('revealed');
+      }
+    }
+
+    private handleLogoClick() {
+      if (!this.batLogo.classList.contains('revealed')) return;
+      
+      this.isFound = true;
+      this.container.classList.add('found');
+      
+      this.batLogo.style.opacity = '1';
+      this.batLogo.style.transform = 'scale(1.2)';
+      this.batLogo.style.transition = 'transform 0.5s ease';
+      
+      setTimeout(() => {
+        this.container.classList.add('hidden');
+        
+        const content = document.getElementById('content');
+        if (content) {
+          content.classList.add('visible');
+          content.setAttribute('aria-hidden', 'false');
+        }
+        
+        const intro = document.getElementById('intro');
+        if (intro) {
+          intro.style.display = 'none';
+        }
+        
+        document.dispatchEvent(new CustomEvent('spotlight-complete'));
+      }, 1500);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    new SpotlightSearch();
+  });
+</script>
