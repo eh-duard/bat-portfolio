@@ -622,6 +622,8 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
     height: auto;
     pointer-events: none;
     z-index: 2;
+    min-width: 100px;
+    min-height: 75px;
   }
 
   .bat-logo-spotlight {
@@ -670,14 +672,18 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
     display: block;
     filter: brightness(0) saturate(0) invert(0) drop-shadow(var(--glow-shadow-x, 0px) var(--glow-shadow-y, 0px) 12px rgba(255, 215, 0, 0));
     transition: filter 0.2s ease;
+    /* Fallback visibility per mobile - rendere il logo visibile almeno debolmente se non è ancora stato trovato */
+    opacity: 0.15;
   }
 
   /* Proximity states - il logo si rivela solo quando MOLTO vicino */
   .bat-logo-container.proximity-close .bat-logo img {
+    opacity: 0.35;
     filter: brightness(0.05) saturate(0) invert(0) drop-shadow(var(--glow-shadow-x, 0px) var(--glow-shadow-y, 0px) 8px rgba(255, 215, 0, 0.2));
   }
 
   .bat-logo-container.proximity-very-close .bat-logo img {
+    opacity: 1;
     filter: brightness(0.4) saturate(0) invert(0) drop-shadow(0 0 12px rgba(255, 255, 255, 0.3)) drop-shadow(var(--glow-shadow-x, 0px) var(--glow-shadow-y, 0px) 15px rgba(255, 215, 0, 0.6));
   }
   .bat-logo-container.proximity-close .bat-logo-spotlight {
@@ -1661,11 +1667,18 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
       const img = this.batLogoContainer.querySelector('img') as HTMLImageElement;
       
       const getDimensions = () => {
-        // Forza reflow multiplo per garantire che le dimensioni siano pronte
-        void this.batLogoContainer.offsetWidth;
-        const logoWidth = this.batLogoContainer.offsetWidth;
-        const logoHeight = this.batLogoContainer.offsetHeight;
+        // Leggi dimensioni
+        let logoWidth = this.batLogoContainer.offsetWidth;
+        let logoHeight = this.batLogoContainer.offsetHeight;
         
+        // Fallback: se il logo ha dimensione 0, usa un valore di default
+        if (logoWidth === 0 || logoHeight === 0) {
+          console.warn('Logo dimensions are 0, using fallback');
+          logoWidth = 150;
+          logoHeight = 110;
+        }
+        
+        console.log('Logo dimensions:', { logoWidth, logoHeight });
         return { logoWidth, logoHeight };
       };
 
