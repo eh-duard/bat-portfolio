@@ -909,11 +909,17 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
     private time: number = 0;
     private lastSpotlightX: number = 0;
     private lastSpotlightY: number = 0;
+    private isMobile: boolean = false;
+    private frameCounter: number = 0;
+    private frameSkip: number = 1; // Disegna ogni frame per default
 
     constructor(canvasId: string) {
       this.canvas = document.getElementById(canvasId) as HTMLCanvasElement;
       this.ctx = this.canvas.getContext('2d')!;
       this.noise = new SimpleNoise();
+      this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      // Su mobile: disegna solo ogni 2-3 frame (riduce da 60fps a 20-30fps)
+      this.frameSkip = this.isMobile ? 3 : 1;
       this.setupCanvas();
     }
 
@@ -927,7 +933,13 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
     }
 
     update(spotlightX: number, spotlightY: number, spotlightRadius: number) {
-      this.time += 0.004;
+      this.frameCounter++;
+      // Su mobile, salta alcuni frame per performance
+      if (this.frameCounter % this.frameSkip !== 0) {
+        return;
+      }
+
+      this.time += 0.004 * this.frameSkip;
 
       // Smooth spotlight tracking
       this.lastSpotlightX = lerp(this.lastSpotlightX, spotlightX, 0.15);
@@ -935,7 +947,8 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
 
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-      const pixelSize = 10;
+      // Su mobile: aumenta pixelSize da 10 a 16 per meno calcoli
+      const pixelSize = this.isMobile ? 16 : 10;
       const cols = Math.ceil(this.canvas.width / pixelSize);
       const rows = Math.ceil(this.canvas.height / pixelSize);
 
@@ -982,10 +995,13 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
     private time: number = 0;
     private currentRadius: number = 100;
     private targetRadius: number = 100;
+    private isMobile: boolean = false;
+    private frameCounter: number = 0;
 
     constructor(canvasId: string) {
       this.canvas = document.getElementById(canvasId) as HTMLCanvasElement;
       this.ctx = this.canvas.getContext('2d')!;
+      this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       this.setupCanvas();
     }
 
@@ -1003,7 +1019,13 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
     }
 
     update(x: number, y: number) {
-      this.time += 0.016;
+      this.frameCounter++;
+      // Su mobile, disegna meno frequentemente (riduce il costo dei gradient)
+      if (this.isMobile && this.frameCounter % 2 !== 0) {
+        return;
+      }
+
+      this.time += 0.016 * (this.isMobile ? 2 : 1);
 
       // Smooth lerp
       this.currentRadius = lerp(this.currentRadius, this.targetRadius, 0.12);
@@ -1429,7 +1451,9 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
 
     update() {
       const now = Date.now();
-      if (now - this.lastUpdate < 50) return; // 20fps per performance
+      // Su mobile: ridisegna ogni 100ms (~10fps) invece di ogni frame
+      const updateInterval = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 100 : 33;
+      if (now - this.lastUpdate < updateInterval) return;
       this.lastUpdate = now;
 
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -1468,6 +1492,8 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
     private beamsContainer: HTMLElement | null = null;
     private skylineProfile: number[] = [];
     private skylineImageLoaded = false;
+    private isMobileDevice: boolean = false;
+    private isLowEndDevice: boolean = false;
 
     private logoPosition: { x: number; y: number } = { x: 0, y: 0 };
     private isFound: boolean = false;
@@ -1496,12 +1522,37 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
       this.beams = document.querySelectorAll('.sky-beams-behind .beam, .sky-beams-front .beam');
       this.beamsContainer = document.querySelector('.sky-beams-behind');
 
+      // Rileva dispositivi mobili e low-end
+      this.isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      this.isLowEndDevice = this.detectLowEndDevice();
+
       this.volumetricFog = new VolumetricFog('fog-canvas');
       this.spotlightSystem = new CinematicSpotlight('spotlight-canvas');
       this.lightRevealSystem = new ProgressiveLightReveal('logo-reveal-canvas');
       this.distortionSystem = new DistortionEffect('distortion-canvas');
 
       this.init();
+    }
+
+    private detectLowEndDevice(): boolean {
+      // Detecta dispositivi low-end basato su memoria e core disponibili
+      const memory = (navigator as any).deviceMemory;
+      const cores = navigator.hardwareConcurrency || 1;
+      
+      // Considera low-end se ha meno di 4GB o meno di 2 core
+      if (memory && memory < 4) return true;
+      if (cores <= 2) return true;
+      
+      // Detecta battery saver su mobile
+      if ((navigator as any).getBattery) {
+        (navigator as any).getBattery().then((battery: any) => {
+          if (battery.level < 0.2 && !battery.charging) {
+            this.isLowEndDevice = true;
+          }
+        });
+      }
+      
+      return false;
     }
 
     private init() {
@@ -1902,10 +1953,15 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
 
     private animate = () => {
       if (!this.isFound) {
-        this.spotlightSystem.update(this.currentMouse.x, this.currentMouse.y);
+        // Su dispositivi low-end, disabilita alcuni effetti costosi
+        if (!this.isLowEndDevice) {
+          this.spotlightSystem.update(this.currentMouse.x, this.currentMouse.y);
+          this.distortionSystem.update(this.currentMouse.x, this.currentMouse.y, 100);
+        }
+        
         this.volumetricFog.update(this.currentMouse.x, this.currentMouse.y, 100);
         this.lightRevealSystem.update(this.currentMouse.x, this.currentMouse.y, 100);
-        this.distortionSystem.update(this.currentMouse.x, this.currentMouse.y, 100);
+        
         if (this.windowLightsSystem) {
           this.windowLightsSystem.update();
         }

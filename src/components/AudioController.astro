@@ -265,10 +265,11 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
       this.foundAudio = document.getElementById('found-audio');
       
       this.isMuted = true;
-      this.isReady = false; // Prevent found sound before user interaction
-      this.isUnlocking = false; // Track if we're in the middle of unlocking audio
-      this.hasFoundLogo = false; // Prevent multiple found sounds
-      this.crossfadeInterval = null;
+      this.isReady = false;
+      this.isUnlocking = false;
+      this.hasFoundLogo = false;
+      this.crossfadeTimeout = null; // Debounce crossfade
+      this.crossfadePending = false;
       
       this.ambientAudio.volume = ambientVolume;
       this.ambientAudio2.volume = 0;
@@ -283,18 +284,32 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
     }
 
     setupCrossfade() {
-      // When first audio is about to end, start crossfade to second
+      // Debounce: controlla il crossfade solo ogni 200ms per mobile
       this.ambientAudio.addEventListener('timeupdate', () => {
+        if (this.crossfadePending) return; // Skip if already pending
+        
         const timeLeft = this.ambientAudio.duration - this.ambientAudio.currentTime;
         if (timeLeft <= 1 && timeLeft > 0 && !this.isMuted && this.ambientAudio2.paused) {
-          this.startCrossfade(this.ambientAudio, this.ambientAudio2);
+          this.crossfadePending = true;
+          clearTimeout(this.crossfadeTimeout);
+          this.crossfadeTimeout = setTimeout(() => {
+            this.startCrossfade(this.ambientAudio, this.ambientAudio2);
+            this.crossfadePending = false;
+          }, 100); // Debounce delay
         }
       });
       
       this.ambientAudio2.addEventListener('timeupdate', () => {
+        if (this.crossfadePending) return;
+        
         const timeLeft = this.ambientAudio2.duration - this.ambientAudio2.currentTime;
         if (timeLeft <= 1 && timeLeft > 0 && !this.isMuted && this.ambientAudio.paused) {
-          this.startCrossfade(this.ambientAudio2, this.ambientAudio);
+          this.crossfadePending = true;
+          clearTimeout(this.crossfadeTimeout);
+          this.crossfadeTimeout = setTimeout(() => {
+            this.startCrossfade(this.ambientAudio2, this.ambientAudio);
+            this.crossfadePending = false;
+          }, 100);
         }
       });
     }
@@ -305,7 +320,7 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
       toAudio.play().catch(() => {});
       
       const fadeStep = 0.05;
-      const fadeInterval = 50; // 50ms steps = 1 sec total fade
+      const fadeInterval = 50;
       
       const fade = setInterval(() => {
         if (fromAudio.volume > fadeStep) {
@@ -334,11 +349,9 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
 
     startWithAudio() {
       this.isMuted = false;
-      this.isUnlocking = true; // Mark that we're unlocking
+      this.isUnlocking = true;
       this.hideGate();
       
-      // Unlock ALL audio elements on user interaction (required for iOS/mobile)
-      // Set volume to 0 during unlock to prevent hearing it
       const originalFoundVolume = effectVolume;
       
       this.foundAudio.volume = 0;
@@ -348,7 +361,6 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
       const checkUnlockComplete = () => {
         unlockCount++;
         if (unlockCount >= 2) {
-          // Both audio elements unlocked, now safe to play found sound
           this.isUnlocking = false;
           this.isReady = true;
         }
@@ -410,12 +422,10 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
     }
 
     playFoundSound() {
-      // Only play if: not muted, ready (unlock complete), not unlocking, and not already played
       if (this.isMuted || !this.isReady || this.isUnlocking || this.hasFoundLogo) return;
       
-      this.hasFoundLogo = true; // Prevent playing again
+      this.hasFoundLogo = true;
       
-      // Stop ambient immediately
       this.ambientAudio.pause();
       this.ambientAudio.currentTime = 0;
       this.ambientAudio.volume = ambientVolume;
@@ -423,7 +433,6 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
       this.ambientAudio2.currentTime = 0;
       this.ambientAudio2.volume = 0;
       
-      // Play found effect
       this.foundAudio.currentTime = 0;
       this.foundAudio.play().catch(() => {});
     }
