@@ -73,10 +73,10 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
   <!-- Overlay simboli gotici -->
   <div class="gotham-symbols"></div>
   
-  <p class="search-text gotham-font" data-i18n="intro.search">{searchText}</p>
+  <p class="search-text gotham-font">{searchText}</p>
   <div class="bat-signal-effect" id="bat-signal-effect"></div>
-  <p class="found-text gotham-font bat-revealed" aria-hidden="true" data-i18n="intro.found">{foundText}</p>
-  <p class="mobile-hint gotham-font" data-i18n="intro.hint">{hintText}</p>
+  <p class="found-text gotham-font bat-revealed" aria-hidden="true">{foundText}</p>
+  <p class="mobile-hint gotham-font">{hintText}</p>
   
   <!-- Logo Batman con effetto Arkham -->
   <!-- SVG filter per il glow direzionale -->
@@ -109,6 +109,8 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
   <!-- Effetti di distorsione finale -->
   <div class="glitch-overlay" id="glitch-overlay"></div>
 </div>
+
+<div id="post-game-blackout" class="post-game-blackout" aria-hidden="true"></div>
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Staatliches&display=swap');
@@ -797,6 +799,18 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
   .spotlight-container.found .glitch-overlay {
     opacity: 0.3;
     animation: glitchFlicker 0.3s ease-out;
+  }
+
+  .post-game-blackout {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: calc(var(--z-spotlight) + 500);
+    display: none;
+  }
+
+  .post-game-blackout.visible {
+    display: block;
   }
 
   @keyframes glitchFlicker {
@@ -1493,6 +1507,7 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
     private batSignalEffect: HTMLElement;
     private vignetteSpotlight: HTMLElement;
     private glitchOverlay: HTMLElement;
+    private blackout: HTMLElement;
     private searchText: HTMLElement;
     private skyline: HTMLElement;
     private skylineHeight: number = 0;
@@ -1525,6 +1540,7 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
       this.batSignalEffect = document.getElementById('bat-signal-effect')!;
       this.vignetteSpotlight = document.getElementById('vignette-spotlight')!;
       this.glitchOverlay = document.getElementById('glitch-overlay')!;
+      this.blackout = document.getElementById('post-game-blackout')!;
       this.searchText = document.querySelector('.search-text')!;
       this.skyline = document.getElementById('gotham-skyline')!;
       this.skylineHeight = this.skyline.offsetHeight || 0;
@@ -1562,6 +1578,28 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
       }
       
       return false;
+    }
+
+    private stopAudioPlayback() {
+      ['ambient-audio', 'ambient-audio-2', 'found-audio'].forEach(id => {
+        const audio = document.getElementById(id) as HTMLAudioElement | null;
+        if (audio) {
+          audio.pause();
+          audio.currentTime = 0;
+        }
+      });
+
+      const controller = document.getElementById('audio-controller');
+      if (controller) {
+        controller.classList.add('hidden');
+      }
+    }
+
+    private showBlackoutScreen() {
+      this.blackout.classList.add('visible');
+      this.blackout.setAttribute('aria-hidden', 'false');
+      document.body.style.backgroundColor = '#000';
+      document.documentElement.style.backgroundColor = '#000';
     }
 
     private init() {
@@ -1954,14 +1992,10 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
       setTimeout(() => {
         this.container.classList.add('hidden');
         setTimeout(() => {
-          const content = document.getElementById('content');
-          if (content) {
-            content.classList.add('visible');
-            content.setAttribute('aria-hidden', 'false');
-          }
+          this.stopAudioPlayback();
           this.container.style.display = 'none';
-          document.dispatchEvent(new CustomEvent('spotlight-complete'));
-        }, 1000);
+          this.showBlackoutScreen();
+        }, 600);
       }, foundTransitionDelay);
 
       // Hide found text and radar synced with the same delay (no flicker)
