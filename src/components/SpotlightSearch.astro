@@ -114,7 +114,6 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
   @import url('https://fonts.googleapis.com/css2?family=Staatliches&display=swap');
 
   :global(html, body) {
-    overflow: hidden;
     height: 100%;
   }
 
@@ -131,12 +130,13 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
     overflow: hidden;
     cursor: none;
     z-index: var(--z-spotlight);
-    touch-action: none;
+    touch-action: manipulation;
   }
 
   .spotlight-container.found {
     cursor: default;
     touch-action: auto;
+    pointer-events: none;
   }
 
   .spotlight-container.hidden {
