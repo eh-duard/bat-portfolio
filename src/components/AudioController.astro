@@ -74,6 +74,8 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
 </audio>
 
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Staatliches&display=swap');
+
   /* Audio Gate Overlay */
   .audio-gate {
     position: fixed;
@@ -81,12 +83,19 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
     display: flex;
     align-items: center;
     justify-content: center;
-    /* Force dark background regardless of theme */
-    background: #0a0a0a;
+    background: #05050a;
     z-index: calc(var(--z-audio) + 100);
     transition: opacity 0.5s ease, visibility 0.5s ease;
     overflow: hidden;
     touch-action: none;
+  }
+
+  .audio-gate::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 35%, rgba(255, 215, 0, 0.06) 0%, rgba(7, 7, 14, 0.92) 45%, #05050a 100%);
+    pointer-events: none;
   }
 
   .audio-gate.hidden {
@@ -98,15 +107,20 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
   .gate-content {
     text-align: center;
     padding: var(--space-xl);
+    background: rgba(10, 10, 20, 0.7);
+    border: 1px solid rgba(255, 215, 0, 0.35);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), inset 0 0 30px rgba(255, 215, 0, 0.08);
+    border-radius: 16px;
+    backdrop-filter: blur(6px);
   }
 
   .gate-icon {
-    width: 80px;
-    height: 80px;
+    width: 84px;
+    height: 84px;
     margin: 0 auto var(--space-lg);
-    /* Force gold color */
     color: #ffd700;
     animation: pulse-glow 2s ease-in-out infinite;
+    filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.35));
   }
 
   .gate-icon svg {
@@ -126,58 +140,63 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
   }
 
   .gate-text {
-    font-family: var(--font-display);
-    font-size: clamp(1rem, 3vw, 1.5rem);
-    /* Force light text color */
-    color: #d1d5db;
+    font-family: 'Staatliches', 'Cardo', 'Garamond', 'Georgia', serif;
+    font-size: clamp(1.1rem, 3.5vw, 1.6rem);
+    color: #f5f6fb;
     margin-bottom: var(--space-lg);
-    letter-spacing: 0.1em;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-shadow: 0 0 18px rgba(255, 215, 0, 0.35), 0 0 4px rgba(0, 0, 0, 0.8);
   }
 
   .gate-buttons {
     display: flex;
     flex-direction: column;
     gap: var(--space-sm);
-    max-width: 250px;
+    max-width: 260px;
     margin: 0 auto;
   }
 
   .gate-btn {
     padding: var(--space-md) var(--space-lg);
-    font-family: var(--font-display);
+    font-family: 'Staatliches', 'Cardo', 'Garamond', 'Georgia', serif;
     font-size: 1rem;
-    letter-spacing: 0.05em;
-    border-radius: 4px;
+    letter-spacing: 0.12em;
+    border-radius: 999px;
     cursor: pointer;
     transition: all var(--transition-fast);
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
     user-select: none;
+    text-transform: uppercase;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
   }
 
   .gate-btn-primary {
-    background: #ffd700;
+    background: linear-gradient(135deg, #ffd700, #ffbf00);
     color: #0a0a0a;
     border: 2px solid #ffd700;
   }
 
   .gate-btn-primary:hover,
   .gate-btn-primary:active {
-    background: #ffed4a;
+    background: linear-gradient(135deg, #ffed4a, #ffd000);
     border-color: #ffed4a;
-    transform: scale(1.02);
+    transform: translateY(-1px) scale(1.02);
   }
 
   .gate-btn-secondary {
-    background: transparent;
-    color: #6b7280;
-    border: 1px solid #6b7280;
+    background: rgba(255, 215, 0, 0.05);
+    color: #d1d5db;
+    border: 1px solid rgba(255, 215, 0, 0.35);
   }
 
   .gate-btn-secondary:hover,
   .gate-btn-secondary:active {
-    color: #d1d5db;
-    border-color: #d1d5db;
+    color: #ffd700;
+    border-color: #ffd700;
+    background: rgba(255, 215, 0, 0.12);
+    transform: translateY(-1px) scale(1.02);
   }
 
   /* Audio Controller */

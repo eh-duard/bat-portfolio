@@ -17,29 +17,121 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
 ---
 
 <div id="spotlight-container" class="spotlight-container">
-  <p class="search-text" data-i18n="intro.search">{searchText}</p>
-  <p class="found-text" aria-hidden="true" data-i18n="intro.found">{foundText}</p>
-  <p class="mobile-hint" data-i18n="intro.hint">{hintText}</p>
-  
-  <div class="bat-logo" id="bat-logo">
-    <img src={`${baseUrl}images/bat-logo.svg`} alt="Bat Signal" loading="eager" />
+  <!-- Background Gotham scuro -->
+  <div class="gotham-background">
+    <div class="gotham-storm"></div>
+    <div class="gotham-clouds"></div>
   </div>
   
-  <div class="spotlight" id="spotlight"></div>
+  <!-- Nebbia procedurale volumetrica -->
+  <canvas id="fog-canvas" class="fog-layer"></canvas>
   
-  <canvas id="fog-canvas"></canvas>
+  <!-- Distorsione atmosferica -->
+  <canvas id="distortion-canvas" class="distortion-layer"></canvas>
+  
+  <!-- Film grain + noise cinematico -->
+  <div class="cinema-grain"></div>
+  
+  <!-- Vignettatura gotica base -->
+  <div class="vignette-gothic"></div>
+  
+  <!-- Vignettatura dinamica spotlight -->
+  <div class="vignette-spotlight" id="vignette-spotlight"></div>
+
+  <!-- Fasci di luce DIETRO la skyline -->
+  <div class="sky-beams-behind" aria-hidden="true">
+    <span class="beam beam-behind-1"></span>
+    <span class="beam beam-behind-2"></span>
+  </div>
+
+  <!-- Blocker solido per nascondere i fasci dietro -->
+  <div 
+    class="skyline-blocker" 
+    aria-hidden="true"
+    style={`--skyline-url: url('${baseUrl}images/gotham-skyline.svg')`}
+  ></div>
+
+  <!-- Skyline gotica animata -->
+  <div 
+    class="gotham-skyline" 
+    id="gotham-skyline" 
+    aria-hidden="true"
+    style={`--skyline-url: url('${baseUrl}images/gotham-skyline.svg')`}
+  ></div>
+
+  <!-- Canvas per finestre illuminate -->
+  <canvas id="windows-canvas" class="windows-canvas"></canvas>
+
+  <!-- Fasci di luce DAVANTI la skyline -->
+  <div class="sky-beams-front" aria-hidden="true">
+    <span class="beam beam-front-1"></span>
+  </div>
+
+  <!-- Strato nuvole SVG leggere -->
+  <div class="svg-cloud-layer" aria-hidden="true"></div>
+  
+  <!-- Overlay simboli gotici -->
+  <div class="gotham-symbols"></div>
+  
+  <p class="search-text gotham-font" data-i18n="intro.search">{searchText}</p>
+  <div class="bat-signal-effect" id="bat-signal-effect"></div>
+  <p class="found-text gotham-font bat-revealed" aria-hidden="true" data-i18n="intro.found">{foundText}</p>
+  <p class="mobile-hint gotham-font" data-i18n="intro.hint">{hintText}</p>
+  
+  <!-- Logo Batman con effetto Arkham -->
+  <!-- SVG filter per il glow direzionale -->
+  <svg style="display: none;" width="0" height="0">
+    <defs>
+      <filter id="directionalGlow">
+        <feGaussianBlur stdDeviation="4" result="coloredBlur" />
+        <feMerge>
+          <feMergeNode in="coloredBlur" />
+          <feMergeNode in="SourceGraphic" />
+        </feMerge>
+      </filter>
+    </defs>
+  </svg>
+
+  <div class="bat-logo-container" id="bat-logo-container">
+    <div class="bat-logo-spotlight" id="bat-logo-spotlight"></div>
+    <div class="bat-logo-aura" id="bat-logo-aura"></div>
+    <div class="bat-logo" id="bat-logo">
+      <img src={`${baseUrl}images/bat-logo.svg`} alt="Bat Signal" loading="eager" id="bat-logo-img" filter="url(#directionalGlow)" />
+    </div>
+  </div>
+  
+  <!-- Spotlight effetto luce cinematico -->
+  <canvas id="spotlight-canvas" class="spotlight-canvas"></canvas>
+  
+  <!-- Canvas per l'effetto di illuminazione progressiva del logo -->
+  <canvas id="logo-reveal-canvas" class="logo-reveal-canvas"></canvas>
+  
+  <!-- Effetti di distorsione finale -->
+  <div class="glitch-overlay" id="glitch-overlay"></div>
 </div>
 
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Staatliches&display=swap');
+
+  :global(html, body) {
+    overflow: hidden;
+    height: 100%;
+  }
+
+  :global(body::-webkit-scrollbar) {
+    width: 0;
+    height: 0;
+  }
+
+  /* ==================== GOTHAM ATMOSPHERE ==================== */
   .spotlight-container {
     position: fixed;
     inset: 0;
-    /* Force dark background regardless of theme - spotlight needs dark to work */
     background: #0a0a0a;
     overflow: hidden;
     cursor: none;
     z-index: var(--z-spotlight);
-    touch-action: none; /* Prevent scroll on touch */
+    touch-action: none;
   }
 
   .spotlight-container.found {
@@ -54,32 +146,434 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
     transition: opacity 1s ease, visibility 1s ease;
   }
 
-  .search-text,
+  /* Gotham stormy background */
+  .gotham-background {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      #0a0a15 0%,
+      #1a1a2e 30%,
+      #0d0d1a 60%,
+      #000000 100%
+    );
+    z-index: 0;
+  }
+
+  .gotham-storm {
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse at 20% 50%, rgba(30, 30, 50, 0.4) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 30%, rgba(25, 25, 45, 0.3) 0%, transparent 50%);
+    animation: stormDrift 30s ease-in-out infinite;
+    z-index: 0;
+  }
+
+  .gotham-clouds {
+    position: absolute;
+    inset: 0;
+    background: 
+      url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200"><defs><filter id="turbulence"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="3" result="noise" /><feDisplacementMap in="SourceGraphic" in2="noise" scale="50" /></filter></defs><rect width="100%" height="100%" fill="%23151520" filter="url(%23turbulence)" opacity="0.15"/></svg>');
+    background-size: 400px 200px;
+    animation: cloudDrift 60s linear infinite;
+    z-index: 0;
+  }
+
+  @keyframes stormDrift {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(10px, 5px); }
+  }
+
+  @keyframes cloudDrift {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(400px); }
+  }
+
+  /* ==================== VOLUMETRIC FOG ==================== */
+  .fog-layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    mix-blend-mode: multiply;
+  }
+
+  .distortion-layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* ==================== CINEMA GRAIN + FILM EFFECT ==================== */
+  .cinema-grain {
+    position: absolute;
+    inset: 0;
+    background-image: 
+      url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800"><filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" seed="1" /><feColorMatrix type="saturate" values="0" /><feComponentTransfer><feFuncA type="linear" slope="0.05" /></feComponentTransfer></filter><rect width="100%" height="100%" fill="white" filter="url(%23grain)" /></svg>');
+    background-size: 800px 800px;
+    pointer-events: none;
+    z-index: 20;
+    mix-blend-mode: overlay;
+    opacity: 0.4;
+  }
+
+  /* ==================== GOTHAM SYMBOLS OVERLAY ==================== */
+  .gotham-symbols {
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(circle at 10% 20%, rgba(255, 215, 0, 0.02) 0%, transparent 5%),
+      radial-gradient(circle at 90% 80%, rgba(255, 215, 0, 0.02) 0%, transparent 5%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Blocker solido - blocca i fasci dietro la skyline */
+  .skyline-blocker {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: clamp(90px, 18vh, 180px);
+    background-color: #0a0a0a;
+    -webkit-mask-image: var(--skyline-url);
+    mask-image: var(--skyline-url);
+    -webkit-mask-repeat: repeat-x;
+    mask-repeat: repeat-x;
+    -webkit-mask-size: auto 100%;
+    mask-size: auto 100%;
+    -webkit-mask-position: 0 100%;
+    mask-position: 0 100%;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .gotham-skyline {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: clamp(90px, 18vh, 180px);
+    background-color: #0b0c14;
+    -webkit-mask-image: var(--skyline-url);
+    mask-image: var(--skyline-url);
+    -webkit-mask-repeat: repeat-x;
+    mask-repeat: repeat-x;
+    -webkit-mask-size: auto 100%;
+    mask-size: auto 100%;
+    -webkit-mask-position: 0 100%;
+    mask-position: 0 100%;
+    filter: drop-shadow(var(--glow-shadow-x, 0px) var(--glow-shadow-y, 0px) 22px rgba(255, 215, 0, var(--sky-glow, 0)));
+    opacity: 0.9;
+    mix-blend-mode: screen;
+    pointer-events: none;
+    z-index: 3;
+    --skyline-windows: none;
+    --windows-opacity: 0.3;
+  }
+
+  .windows-canvas {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: clamp(90px, 18vh, 180px);
+    pointer-events: none;
+    z-index: 4;
+    mix-blend-mode: screen;
+  }
+
+  .gotham-skyline::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    mix-blend-mode: screen;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .gotham-skyline::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    mix-blend-mode: screen;
+  }
+
+  /* Animazione finestre - gestita via JS */
+  @property --window-opacity {
+    syntax: '<number>';
+    inherits: false;
+    initial-value: 0;
+  }
+
+  @keyframes skylineMaskPan {
+    0% {
+      -webkit-mask-position: 0 100%;
+      mask-position: 0 100%;
+    }
+    100% {
+      -webkit-mask-position: -320px 100%;
+      mask-position: -320px 100%;
+    }
+  }
+
+  @keyframes windowFlicker {
+    0%, 18% { opacity: 0.2; }
+    19%, 22% { opacity: 0.6; }
+    23%, 45% { opacity: 0.35; }
+    46%, 52% { opacity: 0.8; }
+    53%, 70% { opacity: 0.4; }
+    71%, 75% { opacity: 0.7; }
+    76%, 100% { opacity: 0.3; }
+  }
+
+  .sky-beams-behind,
+  .sky-beams-front {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 55vh;
+    pointer-events: none;
+    overflow: visible;
+  }
+
+  .sky-beams-behind { z-index: 1; }
+  .sky-beams-front { z-index: 4; }
+
+  .sky-beams-behind .beam,
+  .sky-beams-front .beam {
+    position: absolute;
+    bottom: -5px;
+    width: clamp(18px, 2.5vw, 32px);
+    height: calc(55vh + var(--beam-rise, 0px) + 40px);
+    background: linear-gradient(
+      to top,
+      rgba(255, 240, 200, 0.95) 0%,
+      rgba(255, 225, 100, 0.75) 6%,
+      rgba(255, 215, 0, 0.35) 22%,
+      rgba(255, 215, 0, 0.08) 55%,
+      rgba(255, 215, 0, 0) 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 0.95) 8%,
+      rgba(0, 0, 0, 0.7) 35%,
+      rgba(0, 0, 0, 0.2) 75%,
+      rgba(0, 0, 0, 0) 100%
+    );
+    mask-image: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 0.95) 8%,
+      rgba(0, 0, 0, 0.7) 35%,
+      rgba(0, 0, 0, 0.2) 75%,
+      rgba(0, 0, 0, 0) 100%
+    );
+    -webkit-clip-path: polygon(20% 100%, 80% 100%, 95% 25%, 90% 15%, 85% 8%, 75% 2%, 50% 0%, 25% 2%, 15% 8%, 10% 15%, 5% 25%);
+    clip-path: polygon(20% 100%, 80% 100%, 95% 25%, 90% 15%, 85% 8%, 75% 2%, 50% 0%, 25% 2%, 15% 8%, 10% 15%, 5% 25%);
+    filter: blur(2.5px);
+    transform-origin: bottom center;
+    opacity: 0;
+    mix-blend-mode: screen;
+    animation: beamSweep var(--beam-duration, 9s) ease-in-out infinite;
+    animation-delay: var(--beam-delay, 0s);
+    animation-fill-mode: both;
+    animation-iteration-count: infinite;
+  }
+
+  .sky-beams-behind .beam::before,
+  .sky-beams-front .beam::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    left: 50%;
+    width: 200%;
+    height: 80%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(ellipse 120% 100% at center top, rgba(255, 240, 180, 0.5) 0%, rgba(255, 215, 0, 0.15) 60%, transparent 85%);
+    filter: blur(20px);
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  .sky-beams-behind .beam::after,
+  .sky-beams-front .beam::after {
+    content: '';
+    position: absolute;
+    bottom: -20%;
+    left: 50%;
+    width: 280%;
+    height: 80%;
+    transform: translate(-50%, 0);
+    background: radial-gradient(ellipse 160% 140% at center bottom, rgba(255, 240, 190, 0.7) 0%, rgba(255, 215, 0, 0.2) 45%, transparent 75%);
+    filter: blur(20px);
+    opacity: 0.65;
+    pointer-events: none;
+  }
+
+  @keyframes beamSweep {
+    0% { transform: translateX(var(--beam-offset, 0px)) rotate(var(--beam-rot-start, -5deg)) scaleY(0.7); opacity: 0.05; }
+    8% { opacity: 0.4; }
+    25% { transform: translateX(calc(var(--beam-offset, 0px) * 0.6)) rotate(var(--beam-rot-mid, 4deg)) scaleY(var(--beam-scale, 1)); opacity: 0.85; }
+    50% { transform: translateX(calc(var(--beam-offset, 0px) * 0.8)) rotate(var(--beam-rot-end, -3deg)) scaleY(var(--beam-scale, 0.95)); opacity: 0.8; }
+    75% { opacity: 0.5; }
+    92% { opacity: 0.15; }
+    100% { transform: translateX(var(--beam-offset, 0px)) rotate(var(--beam-rot-end, 2deg)) scaleY(0.6); opacity: 0; }
+  }
+
+  .svg-cloud-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    display: none; /* In attesa delle SVG fornite dall'utente */
+  }
+
+  /* ==================== VIGNETTE EFFECTS ==================== */
+  .vignette-gothic {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      ellipse at center,
+      transparent 0%,
+      rgba(10, 10, 20, 0.4) 60%,
+      rgba(0, 0, 0, 0.8) 100%
+    );
+    pointer-events: none;
+    z-index: 18;
+    box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.7);
+  }
+
+  .vignette-spotlight {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      ellipse at center,
+      transparent 0%,
+      rgba(0, 0, 0, 0) 40%,
+      rgba(0, 0, 0, 0) 100%
+    );
+    pointer-events: none;
+    z-index: 19;
+    transition: background 0.3s ease;
+  }
+
+  /* ==================== TEXT ELEMENTS - GOTHAM STYLE ==================== */
+  .gotham-font {
+    font-family: 'Staatliches', 'Cardo', 'Garamond', 'Georgia', serif;
+    font-weight: 400;
+    letter-spacing: 0.16em;
+  }
+
+  .search-text {
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: clamp(2rem, 7vw, 4rem);
+    color: #ffd700;
+    text-transform: uppercase;
+    pointer-events: none;
+    z-index: 15;
+    text-align: center;
+    text-shadow: 
+      var(--glow-shadow-x, 0px) var(--glow-shadow-y, 0px) 16px rgba(255, 215, 0, 0.8),
+      2px 2px 0 rgba(0, 0, 0, 0.8);
+    transition: opacity 0.4s ease;
+    will-change: transform, text-shadow, opacity;
+  }
+
+  @keyframes batSignalPulseText {
+    0%, 100% { 
+      opacity: 0.6;
+      text-shadow: 
+        0 0 10px rgba(255, 215, 0, 0.6),
+        0 0 20px rgba(255, 215, 0, 0.3),
+        0 0 40px rgba(255, 215, 0, 0.1),
+        2px 2px 0 rgba(0, 0, 0, 0.8);
+    }
+    50% { 
+      opacity: 1;
+      text-shadow: 
+        0 0 20px rgba(255, 215, 0, 1),
+        0 0 40px rgba(255, 215, 0, 0.6),
+        0 0 80px rgba(255, 215, 0, 0.3),
+        2px 2px 0 rgba(0, 0, 0, 0.8);
+    }
+  }
+
+  .bat-signal-effect {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    height: 400px;
+    pointer-events: none;
+    z-index: 14;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+
+  .bat-signal-effect::before,
+  .bat-signal-effect::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 215, 0, 0.2);
+  }
+
+  .bat-signal-effect::before {
+    animation: signalRadiateOuter 1.5s ease-out infinite;
+  }
+
+  .bat-signal-effect::after {
+    animation: signalRadiateInner 2s ease-out infinite;
+  }
+
+  @keyframes signalRadiateOuter {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(1.5); opacity: 0; }
+  }
+
+  @keyframes signalRadiateInner {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(2); opacity: 0; }
+  }
+
   .found-text {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-family: var(--font-display);
-    font-size: clamp(1.5rem, 5vw, 3rem);
-    /* Force gold color for spotlight screen */
+    font-size: clamp(2rem, 7vw, 4rem);
     color: #ffd700;
     text-transform: uppercase;
-    letter-spacing: 0.3em;
     pointer-events: none;
-    z-index: 2;
+    z-index: 15;
     text-align: center;
-  }
-
-  .search-text {
-    animation: pulse 2s ease-in-out infinite;
-    transition: opacity 0.3s ease;
-  }
-
-  .found-text {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(0.8);
-    transition: opacity 0.5s ease, transform 0.5s ease;
+    text-shadow: 
+      0 0 20px rgba(255, 215, 0, 1),
+      0 0 40px rgba(255, 215, 0, 0.6),
+      0 0 80px rgba(255, 215, 0, 0.3),
+      2px 2px 0 rgba(0, 0, 0, 0.9);
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .bat-revealed {
+    transform: translate(-50%, -50%) scale(0);
   }
 
   .spotlight-container.found .search-text {
@@ -89,131 +583,338 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
 
   .spotlight-container.found .found-text {
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
+    animation: batRevealCinematic 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   }
 
-  @keyframes pulse {
-    0%, 100% { opacity: 0.4; }
-    50% { opacity: 1; }
+  .spotlight-container.found .bat-signal-effect {
+    opacity: 1;
+  }
+
+  @keyframes batRevealCinematic {
+    0% {
+      transform: translate(-50%, -50%) scale(0) rotateZ(-5deg);
+      opacity: 0;
+      text-shadow: 
+        0 0 0 rgba(255, 215, 0, 0),
+        0 0 0 rgba(255, 215, 0, 0),
+        0 0 0 rgba(255, 215, 0, 0),
+        0 0 0 rgba(0, 0, 0, 0);
+    }
+    30% {
+      transform: translate(-50%, -50%) scale(1.1) rotateZ(2deg);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(1) rotateZ(0);
+      opacity: 1;
+      text-shadow: 
+        0 0 20px rgba(255, 215, 0, 1),
+        0 0 40px rgba(255, 215, 0, 0.6),
+        0 0 80px rgba(255, 215, 0, 0.3),
+        2px 2px 0 rgba(0, 0, 0, 0.9);
+    }
+  }
+
+  /* ==================== BAT LOGO - ARKHAM STYLE ==================== */
+  .bat-logo-container {
+    position: absolute;
+    width: clamp(100px, 18vw, 200px);
+    height: auto;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .bat-logo-spotlight {
+    position: absolute;
+    inset: -50%;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      rgba(255, 215, 0, 0) 0%,
+      rgba(255, 215, 0, 0) 100%
+    );
+    filter: blur(30px);
+    opacity: 0;
+    transition: all 0.4s ease;
+    z-index: -2;
+  }
+
+  .bat-logo-aura {
+    position: absolute;
+    inset: -40%;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      rgba(255, 215, 0, 0.15) 0%,
+      rgba(255, 215, 0, 0.05) 50%,
+      rgba(255, 215, 0, 0) 100%
+    );
+    filter: blur(40px);
+    opacity: 0;
+    transition: all 0.4s ease;
+    z-index: -1;
   }
 
   .bat-logo {
-    position: absolute;
-    width: clamp(80px, 15vw, 150px);
+    position: relative;
+    width: 100%;
     height: auto;
-    opacity: 0;
     pointer-events: none;
-    z-index: 1;
-    filter: drop-shadow(0 0 20px var(--color-accent));
-    transition: opacity 0.3s ease;
+    transition: all 0.3s ease;
+    filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0));
   }
 
   .bat-logo img {
     width: 100%;
     height: auto;
-    filter: invert(1) brightness(0.15);
+    display: block;
+    filter: brightness(0) saturate(0) invert(0) drop-shadow(var(--glow-shadow-x, 0px) var(--glow-shadow-y, 0px) 12px rgba(255, 215, 0, 0));
+    transition: filter 0.2s ease;
   }
 
-  .bat-logo.revealed {
+  /* Proximity states - il logo si rivela solo quando MOLTO vicino */
+  .bat-logo-container.proximity-close .bat-logo img {
+    filter: brightness(0.05) saturate(0) invert(0) drop-shadow(var(--glow-shadow-x, 0px) var(--glow-shadow-y, 0px) 8px rgba(255, 215, 0, 0.2));
+  }
+
+  .bat-logo-container.proximity-very-close .bat-logo img {
+    filter: brightness(0.4) saturate(0) invert(0) drop-shadow(0 0 12px rgba(255, 255, 255, 0.3)) drop-shadow(var(--glow-shadow-x, 0px) var(--glow-shadow-y, 0px) 15px rgba(255, 215, 0, 0.6));
+  }
+  .bat-logo-container.proximity-close .bat-logo-spotlight {
+    opacity: 0.4;
+    background: radial-gradient(
+      circle,
+      rgba(255, 215, 0, 0.6) 0%,
+      rgba(255, 215, 0, 0.2) 50%,
+      rgba(255, 215, 0, 0) 100%
+    );
+  }
+
+  .bat-logo-container.proximity-close .bat-logo-aura {
+    opacity: 0.5;
+  }
+
+  .bat-logo-container.proximity-very-close .bat-logo-spotlight {
+    opacity: 0.8;
+    background: radial-gradient(
+      circle,
+      rgba(255, 215, 0, 1) 0%,
+      rgba(255, 215, 0, 0.5) 40%,
+      rgba(255, 215, 0, 0.2) 100%
+    );
+  }
+
+  .bat-logo-container.proximity-very-close .bat-logo-aura {
+    opacity: 1;
+    background: radial-gradient(
+      circle,
+      rgba(255, 215, 0, 0.3) 0%,
+      rgba(255, 215, 0, 0.1) 50%,
+      rgba(255, 215, 0, 0) 100%
+    );
+  }
+
+  .bat-logo-container.proximity-very-close .bat-logo {
+    filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.6));
+  }
+
+  .bat-logo-container.revealed {
     pointer-events: auto;
     cursor: pointer;
   }
 
-  .bat-logo.revealed img {
-    filter: invert(83%) sepia(56%) saturate(1066%) hue-rotate(359deg) brightness(103%) contrast(104%);
+  .bat-logo-container.revealed .bat-logo img {
+    filter: invert(83%) sepia(56%) saturate(1066%) hue-rotate(359deg) brightness(110%) contrast(110%) drop-shadow(0 0 25px rgba(255, 215, 0, 1));
+    animation: batRevealExplosion 0.8s ease-out;
   }
 
-  .spotlight {
-    position: fixed;
-    width: 200px;
-    height: 200px;
-    border-radius: 50%;
+  @keyframes batRevealExplosion {
+    0% {
+      transform: scale(0.5) rotateZ(-10deg);
+      filter: invert(83%) sepia(56%) saturate(1066%) hue-rotate(359deg) brightness(103%) contrast(104%) drop-shadow(0 0 0 rgba(255, 215, 0, 0));
+    }
+    50% {
+      transform: scale(1.15) rotateZ(5deg);
+      filter: invert(83%) sepia(56%) saturate(1066%) hue-rotate(359deg) brightness(103%) contrast(104%) drop-shadow(0 0 40px rgba(255, 215, 0, 1));
+    }
+    100% {
+      transform: scale(1) rotateZ(0);
+      filter: invert(83%) sepia(56%) saturate(1066%) hue-rotate(359deg) brightness(103%) contrast(104%) drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
+    }
+  }
+
+  /* ==================== SPOTLIGHT CANVAS ==================== */
+  .spotlight-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
     pointer-events: none;
-    z-index: 3;
-    background: radial-gradient(
-      circle,
-      rgba(255, 215, 0, 0.15) 0%,
-      rgba(255, 215, 0, 0.08) 30%,
-      rgba(255, 215, 0, 0.02) 60%,
-      transparent 70%
-    );
-    transform: translate(-50%, -50%);
+    z-index: 4;
     mix-blend-mode: screen;
+  }
+
+  /* ==================== LOGO REVEAL CANVAS - LIGHT REVEAL EFFECT ==================== */
+  .logo-reveal-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 12;
+    mix-blend-mode: screen;
+  }
+
+  /* ==================== GLITCH EFFECT ==================== */
+  .glitch-overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 21;
+    opacity: 0;
+    background: 
+      repeating-linear-gradient(
+        0deg,
+        rgba(255, 215, 0, 0.1) 0px,
+        rgba(255, 215, 0, 0.1) 1px,
+        transparent 1px,
+        transparent 2px
+      );
     transition: opacity 0.3s ease;
   }
 
-  /* Mobile hint text */
+  .spotlight-container.found .glitch-overlay {
+    opacity: 0.3;
+    animation: glitchFlicker 0.3s ease-out;
+  }
+
+  @keyframes glitchFlicker {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 0.5; }
+  }
+
+  /* ==================== MOBILE HINT ==================== */
   .mobile-hint {
     position: absolute;
     bottom: 20%;
     left: 50%;
     transform: translateX(-50%);
-    font-family: var(--font-display);
     font-size: 0.875rem;
-    /* Force muted color for spotlight screen */
-    color: #6b7280;
+    color: #888;
     text-align: center;
     opacity: 0;
     animation: fadeInHint 0.5s ease 2s forwards;
     pointer-events: none;
-    z-index: 2;
+    z-index: 16;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
   }
 
   @keyframes fadeInHint {
-    to { opacity: 0.6; }
+    to { opacity: 0.7; }
   }
 
   .spotlight-container.found .mobile-hint {
     display: none;
   }
 
-  /* Hide hint on desktop */
   @media (hover: hover) and (pointer: fine) {
     .mobile-hint {
       display: none;
     }
   }
-
-  #fog-canvas {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    opacity: 0.4;
-    z-index: 0;
-  }
 </style>
 
 <script>
-  class SpotlightSearch {
-    private container: HTMLElement;
-    private spotlight: HTMLElement;
-    private batLogo: HTMLElement;
-    private canvas: HTMLCanvasElement;
-    private ctx: CanvasRenderingContext2D;
-    private logoPosition: { x: number; y: number };
-    private isFound: boolean = false;
-    private fogParticles: Array<{ x: number; y: number; vx: number; vy: number; size: number; opacity: number }> = [];
+  /* ==================== UTILITIES ==================== */
+  function lerp(a: number, b: number, t: number): number {
+    return a + (b - a) * t;
+  }
+
+  function clamp(v: number, min: number, max: number): number {
+    return Math.min(Math.max(v, min), max);
+  }
+
+  function distance(x1: number, y1: number, x2: number, y2: number): number {
+    return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+  }
+
+  /* ==================== PERLIN NOISE ==================== */
+  class SimpleNoise {
+    private permutation: number[] = [];
 
     constructor() {
-      this.container = document.getElementById('spotlight-container')!;
-      this.spotlight = document.getElementById('spotlight')!;
-      this.batLogo = document.getElementById('bat-logo')!;
-      this.canvas = document.getElementById('fog-canvas') as HTMLCanvasElement;
-      this.ctx = this.canvas.getContext('2d')!;
-      
-      this.logoPosition = { x: 0, y: 0 };
-      
-      this.init();
+      const p = [
+        151, 160, 137, 91, 90, 15, 131, 13, 201, 95, 96, 53, 194, 233, 7, 225,
+        140, 36, 103, 30, 69, 142, 8, 99, 37, 240, 21, 10, 23, 190, 6, 148,
+        247, 120, 234, 75, 0, 26, 197, 62, 94, 252, 219, 203, 117, 35, 11, 32,
+        57, 177, 33, 88, 237, 149, 56, 87, 174, 20, 125, 136, 171, 168, 68,
+        175, 74, 165, 71, 134, 139, 48, 27, 166, 102, 143, 97, 278, 65, 38,
+        27, 97, 244, 271, 251, 127, 188, 207, 25, 70, 188, 200, 130, 201, 122,
+        167, 248, 158, 31, 65, 201, 95, 236, 151, 160, 137, 91, 90, 15, 131,
+        13, 201, 95, 96, 53, 194, 233, 7, 225, 140, 36, 103, 30, 69, 142, 8,
+        99, 37, 240, 21, 10, 23, 190, 6, 148, 247, 120, 234, 75, 0, 26, 197,
+        62, 94, 252, 219, 203, 117, 35, 11, 32, 57, 177, 33, 88, 237, 149, 56,
+        87, 174, 20, 125, 136, 171, 168, 68, 175, 74, 165, 71, 134, 139, 48,
+        27, 166, 102, 143, 97, 278, 65, 38, 27, 97, 244, 271, 251, 127, 188,
+        207, 25, 70, 188, 200, 130, 201, 122, 167, 248, 158, 31, 65, 201, 95,
+        236, 151
+      ];
+      this.permutation = [...p, ...p];
     }
 
-    private init() {
+    private fade(t: number): number {
+      return t * t * t * (t * (t * 6 - 15) + 10);
+    }
+
+    private lerp(t: number, a: number, b: number): number {
+      return a + t * (b - a);
+    }
+
+    private grad(hash: number, x: number, y: number): number {
+      const h = hash & 15;
+      const u = h < 8 ? x : y;
+      const v = h < 8 ? y : x;
+      return ((h & 1) === 0 ? u : -u) + ((h & 2) === 0 ? v : -v);
+    }
+
+    perlin(x: number, y: number): number {
+      const xi = Math.floor(x) & 255;
+      const yi = Math.floor(y) & 255;
+
+      const xf = x - Math.floor(x);
+      const yf = y - Math.floor(y);
+
+      const u = this.fade(xf);
+      const v = this.fade(yf);
+
+      const aa = this.permutation[this.permutation[xi] + yi];
+      const ab = this.permutation[this.permutation[xi] + yi + 1];
+      const ba = this.permutation[this.permutation[xi + 1] + yi];
+      const bb = this.permutation[this.permutation[xi + 1] + yi + 1];
+
+      const x1 = this.lerp(u, this.grad(aa, xf, yf), this.grad(ba, xf - 1, yf));
+      const x2 = this.lerp(u, this.grad(ab, xf, yf - 1), this.grad(bb, xf - 1, yf - 1));
+
+      return this.lerp(v, x1, x2);
+    }
+  }
+
+  /* ==================== VOLUMETRIC FOG ==================== */
+  class VolumetricFog {
+    private canvas: HTMLCanvasElement;
+    private ctx: CanvasRenderingContext2D;
+    private noise: SimpleNoise;
+    private time: number = 0;
+    private lastSpotlightX: number = 0;
+    private lastSpotlightY: number = 0;
+
+    constructor(canvasId: string) {
+      this.canvas = document.getElementById(canvasId) as HTMLCanvasElement;
+      this.ctx = this.canvas.getContext('2d')!;
+      this.noise = new SimpleNoise();
       this.setupCanvas();
-      this.positionLogo();
-      this.createFogParticles();
-      this.bindEvents();
-      this.animateFog();
     }
 
     private setupCanvas() {
@@ -225,238 +926,995 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
       window.addEventListener('resize', resize);
     }
 
+    update(spotlightX: number, spotlightY: number, spotlightRadius: number) {
+      this.time += 0.004;
+
+      // Smooth spotlight tracking
+      this.lastSpotlightX = lerp(this.lastSpotlightX, spotlightX, 0.15);
+      this.lastSpotlightY = lerp(this.lastSpotlightY, spotlightY, 0.15);
+
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+      const pixelSize = 10;
+      const cols = Math.ceil(this.canvas.width / pixelSize);
+      const rows = Math.ceil(this.canvas.height / pixelSize);
+
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          const x = col * pixelSize;
+          const y = row * pixelSize;
+
+          // Multi-layer Perlin noise per nebbia cinematica
+          const noise1 = this.noise.perlin(
+            x * 0.001 + this.time,
+            y * 0.001 + this.time * 0.5
+          );
+          const noise2 = this.noise.perlin(
+            x * 0.002 - this.time * 0.5,
+            y * 0.002 + this.time * 0.3
+          );
+          const noiseVal = (noise1 + noise2) * 0.5;
+
+          // Distance from spotlight - ora dinamico
+          const dist = distance(x, y, this.lastSpotlightX, this.lastSpotlightY);
+          const spotlightInfluence = Math.max(0, 1 - dist / (spotlightRadius * 3.5));
+
+          // Fog density: aumenta con noise, diminuisce in spotlight
+          let fogDensity = 0.12 + noiseVal * 0.08;
+          fogDensity *= (1 - spotlightInfluence * 0.85);
+
+          // Colore nebbia: blu-grigio Gotham con variazione
+          const r = Math.floor(20 + noiseVal * 12);
+          const g = Math.floor(24 + noiseVal * 18);
+          const b = Math.floor(40 + noiseVal * 25);
+
+          this.ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${fogDensity})`;
+          this.ctx.fillRect(x, y, pixelSize, pixelSize);
+        }
+      }
+    }
+  }
+
+  /* ==================== SPOTLIGHT CINEMATICO ==================== */
+  class CinematicSpotlight {
+    private canvas: HTMLCanvasElement;
+    private ctx: CanvasRenderingContext2D;
+    private time: number = 0;
+    private currentRadius: number = 100;
+    private targetRadius: number = 100;
+
+    constructor(canvasId: string) {
+      this.canvas = document.getElementById(canvasId) as HTMLCanvasElement;
+      this.ctx = this.canvas.getContext('2d')!;
+      this.setupCanvas();
+    }
+
+    private setupCanvas() {
+      const resize = () => {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+      };
+      resize();
+      window.addEventListener('resize', resize);
+    }
+
+    setTargetRadius(radius: number) {
+      this.targetRadius = radius;
+    }
+
+    update(x: number, y: number) {
+      this.time += 0.016;
+
+      // Smooth lerp
+      this.currentRadius = lerp(this.currentRadius, this.targetRadius, 0.12);
+
+      // Breathing animation (1.5% oscillation)
+      const breathe = 1 + Math.sin(this.time * 1.8) * 0.015;
+
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+      // Layer 1: Outer glow very soft
+      const glowGradient = this.ctx.createRadialGradient(
+        x, y, 0,
+        x, y, this.currentRadius * 2 * breathe
+      );
+      glowGradient.addColorStop(0, 'rgba(255, 215, 0, 0.08)');
+      glowGradient.addColorStop(0.3, 'rgba(255, 215, 0, 0.04)');
+      glowGradient.addColorStop(1, 'rgba(255, 215, 0, 0)');
+
+      this.ctx.fillStyle = glowGradient;
+      this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+      // Layer 2: Medium cone - increased visibility
+      const coneGradient = this.ctx.createRadialGradient(
+        x, y, 0,
+        x, y, this.currentRadius * breathe
+      );
+      coneGradient.addColorStop(0, 'rgba(255, 215, 0, 0.28)');
+      coneGradient.addColorStop(0.25, 'rgba(255, 215, 0, 0.15)');
+      coneGradient.addColorStop(0.6, 'rgba(255, 215, 0, 0.04)');
+      coneGradient.addColorStop(1, 'rgba(255, 215, 0, 0)');
+
+      this.ctx.fillStyle = coneGradient;
+      this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+      // Layer 3: Core inner light (cinematico) - più luminoso
+      const coreGradient = this.ctx.createRadialGradient(
+        x, y, 0,
+        x, y, this.currentRadius * 0.4 * breathe
+      );
+      coreGradient.addColorStop(0, 'rgba(255, 235, 180, 0.22)');
+      coreGradient.addColorStop(0.5, 'rgba(255, 220, 100, 0.08)');
+      coreGradient.addColorStop(1, 'rgba(255, 215, 0, 0)');
+
+      this.ctx.fillStyle = coreGradient;
+      this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+  }
+
+  /* ==================== PROGRESSIVE LIGHT REVEAL SYSTEM ==================== */
+  class ProgressiveLightReveal {
+    private canvas: HTMLCanvasElement;
+    private ctx: CanvasRenderingContext2D;
+    private logoX: number = 0;
+    private logoY: number = 0;
+    private logoWidth: number = 100;
+    private logoHeight: number = 75;
+    private proximityValue: number = 0; // 0 = far, 1 = very close
+
+    constructor(canvasId: string) {
+      this.canvas = document.getElementById(canvasId) as HTMLCanvasElement;
+      this.ctx = this.canvas.getContext('2d')!;
+      this.setupCanvas();
+    }
+
+    private setupCanvas() {
+      const resize = () => {
+        const dpr = window.devicePixelRatio || 1;
+        this.canvas.width = window.innerWidth * dpr;
+        this.canvas.height = window.innerHeight * dpr;
+        this.canvas.style.width = window.innerWidth + 'px';
+        this.canvas.style.height = window.innerHeight + 'px';
+        this.ctx.scale(dpr, dpr);
+      };
+      resize();
+      window.addEventListener('resize', resize);
+    }
+
+    setLogoPosition(x: number, y: number, width: number, height: number) {
+      // Centro esatto del logo per allineamento perfetto con il cerchio radar
+      this.logoX = x + width / 2;
+      this.logoY = y + height / 2;
+      this.logoWidth = width;
+      this.logoHeight = height;
+    }
+
+    setProximity(value: number) {
+      this.proximityValue = clamp(value, 0, 1);
+    }
+
+    update(spotlightX: number, spotlightY: number, spotlightRadius: number) {
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+      if (this.proximityValue < 0.01) return; // Non disegnare se troppo lontano
+
+      // Calcolo la distanza tra spotlight e logo
+      const dist = distance(spotlightX, spotlightY, this.logoX, this.logoY);
+      
+      // Se la luce è abbastanza vicina, disegna l'effetto di illuminazione
+      if (dist < spotlightRadius * 2.5) {
+        this.drawLightReveal(spotlightX, spotlightY, spotlightRadius);
+      }
+    }
+
+    private drawLightReveal(spotlightX: number, spotlightY: number, spotlightRadius: number) {
+      const now = Date.now();
+      
+      // Effetto sonar sottile: anelli che si espandono dolcemente (come rilevamento radar)
+      if (this.proximityValue > 0.3) {
+        const ringCount = 3;
+        const maxRingRadius = 160;
+        const animationSpeed = 0.0005;
+        const animationPhase = (now * animationSpeed) % 1;
+        
+        for (let i = 0; i < ringCount; i++) {
+          const ringPhase = (animationPhase + i / ringCount) % 1;
+          const ringRadius = ringPhase * maxRingRadius * this.proximityValue;
+          const fadeOut = Math.pow(1 - ringPhase, 2);
+          const ringAlpha = fadeOut * this.proximityValue * 0.25;
+          
+          if (ringAlpha > 0.02) {
+            this.ctx.strokeStyle = `rgba(255, 215, 0, ${ringAlpha})`;
+            this.ctx.lineWidth = 2 * fadeOut + 0.5;
+            this.ctx.shadowBlur = 12;
+            this.ctx.shadowColor = `rgba(255, 215, 0, ${ringAlpha * 0.6})`;
+            this.ctx.beginPath();
+            this.ctx.arc(this.logoX, this.logoY, ringRadius, 0, Math.PI * 2);
+            this.ctx.stroke();
+            this.ctx.shadowBlur = 0;
+          }
+        }
+      }
+
+      // Core delicato: pulsazione leggera al centro quando molto vicino
+      if (this.proximityValue > 0.5) {
+        const heartbeat = Math.sin(now * 0.002);
+        const coreRadius = 12 + Math.abs(heartbeat) * 4;
+        const coreAlpha = (0.25 + Math.abs(heartbeat) * 0.15) * this.proximityValue;
+        
+        const coreGradient = this.ctx.createRadialGradient(
+          this.logoX, this.logoY, 0,
+          this.logoX, this.logoY, coreRadius
+        );
+        coreGradient.addColorStop(0, `rgba(255, 215, 0, ${coreAlpha})`);
+        coreGradient.addColorStop(0, `rgba(255, 215, 0, ${coreAlpha})`);
+        coreGradient.addColorStop(0.6, `rgba(255, 200, 80, ${coreAlpha * 0.6})`);
+        coreGradient.addColorStop(1, 'rgba(255, 215, 0, 0)');
+        
+        this.ctx.fillStyle = coreGradient;
+        this.ctx.beginPath();
+        this.ctx.arc(this.logoX, this.logoY, coreRadius, 0, Math.PI * 2);
+        this.ctx.fill();
+      }
+    }
+  }
+
+  /* ==================== DISTORTION LAYER ==================== */
+  class DistortionEffect {
+    private canvas: HTMLCanvasElement;
+    private ctx: CanvasRenderingContext2D;
+    private time: number = 0;
+    private lastSpotlightX: number = 0;
+    private lastSpotlightY: number = 0;
+
+    constructor(canvasId: string) {
+      this.canvas = document.getElementById(canvasId) as HTMLCanvasElement;
+      this.ctx = this.canvas.getContext('2d')!;
+      this.setupCanvas();
+    }
+
+    private setupCanvas() {
+      const resize = () => {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+      };
+      resize();
+      window.addEventListener('resize', resize);
+    }
+
+    update(spotlightX: number, spotlightY: number, spotlightRadius: number) {
+      this.time += 0.012;
+
+      // Smooth spotlight tracking
+      this.lastSpotlightX = lerp(this.lastSpotlightX, spotlightX, 0.2);
+      this.lastSpotlightY = lerp(this.lastSpotlightY, spotlightY, 0.2);
+
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+      // Effetto onda radiante dinamica dalle coordinate dello spotlight
+      const waveGradient = this.ctx.createRadialGradient(
+        this.lastSpotlightX, this.lastSpotlightY, spotlightRadius * 0.2,
+        this.lastSpotlightX, this.lastSpotlightY, spotlightRadius * 2.5
+      );
+
+      const waveIntensity = Math.sin(this.time * 2.5) * 0.025;
+      waveGradient.addColorStop(0, `rgba(255, 215, 0, ${0.03 + waveIntensity})`);
+      waveGradient.addColorStop(0.5, `rgba(255, 215, 0, ${0.01 + waveIntensity * 0.5})`);
+      waveGradient.addColorStop(1, 'rgba(255, 215, 0, 0)');
+
+      this.ctx.fillStyle = waveGradient;
+      this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+      // Aggiunta onda secondaria per effetto più dinamico
+      const secondWave = this.ctx.createRadialGradient(
+        this.lastSpotlightX, this.lastSpotlightY, spotlightRadius * 0.5,
+        this.lastSpotlightX, this.lastSpotlightY, spotlightRadius * 3
+      );
+
+      const secondWaveIntensity = Math.sin(this.time * 1.8 + Math.PI * 0.5) * 0.015;
+      secondWave.addColorStop(0, `rgba(255, 215, 0, ${0 + secondWaveIntensity})`);
+      secondWave.addColorStop(1, 'rgba(255, 215, 0, 0)');
+
+      this.ctx.fillStyle = secondWave;
+      this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+  }
+
+  /* ==================== MAIN SPOTLIGHT SEARCH - ARKHAM EDITION ==================== */
+  class WindowLightsSystem {
+    private canvas: HTMLCanvasElement;
+    private ctx: CanvasRenderingContext2D;
+    private windows: Array<{ x: number; y: number; state: number; changeTime: number }> = [];
+    private skylineImageData: ImageData | null = null;
+    private lastUpdate: number = 0;
+
+    constructor(canvasId: string, skylineElement: HTMLElement) {
+      this.canvas = document.getElementById(canvasId) as HTMLCanvasElement;
+      this.ctx = this.canvas.getContext('2d', { willReadFrequently: true })!;
+      this.setupCanvas();
+      this.captureSkylineShape(skylineElement);
+    }
+
+    private setupCanvas() {
+      const resize = () => {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = this.canvas.offsetHeight;
+      };
+      resize();
+      window.addEventListener('resize', resize);
+    }
+
+    private async captureSkylineShape(skylineElement: HTMLElement) {
+      // Crea un canvas temporaneo per "fotografare" la skyline
+      const tempCanvas = document.createElement('canvas');
+      const tempCtx = tempCanvas.getContext('2d')!;
+      
+      // Usa le dimensioni esatte del canvas finale
+      tempCanvas.width = this.canvas.width;
+      tempCanvas.height = this.canvas.height;
+      
+      // Ottieni l'immagine SVG dalla mask
+      const style = window.getComputedStyle(skylineElement);
+      const maskImage = style.webkitMaskImage || style.maskImage;
+      const urlMatch = maskImage.match(/url\(['"]?(.+?)['"]?\)/);
+      
+      if (!urlMatch) {
+        console.warn('Could not extract skyline mask URL');
+        this.generateFallbackWindows();
+        return;
+      }
+      
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.src = urlMatch[1];
+      
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => {
+          // Calcola quante volte l'SVG si ripete per coprire la larghezza
+          const skylineHeight = this.canvas.height;
+          const aspectRatio = img.width / img.height;
+          const svgWidth = skylineHeight * aspectRatio;
+          
+          console.log('SVG original size:', img.width, 'x', img.height);
+          console.log('Calculated SVG width for repeat:', svgWidth);
+          
+          // Disegna l'SVG ripetuto
+          const repeats = Math.ceil(this.canvas.width / svgWidth) + 1;
+          for (let i = 0; i < repeats; i++) {
+            tempCtx.drawImage(img, i * svgWidth, 0, svgWidth, skylineHeight);
+          }
+          
+          this.skylineImageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+          console.log('Skyline shape captured with repeats:', repeats);
+          resolve();
+        };
+        img.onerror = () => {
+          console.warn('Failed to load skyline image');
+          this.generateFallbackWindows();
+          resolve();
+        };
+      });
+      
+      this.generateWindows();
+    }
+
+    private isPixelSolid(x: number, y: number): boolean {
+      if (!this.skylineImageData) return false;
+      
+      const width = this.skylineImageData.width;
+      const height = this.skylineImageData.height;
+      
+      if (x < 0 || x >= width || y < 0 || y >= height) return false;
+      
+      const idx = (Math.floor(y) * width + Math.floor(x)) * 4;
+      const alpha = this.skylineImageData.data[idx + 3];
+      
+      return alpha > 128; // Soglia più alta per essere sicuri che sia solido
+    }
+
+    private generateWindows() {
+      this.windows = [];
+      
+      if (!this.skylineImageData) {
+        this.generateFallbackWindows();
+        return;
+      }
+      
+      const canvasWidth = this.canvas.width;
+      const canvasHeight = this.canvas.height;
+      
+      // Trova zone utilizzabili usando chunk quadrati
+      const chunkSize = 8;
+      const validChunks = this.findValidChunks(chunkSize);
+      console.log('Found valid chunks:', validChunks.length);
+      
+      // Per ogni chunk valido, decidi casualmente se mettere una finestra
+      validChunks.forEach(chunk => {
+        // ~40% di probabilità di avere una finestra in questo chunk
+        if (Math.random() < 0.4) {
+          this.windows.push({
+            x: chunk.x + 2,
+            y: chunk.y + 2,
+            state: Math.random() > 0.25 ? 1 : 0,
+            changeTime: Date.now() + Math.random() * 6000
+          });
+        }
+      });
+      
+      console.log('Generated windows:', this.windows.length);
+    }
+
+    private findValidChunks(chunkSize: number): Array<{ x: number; y: number }> {
+      if (!this.skylineImageData) return [];
+      
+      const chunks: Array<{ x: number; y: number }> = [];
+      const canvasWidth = this.canvas.width;
+      const canvasHeight = this.canvas.height;
+      
+      // Scansiona l'intera area con chunk quadrati
+      for (let y = 20; y < canvasHeight - 10; y += chunkSize) {
+        for (let x = 5; x < canvasWidth - 5; x += chunkSize) {
+          // Verifica che TUTTO il chunk sia solido
+          let isChunkValid = true;
+          
+          for (let dy = 0; dy < chunkSize; dy++) {
+            for (let dx = 0; dx < chunkSize; dx++) {
+              if (!this.isPixelSolid(x + dx, y + dy)) {
+                isChunkValid = false;
+                break;
+              }
+            }
+            if (!isChunkValid) break;
+          }
+          
+          if (isChunkValid) {
+            chunks.push({ x, y });
+          }
+        }
+      }
+      
+      return chunks;
+    }
+
+    private findBuildings(): Array<{ left: number; right: number }> {
+      if (!this.skylineImageData) return [];
+      
+      const buildings: Array<{ left: number; right: number }> = [];
+      const canvasWidth = this.canvas.width;
+      const canvasHeight = this.canvas.height;
+      const scanY = canvasHeight - 30; // Scansiona vicino al fondo
+      
+      let inBuilding = false;
+      let buildingStart = 0;
+      
+      for (let x = 0; x < canvasWidth; x++) {
+        const isSolid = this.isPixelSolid(x, scanY);
+        
+        if (isSolid && !inBuilding) {
+          // Inizia un nuovo palazzo
+          buildingStart = x;
+          inBuilding = true;
+        } else if (!isSolid && inBuilding) {
+          // Fine del palazzo
+          buildings.push({ left: buildingStart, right: x });
+          inBuilding = false;
+        }
+      }
+      
+      // Se l'ultimo palazzo arriva fino al bordo
+      if (inBuilding) {
+        buildings.push({ left: buildingStart, right: canvasWidth });
+      }
+      
+      return buildings;
+    }
+
+    private generateFallbackWindows() {
+      // Fallback semplice se il caricamento fallisce
+      const canvasWidth = this.canvas.width;
+      const canvasHeight = this.canvas.height;
+      
+      for (let x = 10; x < canvasWidth - 10; x += 15) {
+        for (let y = canvasHeight * 0.6; y < canvasHeight - 10; y += 15) {
+          this.windows.push({
+            x,
+            y,
+            state: Math.random() > 0.3 ? 1 : 0,
+            changeTime: Date.now() + Math.random() * 8000
+          });
+        }
+      }
+      console.log('Generated fallback windows:', this.windows.length);
+    }
+
+    update() {
+      const now = Date.now();
+      if (now - this.lastUpdate < 50) return; // 20fps per performance
+      this.lastUpdate = now;
+
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+      let drawn = 0;
+      this.windows.forEach(win => {
+        // Cambia stato casualmente
+        if (now > win.changeTime) {
+          win.state = Math.random() > 0.25 ? 1 : 0;
+          win.changeTime = now + 3000 + Math.random() * 5000;
+        }
+
+        if (win.state > 0) {
+          const brightness = 0.7 + Math.random() * 0.2;
+          this.ctx.fillStyle = `rgba(255, 215, 0, ${brightness})`;
+          this.ctx.fillRect(win.x, win.y, 2, 3);
+          drawn++;
+        }
+      });
+    }
+  }
+
+  class ArkhamSpotlightSearch {
+    private container: HTMLElement;
+    private batLogoContainer: HTMLElement;
+    private batLogoSpotlight: HTMLElement;
+    private batLogoAura: HTMLElement;
+    private batSignalEffect: HTMLElement;
+    private vignetteSpotlight: HTMLElement;
+    private glitchOverlay: HTMLElement;
+    private searchText: HTMLElement;
+    private skyline: HTMLElement;
+    private skylineHeight: number = 0;
+    private skylinePatternWidth: number = 0;
+    private beams: NodeListOf<HTMLElement> | null = null;
+    private beamsContainer: HTMLElement | null = null;
+    private skylineProfile: number[] = [];
+    private skylineImageLoaded = false;
+
+    private logoPosition: { x: number; y: number } = { x: 0, y: 0 };
+    private isFound: boolean = false;
+    private currentMouse: { x: number; y: number } = { x: 0, y: 0 };
+
+    private volumetricFog: VolumetricFog;
+    private spotlightSystem: CinematicSpotlight;
+    private lightRevealSystem: ProgressiveLightReveal;
+    private distortionSystem: DistortionEffect;
+    private windowLightsSystem: WindowLightsSystem | null = null;
+
+    private proximityState: 'none' | 'close' | 'very-close' = 'none';
+    private currentProximityValue: number = 0;
+
+    constructor() {
+      this.container = document.getElementById('spotlight-container')!;
+      this.batLogoContainer = document.getElementById('bat-logo-container')!;
+      this.batLogoSpotlight = document.getElementById('bat-logo-spotlight')!;
+      this.batLogoAura = document.getElementById('bat-logo-aura')!;
+      this.batSignalEffect = document.getElementById('bat-signal-effect')!;
+      this.vignetteSpotlight = document.getElementById('vignette-spotlight')!;
+      this.glitchOverlay = document.getElementById('glitch-overlay')!;
+      this.searchText = document.querySelector('.search-text')!;
+      this.skyline = document.getElementById('gotham-skyline')!;
+      this.skylineHeight = this.skyline.offsetHeight || 0;
+      this.beams = document.querySelectorAll('.sky-beams-behind .beam, .sky-beams-front .beam');
+      this.beamsContainer = document.querySelector('.sky-beams-behind');
+
+      this.volumetricFog = new VolumetricFog('fog-canvas');
+      this.spotlightSystem = new CinematicSpotlight('spotlight-canvas');
+      this.lightRevealSystem = new ProgressiveLightReveal('logo-reveal-canvas');
+      this.distortionSystem = new DistortionEffect('distortion-canvas');
+
+      this.init();
+    }
+
+    private init() {
+      this.positionLogo();
+      this.updateSkylineMetrics();
+      this.buildSkylineProfile();
+      this.initBeams();
+      this.bindEvents();
+      this.animate();
+    }
+
+    private updateSkylineMetrics() {
+      this.skylineHeight = this.skyline.offsetHeight || 0;
+    }
+
+    private async buildSkylineProfile() {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      const base = document.querySelector('.gotham-skyline')?.style.getPropertyValue('--skyline-url').match(/url\(['"]?(.+?)['"]?\)/)?.[1];
+      img.src = base || '/images/gotham-skyline.svg';
+
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = () => reject();
+      }).catch(() => {});
+
+      if (!img.naturalWidth || !img.naturalHeight) return;
+
+      const targetHeight = this.skyline.offsetHeight || img.naturalHeight;
+      const scale = targetHeight / img.naturalHeight;
+      const targetWidth = img.naturalWidth * scale;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(targetWidth));
+      canvas.height = Math.max(1, Math.round(targetHeight));
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+
+      const profile: number[] = [];
+      for (let x = 0; x < canvas.width; x += 4) {
+        let topY = canvas.height; // default: nothing found
+        for (let y = 0; y < canvas.height; y++) {
+          const idx = (y * canvas.width + x) * 4 + 3; // alpha
+          if (data[idx] > 5) { // alpha threshold
+            topY = y;
+            break;
+          }
+        }
+        profile.push(topY);
+      }
+      this.skylineProfile = profile;
+      this.skylinePatternWidth = canvas.width;
+      this.skylineImageLoaded = true;
+      
+      // Inizializza sistema finestre passando l'elemento skyline
+      this.windowLightsSystem = new WindowLightsSystem('windows-canvas', this.skyline);
+    }
+
+    private randomizeBeam(el: HTMLElement) {
+      const left = 5 + Math.random() * 90;
+      const offset = (Math.random() - 0.5) * 30;
+      const rotStart = -8 + Math.random() * 16;
+      const rotMid = rotStart + (Math.random() * 14 - 7);
+      const rotEnd = rotStart + (Math.random() * 16 - 8);
+      const scale = 0.65 + Math.random() * 0.7; // Altezze diverse ma non estreme (0.65 - 1.35)
+      const duration = 6 + Math.random() * 6; // Durate più moderate
+      const delay = Math.random() * 2.5;
+      
+      // Aggancia sempre il fascio al bordo inferiore
+      const bottomPosition = 0;
+
+      // Calcola l'origine del fascio rispetto alla sagoma della skyline
+      const skylineWidth = this.skyline.offsetWidth || 1;
+      const xPixel = (left / 100) * skylineWidth;
+      let risePx = this.skylineHeight * 0.15;
+      if (this.skylineImageLoaded && this.skylineProfile.length > 0) {
+        const patternWidth = this.skylinePatternWidth || (this.skylineProfile.length || 1);
+        const sampleX = Math.floor(((xPixel % patternWidth) / patternWidth) * this.skylineProfile.length);
+        const idx = Math.min(this.skylineProfile.length - 1, Math.max(0, sampleX));
+        const topY = this.skylineProfile[idx] ?? this.skylineHeight;
+        risePx = Math.max(0, topY * 0.88);
+      }
+
+      el.style.left = `${left}%`;
+      el.style.bottom = `${bottomPosition}px`;
+      el.style.setProperty('--beam-offset', `${offset}px`);
+      el.style.setProperty('--beam-rot-start', `${rotStart}deg`);
+      el.style.setProperty('--beam-rot-mid', `${rotMid}deg`);
+      el.style.setProperty('--beam-rot-end', `${rotEnd}deg`);
+      el.style.setProperty('--beam-scale', `${scale}`);
+      el.style.setProperty('--beam-rise', `${risePx}px`);
+      el.style.animationDuration = `${duration}s`;
+      el.style.animationDelay = `${delay}s`;
+      el.style.animationTimingFunction = 'cubic-bezier(0.4, 0.0, 0.2, 1)';
+
+      el.style.animationName = 'none';
+      void el.offsetHeight;
+      el.style.animationName = 'beamSweep';
+    }
+
+    private initBeams() {
+      if (!this.beams) return;
+      this.beams.forEach((beam) => {
+        this.randomizeBeam(beam);
+        beam.addEventListener('animationiteration', () => this.randomizeBeam(beam));
+      });
+    }
+
     private positionLogo() {
       const padding = 50;
-      const logoWidth = Math.min(150, window.innerWidth * 0.15);
-      const logoHeight = logoWidth * 0.6;
       
+      // Attendi che il logo sia caricato per ottenere dimensioni accurate
+      const img = this.batLogoContainer.querySelector('img') as HTMLImageElement;
+      
+      const getDimensions = () => {
+        // Forza reflow multiplo per garantire che le dimensioni siano pronte
+        void this.batLogoContainer.offsetWidth;
+        const logoWidth = this.batLogoContainer.offsetWidth;
+        const logoHeight = this.batLogoContainer.offsetHeight;
+        
+        return { logoWidth, logoHeight };
+      };
+
+      // Se l'immagine non è ancora caricata, aspetta
+      if (img && !img.complete) {
+        img.onload = () => this.doPositionLogo(getDimensions());
+        img.onerror = () => this.doPositionLogo(getDimensions());
+      } else {
+        this.doPositionLogo(getDimensions());
+      }
+    }
+
+    private doPositionLogo(dims: { logoWidth: number; logoHeight: number }) {
+      const { logoWidth, logoHeight } = dims;
+      const padding = 50;
+
       const centerX = window.innerWidth / 2;
       const centerY = window.innerHeight / 2;
-      
-      // Exclusion zones (logo center cannot be in these areas)
+
       const exclusionZones = [
-        // Center text "Cercami" zone
-        {
-          x: centerX - 200,
-          y: centerY - 100,
-          width: 400,
-          height: 200
-        },
-        // Bottom hint "Trascina il dito" zone (bottom 30% of screen)
-        {
-          x: 0,
-          y: window.innerHeight * 0.7,
-          width: window.innerWidth,
-          height: window.innerHeight * 0.3
-        }
+        { x: centerX - 250, y: centerY - 150, width: 500, height: 300 },
+        { x: 0, y: window.innerHeight * 0.7, width: window.innerWidth, height: window.innerHeight * 0.3 }
       ];
-      
+
       let x: number, y: number;
       let attempts = 0;
-      const maxAttempts = 100;
-      
-      const isInExclusionZone = (testX: number, testY: number): boolean => {
-        const logoCenterX = testX + logoWidth / 2;
-        const logoCenterY = testY + logoHeight / 2;
-        
-        return exclusionZones.some(zone => 
+
+      do {
+        x = padding + Math.random() * (window.innerWidth - logoWidth - padding * 2);
+        y = padding + Math.random() * (window.innerHeight - logoHeight - padding * 2);
+        attempts++;
+
+        const logoCenterX = x + logoWidth / 2;
+        const logoCenterY = y + logoHeight / 2;
+
+        const inZone = exclusionZones.some(zone =>
           logoCenterX > zone.x &&
           logoCenterX < zone.x + zone.width &&
           logoCenterY > zone.y &&
           logoCenterY < zone.y + zone.height
         );
-      };
-      
-      do {
-        x = padding + (Math.random() * (window.innerWidth - logoWidth - padding * 2));
-        y = padding + (Math.random() * (window.innerHeight - logoHeight - padding * 2));
-        attempts++;
-        
-        if (!isInExclusionZone(x, y) || attempts >= maxAttempts) {
-          break;
-        }
+
+        if (!inZone || attempts >= 100) break;
       } while (true);
-      
-      this.logoPosition.x = x;
-      this.logoPosition.y = y;
-      
-      this.batLogo.style.left = `${this.logoPosition.x}px`;
-      this.batLogo.style.top = `${this.logoPosition.y}px`;
-    }
 
-    private createFogParticles() {
-      const particleCount = 50;
-      for (let i = 0; i < particleCount; i++) {
-        this.fogParticles.push({
-          x: Math.random() * window.innerWidth,
-          y: Math.random() * window.innerHeight,
-          vx: (Math.random() - 0.5) * 0.5,
-          vy: (Math.random() - 0.5) * 0.3,
-          size: Math.random() * 100 + 50,
-          opacity: Math.random() * 0.3 + 0.1
-        });
-      }
-    }
+      this.logoPosition = { x, y };
+      this.batLogoContainer.style.left = `${this.logoPosition.x}px`;
+      this.batLogoContainer.style.top = `${this.logoPosition.y}px`;
 
-    private animateFog() {
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      // DOPO aver posizionato, rileggi le dimensioni perché potrebbero essere cambiate con il reflow
+      void this.batLogoContainer.offsetWidth;
+      const actualLogoWidth = this.batLogoContainer.offsetWidth;
+      const actualLogoHeight = this.batLogoContainer.offsetHeight;
       
-      this.fogParticles.forEach(p => {
-        p.x += p.vx;
-        p.y += p.vy;
-        
-        if (p.x < -p.size) p.x = this.canvas.width + p.size;
-        if (p.x > this.canvas.width + p.size) p.x = -p.size;
-        if (p.y < -p.size) p.y = this.canvas.height + p.size;
-        if (p.y > this.canvas.height + p.size) p.y = -p.size;
-        
-        const gradient = this.ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size);
-        gradient.addColorStop(0, `rgba(42, 42, 74, ${p.opacity})`);
-        gradient.addColorStop(1, 'transparent');
-        
-        this.ctx.fillStyle = gradient;
-        this.ctx.fillRect(p.x - p.size, p.y - p.size, p.size * 2, p.size * 2);
-      });
-      
-      if (!this.isFound) {
-        requestAnimationFrame(() => this.animateFog());
-      }
+      // Passa le dimensioni REALI FINALI lette dal DOM al sistema radar
+      this.lightRevealSystem.setLogoPosition(x, y, actualLogoWidth, actualLogoHeight);
     }
 
     private bindEvents() {
-      // Desktop
       document.addEventListener('mousemove', (e) => this.handleMouseMove(e));
-      
-      // Mobile - touchstart, touchmove, touchend
-      // Only attach to container, not document, to allow audio gate interaction
+
       this.container.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: false });
       this.container.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
       this.container.addEventListener('touchend', () => this.handleTouchEnd());
-      
-      this.batLogo.addEventListener('click', () => this.handleLogoClick());
+
+      this.batLogoContainer.addEventListener('click', () => this.handleLogoClick());
+      window.addEventListener('resize', () => {
+        this.positionLogo();
+        this.updateSkylineMetrics();
+        this.initBeams();
+      });
     }
 
     private handleMouseMove(e: MouseEvent) {
       if (this.isFound) return;
-      
-      this.spotlight.style.left = `${e.clientX}px`;
-      this.spotlight.style.top = `${e.clientY}px`;
-      
-      this.checkLogoVisibility(e.clientX, e.clientY);
+      this.currentMouse = { x: e.clientX, y: e.clientY };
+      this.updateLogic(e.clientX, e.clientY);
     }
 
     private handleTouchStart(e: TouchEvent) {
       if (this.isFound) return;
-      
-      // Check if audio gate is still visible - don't block touch
       const audioGate = document.getElementById('audio-gate');
-      if (audioGate && !audioGate.classList.contains('hidden')) {
-        return; // Let touch through to audio gate
-      }
-      
-      e.preventDefault(); // Prevent scroll only after audio choice
-      
+      if (audioGate && !audioGate.classList.contains('hidden')) return;
+
+      e.preventDefault();
       const touch = e.touches[0];
-      this.spotlight.style.opacity = '1';
-      this.spotlight.style.left = `${touch.clientX}px`;
-      this.spotlight.style.top = `${touch.clientY}px`;
-      
-      this.checkLogoVisibility(touch.clientX, touch.clientY);
+      this.currentMouse = { x: touch.clientX, y: touch.clientY };
+      this.updateLogic(touch.clientX, touch.clientY);
     }
 
     private handleTouchMove(e: TouchEvent) {
       if (this.isFound) return;
-      
-      // Check if audio gate is still visible
       const audioGate = document.getElementById('audio-gate');
-      if (audioGate && !audioGate.classList.contains('hidden')) {
-        return;
-      }
-      
-      e.preventDefault(); // Prevent scroll
-      
+      if (audioGate && !audioGate.classList.contains('hidden')) return;
+
+      e.preventDefault();
       const touch = e.touches[0];
-      this.spotlight.style.left = `${touch.clientX}px`;
-      this.spotlight.style.top = `${touch.clientY}px`;
-      
-      this.checkLogoVisibility(touch.clientX, touch.clientY);
+      this.currentMouse = { x: touch.clientX, y: touch.clientY };
+      this.updateLogic(touch.clientX, touch.clientY);
     }
 
     private handleTouchEnd() {
-      if (this.isFound) return;
-      // Keep spotlight visible but dimmed when finger lifted
-      this.spotlight.style.opacity = '0.5';
+      // Maintain last position
     }
 
-    private checkLogoVisibility(mouseX: number, mouseY: number) {
+    private updateLogic(mouseX: number, mouseY: number) {
       if (this.isFound) return;
-      
-      const logoWidth = this.batLogo.offsetWidth;
-      const logoHeight = this.batLogo.offsetHeight;
+
+      const logoWidth = this.batLogoContainer.offsetWidth;
+      const logoHeight = this.batLogoContainer.offsetHeight;
       const logoCenterX = this.logoPosition.x + logoWidth / 2;
       const logoCenterY = this.logoPosition.y + logoHeight / 2;
-      
-      const distance = Math.sqrt(
-        Math.pow(mouseX - logoCenterX, 2) + 
-        Math.pow(mouseY - logoCenterY, 2)
-      );
-      
-      const revealDistance = 120;
-      
-      if (distance < revealDistance) {
-        const opacity = 1 - (distance / revealDistance);
-        this.batLogo.style.opacity = String(Math.max(0, opacity));
-        
-        // Auto-trigger when fully revealed (opacity > 0.8)
-        if (opacity > 0.8) {
-          this.batLogo.classList.add('revealed');
+
+      const dist = distance(mouseX, mouseY, logoCenterX, logoCenterY);
+
+
+      // Calcola il glow per il logo (come prima)
+      const dxLogo = mouseX - logoCenterX;
+      const dyLogo = mouseY - logoCenterY;
+      const angleLogo = Math.atan2(dyLogo, dxLogo);
+      const glowDistanceLogo = Math.max(12, Math.min(25, 25 * (1 - dist / 200)));
+      const glowXLogo = Math.cos(angleLogo) * glowDistanceLogo;
+      const glowYLogo = Math.sin(angleLogo) * glowDistanceLogo;
+      this.batLogoContainer.style.setProperty('--glow-shadow-x', `${glowXLogo}px`);
+      this.batLogoContainer.style.setProperty('--glow-shadow-y', `${glowYLogo}px`);
+      this.skyline.style.setProperty('--glow-shadow-x', `${glowXLogo}px`);
+      this.skyline.style.setProperty('--glow-shadow-y', `${glowYLogo}px`);
+
+      // Calcola il glow per il testo rispetto al suo centro
+      const textRect = this.searchText.getBoundingClientRect();
+      const textCenterX = textRect.left + textRect.width / 2;
+      const textCenterY = textRect.top + textRect.height / 2;
+      const dxText = mouseX - textCenterX;
+      const dyText = mouseY - textCenterY;
+      const angleText = Math.atan2(dyText, dxText);
+      const distText = Math.sqrt(dxText * dxText + dyText * dyText);
+      const glowDistanceText = Math.max(12, Math.min(25, 25 * (1 - Math.min(distText, 200) / 200)));
+      const glowXText = Math.cos(angleText) * glowDistanceText;
+      const glowYText = Math.sin(angleText) * glowDistanceText;
+      this.searchText.style.setProperty('--glow-shadow-x', `${glowXText}px`);
+      this.searchText.style.setProperty('--glow-shadow-y', `${glowYText}px`);
+
+      // Proximity zones - Arkham style (ridotte per vicinanza stretta)
+      const VERY_CLOSE = 80;
+      const CLOSE = 140;
+      const FAR = 200;
+
+      let newProximity = 'none';
+      if (dist < VERY_CLOSE) {
+        newProximity = 'very-close';
+      } else if (dist < CLOSE) {
+        newProximity = 'close';
+      }
+
+      // Update proximity value for light reveal system (0-1)
+      if (dist < FAR) {
+        this.currentProximityValue = Math.max(0, 1 - dist / FAR);
+      } else {
+        this.currentProximityValue = 0;
+      }
+      this.lightRevealSystem.setProximity(this.currentProximityValue);
+
+      this.proximityState = newProximity as any;
+
+      // Calcola glow skyline in base alla vicinanza verticale del cursore
+      const skylineTop = window.innerHeight - this.skylineHeight;
+      const distFromSkyline = Math.max(0, mouseY - skylineTop);
+      const skyIntensity = clamp(1 - distFromSkyline / (this.skylineHeight * 2 || 1), 0, 1) * 0.9;
+
+      // Update visibility e effects
+      if (dist < FAR) {
+        const opacity = Math.max(0, 1 - dist / FAR);
+        this.batLogoContainer.style.opacity = String(opacity);
+        this.skyline.style.setProperty('--sky-glow', String(Math.max(0, skyIntensity)));
+
+        // Update proximity classes
+        this.batLogoContainer.classList.toggle('proximity-close', dist < CLOSE && dist >= VERY_CLOSE);
+        this.batLogoContainer.classList.toggle('proximity-very-close', dist < VERY_CLOSE);
+
+        // Update spotlight size
+        const spotlightSize = 100 + (1 - dist / FAR) * 60;
+        this.spotlightSystem.setTargetRadius(spotlightSize);
+
+        // Update vignette dynamically
+        const vignetteIntensity = dist < CLOSE ? 0.15 - (opacity * 0.1) : 0.15;
+        this.vignetteSpotlight.style.background = `radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, ${vignetteIntensity}) 100%)`;
+
+        // Show bat-signal effect when very close
+        if (dist < VERY_CLOSE) {
+          this.batSignalEffect.style.opacity = String(Math.max(0, 1 - (dist / VERY_CLOSE) * 0.5));
+        } else {
+          this.batSignalEffect.style.opacity = '0';
+        }
+
+        // Auto-trigger when very close and centered
+        if (opacity > 0.85 && dist < VERY_CLOSE) {
+          this.batLogoContainer.classList.add('revealed');
           this.triggerFound();
         }
       } else {
-        this.batLogo.style.opacity = '0';
-        this.batLogo.classList.remove('revealed');
+        this.batLogoContainer.style.opacity = '0';
+        this.batLogoContainer.classList.remove('proximity-close', 'proximity-very-close', 'revealed');
+        this.spotlightSystem.setTargetRadius(100);
+        this.batSignalEffect.style.opacity = '0';
+        this.skyline.style.setProperty('--sky-glow', String(Math.max(0, skyIntensity)));
       }
     }
 
     private triggerFound() {
       if (this.isFound) return;
-      
       this.isFound = true;
       this.container.classList.add('found');
-      
-      // Dispatch event immediately for sound effect
+
+      // Nascondi subito la scritta "FIND ME" per evitare overlap
+      this.searchText.style.opacity = '0';
+      this.searchText.style.display = 'none';
+
+      // Logo reveal
+      this.batLogoContainer.style.opacity = '1';
+
+      // Maximum light reveal effect on discovery
+      this.lightRevealSystem.setProximity(1);
+
+      // Glitch effect
+      this.glitchOverlay.style.opacity = '0.5';
+
+      // Dispatch audio event
       document.dispatchEvent(new CustomEvent('logo-found'));
-      
-      this.batLogo.style.opacity = '1';
-      this.batLogo.style.transform = 'scale(1.2)';
-      this.batLogo.style.transition = 'transform 0.5s ease';
-      
-      // Wait for "Mi hai trovato" to show, then fade out
+
+      // Bat-signal effect full intensity
+      this.batSignalEffect.style.opacity = '1';
+
+      // Fade fog
+      const fogCanvas = document.getElementById('fog-canvas') as HTMLCanvasElement;
+      if (fogCanvas) {
+        fogCanvas.style.transition = 'opacity 1.2s ease-out';
+        fogCanvas.style.opacity = '0';
+      }
+
+      // Transitions parametrizzate per la fase finale
+      const foundTransitionDelay = 1800; // ms
       setTimeout(() => {
         this.container.classList.add('hidden');
-        
-        // Wait for spotlight fade out to complete before showing content
         setTimeout(() => {
           const content = document.getElementById('content');
           if (content) {
             content.classList.add('visible');
             content.setAttribute('aria-hidden', 'false');
           }
-          
           this.container.style.display = 'none';
-          
           document.dispatchEvent(new CustomEvent('spotlight-complete'));
-        }, 1000); // Wait for 1s fade out transition
-        
-      }, 1500);
+        }, 1000);
+      }, foundTransitionDelay);
+
+      // Hide found text and radar synced with the same delay (no flicker)
+      setTimeout(() => {
+        const foundText = document.querySelector('.found-text') as HTMLElement;
+        const logoRevealCanvas = document.getElementById('logo-reveal-canvas') as HTMLCanvasElement;
+        if (foundText) {
+          foundText.style.transition = 'opacity 0.2s ease';
+          foundText.style.opacity = '0';
+          setTimeout(() => { foundText.style.display = 'none'; }, 220);
+        }
+        if (logoRevealCanvas) {
+          logoRevealCanvas.style.transition = 'opacity 0.2s ease';
+          logoRevealCanvas.style.opacity = '0';
+          setTimeout(() => { logoRevealCanvas.style.display = 'none'; }, 220);
+        }
+      }, foundTransitionDelay);
     }
 
     private handleLogoClick() {
       this.triggerFound();
     }
+
+    private animate = () => {
+      if (!this.isFound) {
+        this.spotlightSystem.update(this.currentMouse.x, this.currentMouse.y);
+        this.volumetricFog.update(this.currentMouse.x, this.currentMouse.y, 100);
+        this.lightRevealSystem.update(this.currentMouse.x, this.currentMouse.y, 100);
+        this.distortionSystem.update(this.currentMouse.x, this.currentMouse.y, 100);
+        if (this.windowLightsSystem) {
+          this.windowLightsSystem.update();
+        }
+      }
+      requestAnimationFrame(this.animate);
+    };
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    new SpotlightSearch();
+    new ArkhamSpotlightSearch();
   });
 </script>
