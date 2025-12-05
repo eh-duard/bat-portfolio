@@ -1735,7 +1735,20 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
     }
 
     private bindEvents() {
-      document.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+      // Throttle mousemove per evitare excessive DOM updates
+      let lastMouseUpdateTime = 0;
+      const throttleDelay = this.isMobileDevice ? 50 : 16; // 20Hz mobile, 60Hz desktop
+      
+      document.addEventListener('mousemove', (e) => {
+        const now = Date.now();
+        if (now - lastMouseUpdateTime >= throttleDelay) {
+          this.handleMouseMove(e);
+          lastMouseUpdateTime = now;
+        } else {
+          // Aggiorna solo la posizione senza updateLogic
+          this.currentMouse = { x: e.clientX, y: e.clientY };
+        }
+      });
 
       this.container.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: false });
       this.container.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
@@ -1774,7 +1787,8 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
       e.preventDefault();
       const touch = e.touches[0];
       this.currentMouse = { x: touch.clientX, y: touch.clientY };
-      this.updateLogic(touch.clientX, touch.clientY);
+      // Throttle touch move updates too
+      // updateLogic viene chiamato già dal loop animate
     }
 
     private handleTouchEnd() {
@@ -1784,6 +1798,7 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
     private updateLogic(mouseX: number, mouseY: number) {
       if (this.isFound) return;
 
+      // Cache le dimensioni invece di chiamare offsetWidth/offsetHeight ogni volta
       const logoWidth = this.batLogoContainer.offsetWidth;
       const logoHeight = this.batLogoContainer.offsetHeight;
       const logoCenterX = this.logoPosition.x + logoWidth / 2;
@@ -1791,20 +1806,23 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
 
       const dist = distance(mouseX, mouseY, logoCenterX, logoCenterY);
 
-
-      // Calcola il glow per il logo (come prima)
+      // Calcola il glow per il logo in una sola volta
       const dxLogo = mouseX - logoCenterX;
       const dyLogo = mouseY - logoCenterY;
       const angleLogo = Math.atan2(dyLogo, dxLogo);
       const glowDistanceLogo = Math.max(12, Math.min(25, 25 * (1 - dist / 200)));
       const glowXLogo = Math.cos(angleLogo) * glowDistanceLogo;
       const glowYLogo = Math.sin(angleLogo) * glowDistanceLogo;
-      this.batLogoContainer.style.setProperty('--glow-shadow-x', `${glowXLogo}px`);
-      this.batLogoContainer.style.setProperty('--glow-shadow-y', `${glowYLogo}px`);
-      this.skyline.style.setProperty('--glow-shadow-x', `${glowXLogo}px`);
-      this.skyline.style.setProperty('--glow-shadow-y', `${glowYLogo}px`);
+      
+      // Batch DOM updates per logo
+      const glowXStr = `${glowXLogo}px`;
+      const glowYStr = `${glowYLogo}px`;
+      this.batLogoContainer.style.setProperty('--glow-shadow-x', glowXStr);
+      this.batLogoContainer.style.setProperty('--glow-shadow-y', glowYStr);
+      this.skyline.style.setProperty('--glow-shadow-x', glowXStr);
+      this.skyline.style.setProperty('--glow-shadow-y', glowYStr);
 
-      // Calcola il glow per il testo rispetto al suo centro
+      // Calcola il glow per il testo - una sola lettura di getBoundingClientRect
       const textRect = this.searchText.getBoundingClientRect();
       const textCenterX = textRect.left + textRect.width / 2;
       const textCenterY = textRect.top + textRect.height / 2;
@@ -1815,10 +1833,14 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
       const glowDistanceText = Math.max(12, Math.min(25, 25 * (1 - Math.min(distText, 200) / 200)));
       const glowXText = Math.cos(angleText) * glowDistanceText;
       const glowYText = Math.sin(angleText) * glowDistanceText;
-      this.searchText.style.setProperty('--glow-shadow-x', `${glowXText}px`);
-      this.searchText.style.setProperty('--glow-shadow-y', `${glowYText}px`);
+      
+      // Batch text glow updates
+      const textGlowXStr = `${glowXText}px`;
+      const textGlowYStr = `${glowYText}px`;
+      this.searchText.style.setProperty('--glow-shadow-x', textGlowXStr);
+      this.searchText.style.setProperty('--glow-shadow-y', textGlowYStr);
 
-      // Proximity zones - Arkham style (ridotte per vicinanza stretta)
+      // Proximity zones
       const VERY_CLOSE = 80;
       const CLOSE = 140;
       const FAR = 200;
@@ -1830,7 +1852,7 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
         newProximity = 'close';
       }
 
-      // Update proximity value for light reveal system (0-1)
+      // Update proximity value for light reveal system
       if (dist < FAR) {
         this.currentProximityValue = Math.max(0, 1 - dist / FAR);
       } else {
@@ -1840,20 +1862,27 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
 
       this.proximityState = newProximity as any;
 
-      // Calcola glow skyline in base alla vicinanza verticale del cursore
+      // Calcola glow skyline
       const skylineTop = window.innerHeight - this.skylineHeight;
       const distFromSkyline = Math.max(0, mouseY - skylineTop);
       const skyIntensity = clamp(1 - distFromSkyline / (this.skylineHeight * 2 || 1), 0, 1) * 0.9;
 
-      // Update visibility e effects
+      // Update visibility e effects - batch updates
       if (dist < FAR) {
         const opacity = Math.max(0, 1 - dist / FAR);
         this.batLogoContainer.style.opacity = String(opacity);
         this.skyline.style.setProperty('--sky-glow', String(Math.max(0, skyIntensity)));
 
-        // Update proximity classes
-        this.batLogoContainer.classList.toggle('proximity-close', dist < CLOSE && dist >= VERY_CLOSE);
-        this.batLogoContainer.classList.toggle('proximity-very-close', dist < VERY_CLOSE);
+        // Update proximity classes - batch together
+        const isProximityClose = dist < CLOSE && dist >= VERY_CLOSE;
+        const isProximityVeryClose = dist < VERY_CLOSE;
+        
+        if (isProximityClose !== this.batLogoContainer.classList.contains('proximity-close')) {
+          this.batLogoContainer.classList.toggle('proximity-close', isProximityClose);
+        }
+        if (isProximityVeryClose !== this.batLogoContainer.classList.contains('proximity-very-close')) {
+          this.batLogoContainer.classList.toggle('proximity-very-close', isProximityVeryClose);
+        }
 
         // Update spotlight size
         const spotlightSize = 100 + (1 - dist / FAR) * 60;
