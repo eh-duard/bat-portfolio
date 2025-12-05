@@ -1693,43 +1693,13 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
 
     private doPositionLogo(dims: { logoWidth: number; logoHeight: number }) {
       const { logoWidth, logoHeight } = dims;
-      const padding = this.isMobileDevice ? 20 : 50;
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
 
-      const centerX = viewportWidth / 2;
-      const centerY = viewportHeight / 2;
-
-      // Su mobile, esclusione zone più piccole per garantire visibilità logo
-      const exclusionZones = this.isMobileDevice ? [
-        { x: centerX - 120, y: centerY - 80, width: 240, height: 160 },
-        { x: 0, y: viewportHeight * 0.75, width: viewportWidth, height: viewportHeight * 0.25 }
-      ] : [
-        { x: centerX - 250, y: centerY - 150, width: 500, height: 300 },
-        { x: 0, y: viewportHeight * 0.7, width: viewportWidth, height: viewportHeight * 0.3 }
-      ];
-
-      let x: number, y: number;
-      let attempts = 0;
-      const maxAttempts = 50;
-
-      do {
-        x = padding + Math.random() * (viewportWidth - logoWidth - padding * 2);
-        y = padding + Math.random() * (viewportHeight - logoHeight - padding * 2);
-        attempts++;
-
-        const logoCenterX = x + logoWidth / 2;
-        const logoCenterY = y + logoHeight / 2;
-
-        const inZone = exclusionZones.some(zone =>
-          logoCenterX > zone.x &&
-          logoCenterX < zone.x + zone.width &&
-          logoCenterY > zone.y &&
-          logoCenterY < zone.y + zone.height
-        );
-
-        if (!inZone || attempts >= maxAttempts) break;
-      } while (true);
+      // Centra il logo nel RADAR (il radar è grande il doppio del container per inset: -50%)
+      // Quindi il container deve essere posizionato a metà della distanza rimanente
+      const x = (viewportWidth - logoWidth) / 2;
+      const y = (viewportHeight - logoHeight) / 2;
 
       this.logoPosition = { x, y };
       this.batLogoContainer.style.cssText = `left: ${x}px; top: ${y}px;`;
@@ -1988,6 +1958,9 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
 
     private animate = () => {
       if (!this.isFound) {
+        // Aggiorna proximity check continuamente - ESSENZIALE per visibility durante drag
+        this.updateLogic(this.currentMouse.x, this.currentMouse.y);
+        
         // Su dispositivi low-end, disabilita alcuni effetti costosi
         if (!this.isLowEndDevice) {
           this.spotlightSystem.update(this.currentMouse.x, this.currentMouse.y);
