@@ -1620,17 +1620,14 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
       const rotStart = -8 + Math.random() * 16;
       const rotMid = rotStart + (Math.random() * 14 - 7);
       const rotEnd = rotStart + (Math.random() * 16 - 8);
-      const scale = 0.65 + Math.random() * 0.7; // Altezze diverse ma non estreme (0.65 - 1.35)
-      const duration = 6 + Math.random() * 6; // Durate più moderate
+      const scale = 0.65 + Math.random() * 0.7;
+      const duration = 6 + Math.random() * 6;
       const delay = Math.random() * 2.5;
       
-      // Aggancia sempre il fascio al bordo inferiore
-      const bottomPosition = 0;
-
-      // Calcola l'origine del fascio rispetto alla sagoma della skyline
-      const skylineWidth = this.skyline.offsetWidth || 1;
+      const skylineWidth = this.skyline.offsetWidth || window.innerWidth;
       const xPixel = (left / 100) * skylineWidth;
       let risePx = this.skylineHeight * 0.15;
+      
       if (this.skylineImageLoaded && this.skylineProfile.length > 0) {
         const patternWidth = this.skylinePatternWidth || (this.skylineProfile.length || 1);
         const sampleX = Math.floor(((xPixel % patternWidth) / patternWidth) * this.skylineProfile.length);
@@ -1639,28 +1636,21 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
         risePx = Math.max(0, topY * 0.88);
       }
 
-      el.style.left = `${left}%`;
-      el.style.bottom = `${bottomPosition}px`;
-      el.style.setProperty('--beam-offset', `${offset}px`);
-      el.style.setProperty('--beam-rot-start', `${rotStart}deg`);
-      el.style.setProperty('--beam-rot-mid', `${rotMid}deg`);
-      el.style.setProperty('--beam-rot-end', `${rotEnd}deg`);
-      el.style.setProperty('--beam-scale', `${scale}`);
-      el.style.setProperty('--beam-rise', `${risePx}px`);
-      el.style.animationDuration = `${duration}s`;
-      el.style.animationDelay = `${delay}s`;
-      el.style.animationTimingFunction = 'cubic-bezier(0.4, 0.0, 0.2, 1)';
-
-      el.style.animationName = 'none';
-      void el.offsetHeight;
-      el.style.animationName = 'beamSweep';
+      el.style.cssText = `left: ${left}%; bottom: 0px; --beam-offset: ${offset}px; --beam-rot-start: ${rotStart}deg; --beam-rot-mid: ${rotMid}deg; --beam-rot-end: ${rotEnd}deg; --beam-scale: ${scale}; --beam-rise: ${risePx}px; animation-duration: ${duration}s; animation-delay: ${delay}s; animation-timing-function: cubic-bezier(0.4, 0.0, 0.2, 1); animation-name: none;`;
+      
+      requestAnimationFrame(() => {
+        el.style.animationName = 'beamSweep';
+      });
     }
 
     private initBeams() {
       if (!this.beams) return;
       this.beams.forEach((beam) => {
         this.randomizeBeam(beam);
-        beam.addEventListener('animationiteration', () => this.randomizeBeam(beam));
+        // Su mobile, disabilita randomizeBeam ad ogni iterazione (troppo CPU-intensive)
+        if (!this.isMobileDevice) {
+          beam.addEventListener('animationiteration', () => this.randomizeBeam(beam));
+        }
       });
     }
 
@@ -1690,22 +1680,29 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
 
     private doPositionLogo(dims: { logoWidth: number; logoHeight: number }) {
       const { logoWidth, logoHeight } = dims;
-      const padding = 50;
+      const padding = this.isMobileDevice ? 20 : 50;
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
 
-      const centerX = window.innerWidth / 2;
-      const centerY = window.innerHeight / 2;
+      const centerX = viewportWidth / 2;
+      const centerY = viewportHeight / 2;
 
-      const exclusionZones = [
+      // Su mobile, esclusione zone più piccole per garantire visibilità logo
+      const exclusionZones = this.isMobileDevice ? [
+        { x: centerX - 120, y: centerY - 80, width: 240, height: 160 },
+        { x: 0, y: viewportHeight * 0.75, width: viewportWidth, height: viewportHeight * 0.25 }
+      ] : [
         { x: centerX - 250, y: centerY - 150, width: 500, height: 300 },
-        { x: 0, y: window.innerHeight * 0.7, width: window.innerWidth, height: window.innerHeight * 0.3 }
+        { x: 0, y: viewportHeight * 0.7, width: viewportWidth, height: viewportHeight * 0.3 }
       ];
 
       let x: number, y: number;
       let attempts = 0;
+      const maxAttempts = 50;
 
       do {
-        x = padding + Math.random() * (window.innerWidth - logoWidth - padding * 2);
-        y = padding + Math.random() * (window.innerHeight - logoHeight - padding * 2);
+        x = padding + Math.random() * (viewportWidth - logoWidth - padding * 2);
+        y = padding + Math.random() * (viewportHeight - logoHeight - padding * 2);
         attempts++;
 
         const logoCenterX = x + logoWidth / 2;
@@ -1718,19 +1715,15 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
           logoCenterY < zone.y + zone.height
         );
 
-        if (!inZone || attempts >= 100) break;
+        if (!inZone || attempts >= maxAttempts) break;
       } while (true);
 
       this.logoPosition = { x, y };
-      this.batLogoContainer.style.left = `${this.logoPosition.x}px`;
-      this.batLogoContainer.style.top = `${this.logoPosition.y}px`;
+      this.batLogoContainer.style.cssText = `left: ${x}px; top: ${y}px;`;
 
-      // DOPO aver posizionato, rileggi le dimensioni perché potrebbero essere cambiate con il reflow
-      void this.batLogoContainer.offsetWidth;
       const actualLogoWidth = this.batLogoContainer.offsetWidth;
       const actualLogoHeight = this.batLogoContainer.offsetHeight;
       
-      // Passa le dimensioni REALI FINALI lette dal DOM al sistema radar
       this.lightRevealSystem.setLogoPosition(x, y, actualLogoWidth, actualLogoHeight);
     }
 
