@@ -93,7 +93,7 @@ const projects = [
             {projects.map((project, index) => (
                 <div class="relative pl-8 md:pl-12 border-l-2 border-[#333] hover:border-[#ffd700] transition-colors duration-500 py-2 group">
                     <!-- Timeline Node -->
-                    <div class="absolute -left-[9px] top-0 w-4 h-4 bg-[#0a0a0a] border-2 border-[#333] group-hover:border-[#ffd700] group-hover:bg-[#ffd700] transition-all duration-500 rotate-45"></div>
+                    <div class="absolute -left-[9px] top-0 w-4 h-4 bg-[#ffd700] border-2 border-[#ffd700] md:bg-[#0a0a0a] md:border-[#333] group-hover:border-[#ffd700] group-hover:bg-[#ffd700] transition-all duration-500 rotate-45"></div>
                     
                     <div class="bg-[#0c0c0c] border border-[#222] p-8 relative overflow-hidden group-hover:border-[#ffd700]/30 transition-all">
                         <!-- Holographic Grid -->
@@ -107,7 +107,7 @@ const projects = [
                                     <span data-i18n="mission.sector">// SECTOR 7G</span>
                                 </div>
                                 
-                                <h3 class="text-3xl font-display text-gray-200 group-hover:text-white transition-colors tracking-wide">{project.caseFile}</h3>
+                                <h3 class="text-3xl font-display text-white md:text-gray-200 group-hover:text-white transition-colors tracking-wide">{project.caseFile}</h3>
                                 
                                 <p class="text-[#888] font-mono text-sm leading-7">
                                     <span class="text-[#ffd700]">></span> <span data-i18n="mission.subject">SUBJECT:</span> {project.title}<br/>
