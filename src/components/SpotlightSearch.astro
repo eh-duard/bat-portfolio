@@ -1274,24 +1274,35 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
     private windows: Array<{ x: number; y: number; state: number; changeTime: number }> = [];
     private skylineImageData: ImageData | null = null;
     private lastUpdate: number = 0;
+    private skylineElement: HTMLElement;
+    private resizeTimeout: any = null;
 
     constructor(canvasId: string, skylineElement: HTMLElement) {
       this.canvas = document.getElementById(canvasId) as HTMLCanvasElement;
       this.ctx = this.canvas.getContext('2d', { willReadFrequently: true })!;
+      this.skylineElement = skylineElement;
       this.setupCanvas();
-      this.captureSkylineShape(skylineElement);
+      this.captureSkylineShape();
     }
 
     private setupCanvas() {
       const resize = () => {
         this.canvas.width = window.innerWidth;
         this.canvas.height = this.canvas.offsetHeight;
+        
+        if (this.resizeTimeout) clearTimeout(this.resizeTimeout);
+        this.resizeTimeout = setTimeout(() => {
+            this.captureSkylineShape();
+        }, 300);
       };
-      resize();
+      
+      this.canvas.width = window.innerWidth;
+      this.canvas.height = this.canvas.offsetHeight;
       window.addEventListener('resize', resize);
     }
 
-    private async captureSkylineShape(skylineElement: HTMLElement) {
+    private async captureSkylineShape() {
+      const skylineElement = this.skylineElement;
       // Crea un canvas temporaneo per "fotografare" la skyline
       const tempCanvas = document.createElement('canvas');
       const tempCtx = tempCanvas.getContext('2d')!;

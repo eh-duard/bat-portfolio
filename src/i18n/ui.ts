@@ -47,9 +47,9 @@ export const ui = {
         'mission.batTitle': 'ARCHIVED CASE FILES',
         'mission.topSecret': 'TOP SECRET',
         'mission.sector': '// SECTOR 7G',
-        'mission.subject': '> SUBJECT:',
-        'mission.analysis': '> ANALYSIS:',
-        'mission.status': '> STATUS: DECLASSIFIED',
+        'mission.subject': 'SUBJECT:',
+        'mission.analysis': 'ANALYSIS:',
+        'mission.status': 'STATUS: DECLASSIFIED',
         'mission.access': 'Access Data',
 
         // Signal (Contact)
@@ -114,9 +114,9 @@ export const ui = {
         'mission.batTitle': 'FILE ARCHIVIATI',
         'mission.topSecret': 'TOP SECRET',
         'mission.sector': '// SETTORE 7G',
-        'mission.subject': '> SOGGETTO:',
-        'mission.analysis': '> ANALISI:',
-        'mission.status': '> STATO: DECLASSIFICATO',
+        'mission.subject': 'SOGGETTO:',
+        'mission.analysis': 'ANALISI:',
+        'mission.status': 'STATO: DECLASSIFICATO',
         'mission.access': 'Accedi ai Dati',
 
         // Signal (Contact)
