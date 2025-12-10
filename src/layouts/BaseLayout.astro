@@ -1,6 +1,9 @@
 ---
+import '../styles/global.css';
+import LanguageToggle from '../components/LanguageToggle.astro';
+
 interface Props {
-  title?: string;
+  title: string;
   description?: string;
   lang?: 'it' | 'en';
 }
@@ -25,6 +28,7 @@ const baseUrl = import.meta.env.BASE_URL;
     <title>{title}</title>
     
     <link rel="icon" type="image/svg+xml" href={`${baseUrl}favicon.svg`} />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css" />
     
     <script is:inline>
       (function() {
@@ -33,10 +37,31 @@ const baseUrl = import.meta.env.BASE_URL;
         
         const lang = localStorage.getItem('lang') || 'it';
         document.documentElement.lang = lang;
+
+        console.log(`%c
+       _==/          i     i          \\==_
+     /XX/            |\\___/|            \\XX\\
+   /XXXX\\            |XXXXX|            /XXXX\\
+  |XXXXXX\\_         _XXXXXXX_         _/XXXXXX|
+ XXXXXXXXXXXxxxxxxxXXXXXXXXXXXxxxxxxxXXXXXXXXXXX
+|XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX|
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+|XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX|
+ XXXXXX/^^^^"\\XXXXXXXXXXXXXXXXXXXXX/^^^^^\\XXXXXX
+  |XXX|       \\XXX/^^\XXXXX/^^\XXX/       |XXX|
+    \\XX\\       \\X/    \\XXX/    \\X/       /XX/
+       "\\       "      \\X/      "      /"
+                        !
+        `, "font-family:monospace; color: #ffd700; font-size: 10px; font-weight: bold;");
+        console.log("%cI am Vengeance. I am the Night. I am... A DEVELOPER.", "color: #ffd700; font-size: 16px; font-weight: bold; background: #000; padding: 10px; border-radius: 5px;");
       })();
     </script>
   </head>
+  <script>
+    import '../scripts/language-manager';
+  </script>
   <body>
+    <LanguageToggle />
     <slot />
   </body>
 </html>

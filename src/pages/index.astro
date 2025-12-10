@@ -1,7 +1,15 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
 import SpotlightSearch from '../components/SpotlightSearch.astro';
 import AudioController from '../components/AudioController.astro';
+import PortfolioContainer from '../components/PortfolioContainer.astro';
+import ModeToggle from '../components/ModeToggle.astro';
+import Hero from '../components/Hero.astro';
+import About from '../components/About.astro';
+import Arsenal from '../components/Arsenal.astro';
+import MissionLog from '../components/MissionLog.astro';
+import Signal from '../components/Signal.astro';
 ---
 
 <BaseLayout title="Bat Portfolio" description="Portfolio di uno sviluppatore fullstack">
@@ -11,5 +19,42 @@ import AudioController from '../components/AudioController.astro';
 
     <!-- Audio Controller -->
     <AudioController />
+
+    <!-- Main Portfolio Content -->
+    <PortfolioContainer>
+      <ModeToggle />
+      <Hero />
+      <About />
+      <Arsenal />
+      <MissionLog />
+      <Signal />
+    </PortfolioContainer>
   </main>
 </BaseLayout>
+
+<script>
+  // Simple Intersection Observer for scroll animations
+  const observerOptions = {
+    root: null,
+    rootMargin: '0px',
+    threshold: 0.1
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+        observer.unobserve(entry.target); // Only animate once
+      }
+    });
+  }, observerOptions);
+
+  // Initialize observer on load and after swaps
+  const initObserver = () => {
+    const hiddenElements = document.querySelectorAll('.on-scroll');
+    hiddenElements.forEach((el) => observer.observe(el));
+  };
+
+  document.addEventListener('astro:page-load', initObserver);
+  document.addEventListener('DOMContentLoaded', initObserver);
+</script>

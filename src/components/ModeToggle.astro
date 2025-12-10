@@ -1,0 +1,108 @@
+---
+// ModeToggle.astro
+---
+<button id="mode-toggle" class="mode-toggle" aria-label="Toggle Mode">
+  <div class="toggle-track">
+    <div class="toggle-indicator"></div>
+    <div class="icon-dev">
+        <span class="mdi mdi-code-tags text-[18px]"></span>
+    </div>
+    <div class="icon-bat">
+        <span class="mdi mdi-bat text-[20px]"></span>
+    </div>
+  </div>
+</button>
+
+<script>
+  import { modeStore, setMode } from '../stores/gameStore';
+
+  const toggleBtn = document.getElementById('mode-toggle');
+  
+  // Sync UI with Store
+  modeStore.subscribe(mode => {
+    const isBat = mode === 'batman';
+    if (isBat) {
+        toggleBtn?.classList.add('batman-active');
+    } else {
+        toggleBtn?.classList.remove('batman-active');
+    }
+    document.body.classList.toggle('batman-mode', isBat);
+  });
+
+  toggleBtn?.addEventListener('click', () => {
+    const current = modeStore.get();
+    const next = current === 'batman' ? 'dev' : 'batman';
+    setMode(next);
+  });
+</script>
+
+<style>
+  .mode-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    z-index: 50;
+    outline: none;
+  }
+
+  .toggle-track {
+    width: 64px;
+    height: 32px;
+    background-color: var(--color-bg-secondary);
+    border: 1px solid var(--color-accent-dim);
+    border-radius: 16px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 6px;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  }
+
+  .toggle-indicator {
+    position: absolute;
+    left: 4px;
+    width: 24px;
+    height: 24px;
+    background-color: var(--color-text-muted);
+    border-radius: 50%;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.3s;
+    z-index: 2;
+  }
+
+  .icon-dev, .icon-bat {
+    z-index: 1;
+    color: var(--color-text-muted);
+    transition: opacity 0.3s, color 0.3s;
+    opacity: 0.5;
+  }
+
+  /* Batman Active State */
+  .mode-toggle.batman-active .toggle-track {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+  }
+
+  .mode-toggle.batman-active .toggle-indicator {
+    transform: translateX(32px);
+    background-color: var(--color-accent);
+    box-shadow: 0 0 10px var(--color-accent);
+  }
+
+  .mode-toggle.batman-active .icon-bat {
+    opacity: 0;
+  }
+  
+  /* Dev Active State (Default) */
+  .mode-toggle:not(.batman-active) .toggle-indicator {
+    background-color: #fff;
+  }
+  
+  .mode-toggle:not(.batman-active) .icon-dev {
+    opacity: 0;
+  }
+</style>

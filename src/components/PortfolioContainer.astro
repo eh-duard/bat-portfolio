@@ -1,0 +1,58 @@
+---
+import { gameStore } from '../stores/gameStore';
+
+// Ascoltiamo lo store per sapere se mostrare il contenuto o meno
+// Nota: In Astro, per reattività client-side complessa, spesso usiamo client directives sui componenti figli
+// Ma qui useremo un wrapper div che controlla la visibilità via CSS/JS vanilla o un framework component se necessario.
+// Per semplicità, rendiamo il container sempre presente ma nascosto/visualizzato via CSS basato su una classe togglata da script.
+---
+
+<div id="portfolio-main" class="portfolio-container hidden-portfolio">
+  <div class="portfolio-content">
+    <slot />
+  </div>
+</div>
+
+<script>
+  import { gameStore } from '../stores/gameStore';
+
+  const container = document.getElementById('portfolio-main');
+  
+  // Sottoscrizione allo store
+  gameStore.subscribe(state => {
+    if (state.isRevealed) {
+      container?.classList.remove('hidden-portfolio');
+      container?.classList.add('visible-portfolio');
+    } else {
+      container?.classList.add('hidden-portfolio');
+      container?.classList.remove('visible-portfolio');
+    }
+  });
+</script>
+
+<style>
+  .portfolio-container {
+    position: relative;
+    z-index: 10; /* Sopra al gioco una volta rivelato */
+    min-height: 100vh;
+    width: 100%;
+    background-color: var(--color-bg-primary);
+    transition: opacity 2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .hidden-portfolio {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.95);
+    height: 0;
+    overflow: hidden;
+  }
+
+  .visible-portfolio {
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1);
+    height: auto;
+    overflow: visible;
+  }
+</style>

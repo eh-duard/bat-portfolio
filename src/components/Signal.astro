@@ -1,0 +1,59 @@
+---
+import DualContent from './DualContent.astro';
+---
+
+<section id="contact" class="py-32 px-4 w-full relative on-scroll">
+  
+  <DualContent className="relative z-10 container mx-auto max-w-4xl">
+    <!-- DEV MODE -->
+    <div slot="dev" class="text-center space-y-8">
+      <div class="space-y-4">
+        <h2 class="text-4xl md:text-5xl font-bold tracking-tight" data-i18n="signal.title">Let's Create Something.</h2>
+        <p class="text-gray-400 max-w-lg mx-auto text-lg font-light" data-i18n="signal.text">
+          Whether you have a project in mind or just want to discuss the latest tech, I'm all ears.
+        </p>
+      </div>
+      
+      <div class="flex flex-col md:flex-row gap-6 justify-center items-center pt-8">
+          <a href="mailto:email@example.com" class="px-8 py-4 bg-white text-black font-bold rounded-full hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-white/10" data-i18n="signal.email">
+            Send an Email
+          </a>
+      </div>
+      
+      <div class="pt-16 flex justify-center gap-12 text-gray-500">
+        <a href="#" class="hover:text-white transition-colors hover:scale-110 transform duration-200">GitHub</a>
+        <a href="#" class="hover:text-white transition-colors hover:scale-110 transform duration-200">LinkedIn</a>
+      </div>
+    </div>
+
+    <!-- BATMAN MODE -->
+    <div slot="batman" class="text-center relative py-12">
+        <!-- Bat Signal Graphic CSS -->
+        <div class="w-48 h-48 md:w-64 md:h-64 mx-auto mb-16 rounded-full bg-[#050505] relative shadow-[0_0_100px_rgba(255,215,0,0.1)] group cursor-pointer hover:shadow-[0_0_200px_rgba(255,215,0,0.4)] transition-all duration-700 border border-[#222]">
+            <div class="absolute inset-2 rounded-full border border-[#333]"></div>
+            <div class="absolute inset-0 flex items-center justify-center opacity-30 group-hover:opacity-100 transition-opacity duration-500">
+                 <!-- Simple Bat Shape CSS or SVG -->
+                 <svg viewBox="0 0 726 252.17" width="180" class="fill-[#ffd700] drop-shadow-[0_0_10px_rgba(255,215,0,0.8)]">
+                    <path d="M483.92 0S481.38 24.71 466 40.11c-11.74 11.74-24.09 12.66-40.26 15.07-9.42 1.41-29.7 3.77-34.81-.79-2.37-2.11-3-21-3.22-27.62-.21-6.92-1.36-16.52-2.82-18-.75 3.06-2.49 11.53-3.09 13.61S378.49 34.3 378 36a85.13 85.13 0 0 0-30.09 0c-.46-1.67-3.17-11.48-3.77-13.56s-2.34-10.55-3.09-13.61c-1.45 1.45-2.61 11.05-2.82 18-.21 6.67-.84 25.51-3.22 27.62-5.11 4.56-25.38 2.2-34.8.79-16.16-2.47-28.51-3.39-40.21-15.13C244.57 24.71 242 0 242 0H0s69.52 22.74 97.52 68.59c16.56 27.11 14.14 58.49 9.92 74.73C170 140 221.46 140 273 158.57c69.23 24.93 83.2 76.19 90 93.6 6.77-17.41 20.75-68.67 90-93.6 51.54-18.56 103-18.59 165.56-15.25-4.21-16.24-6.63-47.62 9.93-74.73C656.43 22.74 726 0 726 0z" />
+                 </svg>
+            </div>
+            <!-- Beam -->
+            <div class="absolute bottom-[50%] left-1/2 -translate-x-1/2 w-full h-[150vh] bg-gradient-to-t from-[rgba(255,215,0,0.15)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none z-[-1]" style="clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);"></div>
+        </div>
+
+        <h2 class="text-4xl md:text-5xl font-display text-[#ffd700] mb-6 uppercase tracking-widest text-shadow" data-i18n="signal.batTitle">Light The Signal</h2>
+        <p class="text-[#a0a0a0] font-mono text-sm max-w-lg mx-auto mb-12 border-l border-[#ffd700]/50 pl-4 py-2 text-left md:text-center md:border-none md:p-0" data-i18n="signal.batText">
+            GOTHAM NEEDS YOU.<br class="md:hidden"/> SEND ENCRYPTED TRANSMISSION.
+        </p>
+
+        <a href="mailto:email@example.com" class="relative inline-flex items-center justify-center px-12 py-4 overflow-hidden font-bold text-white transition-all duration-300 bg-transparent border-2 border-[#ffd700] hover:bg-[#ffd700] hover:text-black group w-full md:w-auto">
+            <span class="absolute w-0 h-0 transition-all duration-500 ease-out bg-white rounded-full group-hover:w-80 group-hover:h-80 opacity-10"></span>
+            <span class="relative uppercase tracking-[0.2em] text-sm flex items-center gap-2">
+                <span data-i18n="signal.broadcast">Broadcast Location</span>
+                <span class="w-1.5 h-1.5 bg-red-500 rounded-full animate-ping"></span>
+            </span>
+        </a>
+    </div>
+  </DualContent>
+</section>
+
