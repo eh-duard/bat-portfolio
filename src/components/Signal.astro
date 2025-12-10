@@ -29,7 +29,7 @@ import DualContent from './DualContent.astro';
     <!-- BATMAN MODE -->
     <div slot="batman" class="text-center relative py-12">
         <!-- Bat Signal Graphic CSS -->
-        <div class="w-48 h-48 md:w-64 md:h-64 mx-auto mb-16 rounded-full bg-[#050505] relative shadow-[0_0_100px_rgba(255,215,0,0.1)] group cursor-pointer hover:shadow-[0_0_200px_rgba(255,215,0,0.4)] transition-all duration-700 border border-[#222]">
+        <div class="w-48 h-48 md:w-64 md:h-64 mx-auto mb-16 rounded-full bg-[#050505] relative shadow-[0_0_100px_rgba(255,215,0,0.1)] group cursor-pointer hover:shadow-[0_0_200px_rgba(255,215,0,0.4)] transition-all duration-700 border border-[#222] overflow-hidden">
             <div class="absolute inset-2 rounded-full border border-[#333]"></div>
             <div class="absolute inset-0 flex items-center justify-center opacity-30 group-hover:opacity-100 transition-opacity duration-500">
                  <!-- Simple Bat Shape CSS or SVG -->
@@ -38,7 +38,7 @@ import DualContent from './DualContent.astro';
                  </svg>
             </div>
             <!-- Beam -->
-            <div class="absolute bottom-[50%] left-1/2 -translate-x-1/2 w-full h-[150vh] bg-gradient-to-t from-[rgba(255,215,0,0.15)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none z-[-1]" style="clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);"></div>
+            <div class="absolute bottom-[50%] left-1/2 -translate-x-1/2 w-full h-[150vh] bg-gradient-to-t from-[rgba(255,215,0,0.15)] to-transparent opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-1000 pointer-events-none z-[-1]" style="clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);"></div>
         </div>
 
         <h2 class="text-4xl md:text-5xl font-display text-[#ffd700] mb-6 uppercase tracking-widest text-shadow" data-i18n="signal.batTitle">Light The Signal</h2>
