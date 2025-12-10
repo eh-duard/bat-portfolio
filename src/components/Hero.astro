@@ -1,0 +1,101 @@
+---
+import DualContent from './DualContent.astro';
+---
+
+<section class="min-h-screen flex flex-col justify-center items-center relative overflow-hidden px-4 md:px-8">
+  
+  <DualContent className="text-center z-10 w-full max-w-7xl mx-auto">
+    <!-- DEV MODE CONTENT (PREMIUM) -->
+    <div slot="dev" class="flex flex-col items-center justify-center space-y-12 py-20">
+      
+      <!-- Top Label -->
+      <div class="overflow-hidden">
+        <h2 class="text-xs md:text-sm font-medium tracking-[0.4em] uppercase text-gray-500 animate-slide-down" data-i18n="hero.role">
+          Full Stack Engineer
+        </h2>
+      </div>
+
+      <!-- Main Name -->
+      <div class="relative group cursor-default">
+        <h1 class="font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white via-gray-200 to-gray-600 animate-fade-in-up pb-4 text-center leading-[0.9]">
+          <span class="block text-6xl md:text-8xl lg:text-9xl">EDUARD</span>
+          <span class="block text-4xl md:text-6xl lg:text-7xl mt-2">ALEXANDRU IACOB</span>
+        </h1>
+        <div class="absolute -inset-8 bg-white/5 blur-3xl rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-700"></div>
+      </div>
+
+      <!-- Description -->
+      <p class="max-w-2xl mx-auto text-lg md:text-xl text-gray-400 font-light leading-relaxed animate-fade-in-up delay-200" data-i18n="hero.desc">
+        Architecting robust digital ecosystems with <span class="text-white font-medium">precision</span> and <span class="text-white font-medium">purpose</span>.
+      </p>
+
+      <!-- CTA -->
+      <div class="pt-8 animate-fade-in-up delay-300">
+        <a href="#projects" class="relative inline-flex items-center justify-center group px-8 py-3 overflow-hidden rounded-full bg-white/5 border border-white/10 hover:border-white/30 transition-all duration-300">
+          <span class="relative z-10 text-sm font-medium tracking-widest uppercase group-hover:text-white transition-colors" data-i18n="hero.cta">Explore Work</span>
+          <div class="absolute inset-0 bg-white/10 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+        </a>
+      </div>
+      
+      <!-- Scroll Indicator -->
+      <div class="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce-slow opacity-50">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 13l5 5 5-5M7 6l5 5 5-5"/></svg>
+      </div>
+    </div>
+
+    <!-- BATMAN MODE CONTENT (VENGEANCE) -->
+    <div slot="batman" class="space-y-8 flex flex-col items-center justify-center min-h-[80vh]">
+        <!-- Bat-Scanline Effect Overlay (Global for this slot technically, but kept local for now) -->
+
+
+        <h2 class="text-xs md:text-sm uppercase tracking-[0.6em] text-[#ffd700] drop-shadow-[0_0_8px_rgba(255,215,0,0.6)] animate-pulse-slow font-mono" data-i18n="hero.system">
+            System Override: Complete
+        </h2>
+        
+        <h1 class="font-display text-6xl md:text-9xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-[#ffd700] via-[#ffd700] to-[#b8860b] drop-shadow-[0_0_30px_rgba(255,215,0,0.2)] animate-glitch" data-i18n="hero.vengeance">
+            VENGEANCE
+        </h1>
+        
+        <div class="h-px w-32 bg-gradient-to-r from-transparent via-[#ffd700] to-transparent opacity-50 my-8"></div>
+
+        <p class="max-w-xl mx-auto text-xl text-[#a0a0a0] font-display tracking-wider leading-relaxed italic text-shadow-sm" data-i18n="hero.quote">
+            "I operate in the shadows to bring code to the light."
+        </p>
+
+        <div class="pt-12 relative group">
+          <a href="#projects" class="relative inline-flex items-center justify-center px-12 py-4 overflow-hidden font-bold border-2 border-[#ffd700] text-[#ffd700] uppercase tracking-[0.25em] transition-all duration-300 group-hover:bg-[#ffd700] group-hover:text-black hover:shadow-[0_0_20px_#ffd700]">
+            <span class="relative z-10 flex items-center gap-4">
+                <span class="w-2 h-2 bg-[#ffd700] group-hover:bg-black rounded-full animate-ping"></span>
+                <span data-i18n="hero.access">Access Mission Log</span>
+                <span class="w-2 h-2 bg-[#ffd700] group-hover:bg-black rounded-full animate-ping"></span>
+            </span>
+          </a>
+        </div>
+    </div>
+  </DualContent>
+
+  <!-- Background Gradients -->
+  <div class="absolute top-0 left-0 w-full h-full pointer-events-none -z-10">
+      <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-900/10 rounded-full blur-[120px] mix-blend-screen"></div>
+      <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-900/10 rounded-full blur-[120px] mix-blend-screen"></div>
+  </div>
+</section>
+
+<style>
+  .animate-bounce-slow { animation: bounce 3s infinite; }
+  @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(10px); } }
+  
+  .animate-pulse-slow { animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+
+  .animate-slide-down { animation: slideDown 1s ease-out forwards; opacity: 0; }
+  @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  
+  .animate-fade-in-up { animation: fadeInUp 0.8s ease-out forwards; opacity: 0; transform: translateY(20px); }
+  @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+  
+  /* Glitch Keyframes could be added here for extra effect */
+  
+  .delay-200 { animation-delay: 0.2s; }
+  .delay-300 { animation-delay: 0.3s; }
+</style>

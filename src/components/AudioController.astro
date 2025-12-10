@@ -21,42 +21,92 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
 ---
 
 <!-- Audio Gate - shown at start -->
-<div id="audio-gate" class="audio-gate">
-  <div class="gate-content">
-    <div class="gate-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M11 5L6 9H2v6h4l5 4V5z"/>
-        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
-      </svg>
+<!-- Audio Gate - shown at start -->
+<div id="audio-gate" class="fixed inset-0 flex items-center justify-center bg-black z-[600] transition-all duration-700">
+  <!-- Dynamic Background with Scanlines -->
+  <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(20,20,20,0)_0%,_rgba(0,0,0,1)_120%)] z-10"></div>
+  <div class="absolute inset-0 bg-[url('/bat-portfolio/scanlines.svg')] opacity-30 pointer-events-none z-0"></div>
+  <div class="absolute inset-0 bg-[url('/bat-portfolio/grid.svg')] opacity-20 pointer-events-none z-0 mask-image-gradient"></div>
+  
+  <div class="relative z-20 text-center p-12 bg-[#050505]/95 border border-white/10 backdrop-blur-2xl rounded-lg shadow-[0_0_80px_rgba(0,0,0,0.9)] max-w-md w-full mx-4 animate-fade-in-up overflow-hidden group">
+    
+    <!-- Decorative Tech Corners -->
+    <div class="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#ffd700] opacity-80"></div>
+    <div class="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-[#ffd700] opacity-80"></div>
+    <div class="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-[#ffd700] opacity-80"></div>
+    <div class="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-[#ffd700] opacity-80"></div>
+
+    <!-- Scanner Line Animation -->
+    <div class="absolute inset-x-0 h-[2px] bg-[#ffd700]/30 top-0 animate-scanline"></div>
+
+    <!-- Icon -->
+    <div class="relative w-24 h-24 mx-auto mb-12 text-[#ffd700] flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+       <div class="absolute inset-0 bg-[#ffd700] blur-[50px] opacity-20 animate-pulse-slow"></div>
+       
+       <!-- Rotating Ring -->
+       <svg viewBox="0 0 24 24" fill="none" class="absolute inset-0 w-full h-full animate-spin-slow opacity-30">
+          <circle cx="12" cy="12" r="11" stroke="currentColor" stroke-width="0.5" stroke-dasharray="4 4" />
+          <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="0.2" />
+       </svg>
+
+       <!-- Static Icon (Scaled Down) -->
+       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-12 h-12 drop-shadow-[0_0_15px_rgba(255,215,0,0.8)] relative z-10">
+         <path d="M11 5L6 9H2v6h4l5 4V5z" fill="currentColor" fill-opacity="0.2"/>
+         <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+       </svg>
     </div>
-    <p class="gate-text">{titleText}</p>
-    <div class="gate-buttons">
-      <button id="audio-enable" class="gate-btn gate-btn-primary">
-        {enableText}
+
+    <!-- Title -->
+    <h2 class="font-display text-3xl text-white mb-3 tracking-[0.25em] uppercase drop-shadow-md" data-i18n="audio.system">
+      System Audio
+    </h2>
+    <div class="w-12 h-0.5 bg-[#ffd700] mx-auto mb-8 opacity-70"></div>
+
+    <p class="font-mono text-xs text-gray-400 mb-12 leading-relaxed max-w-xs mx-auto tracking-wide">
+      <span data-i18n="audio.init">INITIALIZING AUDITORY INTERFACE...</span><br>
+      <span class="text-[#ffd700]/60" data-i18n="audio.immersion">RECOMMENDED FOR IMMERSION</span>
+    </p>
+
+    <!-- Buttons -->
+    <div class="flex flex-col gap-5 items-center w-full">
+      <button id="audio-enable" class="group/btn relative w-full py-4 bg-[#ffd700] text-black font-bold uppercase tracking-[0.2em] hover:bg-[#ffed4a] transition-all duration-300 clip-path-button hover:shadow-[0_0_30px_rgba(255,215,0,0.5)]">
+        <span class="relative z-10 flex items-center justify-center gap-3">
+           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+           <span data-i18n="audio.enable">{enableText}</span>
+        </span>
       </button>
-      <button id="audio-skip" class="gate-btn gate-btn-secondary">
-        {skipText}
+      
+      <button id="audio-skip" class="w-full py-3 border border-white/10 text-xs font-mono text-gray-500 hover:text-white hover:border-white/30 hover:bg-white/5 uppercase tracking-widest transition-all duration-300 rounded-sm">
+        <span data-i18n="audio.skip">{skipText}</span>
       </button>
     </div>
   </div>
 </div>
 
-<!-- Audio Toggle Button (bottom right) -->
-<div id="audio-controller" class="audio-controller hidden">
+<!-- Audio Toggle / Scroll To Top Button -->
+<div id="audio-controller" class="fixed bottom-6 right-6 z-[500] transition-all duration-300 opacity-0 translate-y-10">
   <button 
-    id="audio-toggle" 
-    class="audio-toggle muted" 
-    aria-label="Toggle audio"
-    title="Toggle audio"
+    id="action-btn"
+    class="group relative w-12 h-12 rounded-full border border-[#ffd700] flex items-center justify-center transition-all duration-300 hover:bg-[#ffd700] hover:scale-110 hover:shadow-[0_0_20px_rgba(255,215,0,0.4)] text-[#ffd700] hover:text-black"
+    aria-label="Toggle Audio / Scroll to Top"
   >
-    <svg class="icon-sound-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <path d="M11 5L6 9H2v6h4l5 4V5z"/>
-      <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+    <!-- Sound On Icon -->
+    <svg id="icon-sound-on" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
+      <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
     </svg>
-    <svg class="icon-sound-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <path d="M11 5L6 9H2v6h4l5 4V5z"/>
-      <line x1="23" y1="9" x2="17" y2="15"/>
-      <line x1="17" y1="9" x2="23" y2="15"/>
+
+    <!-- Sound Off Icon -->
+    <svg id="icon-sound-off" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 hidden transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="1" y1="1" x2="23" y2="23"></line>
+      <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15.5 15.5a5 5 0 0 1-7 0V9"></path>
+      <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+      <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
+    </svg>
+
+    <!-- Scroll Top Icon -->
+    <svg id="icon-scroll-top" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 hidden transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18 15l-6-6-6 6"/>
     </svg>
   </button>
 </div>
@@ -73,248 +123,253 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
   <source src={`${baseUrl}sounds/found.mp3`} type="audio/mpeg" />
 </audio>
 
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Staatliches&display=swap');
+<!-- Hidden settings element to pass props -->
+<div id="audio-settings" data-ambient={ambientVolume} data-effect={effectVolume} class="hidden"></div>
 
-  /* Audio Gate Overlay */
-  .audio-gate {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #05050a;
-    z-index: calc(var(--z-audio) + 100);
-    transition: opacity 0.5s ease, visibility 0.5s ease;
-    overflow: hidden;
-    touch-action: none;
-  }
+<script>
+  import { gameStore } from '../stores/gameStore';
 
-  .audio-gate::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse at 50% 35%, rgba(255, 215, 0, 0.06) 0%, rgba(7, 7, 14, 0.92) 45%, #05050a 100%);
-    pointer-events: none;
-  }
-
-  .audio-gate.hidden {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-  }
-
-  .gate-content {
-    text-align: center;
-    padding: var(--space-xl);
-    background: rgba(10, 10, 20, 0.7);
-    border: 1px solid rgba(255, 215, 0, 0.35);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), inset 0 0 30px rgba(255, 215, 0, 0.08);
-    border-radius: 16px;
-    backdrop-filter: blur(6px);
-  }
-
-  .gate-icon {
-    width: 84px;
-    height: 84px;
-    margin: 0 auto var(--space-lg);
-    color: #ffd700;
-    animation: pulse-glow 2s ease-in-out infinite;
-    filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.35));
-  }
-
-  .gate-icon svg {
-    width: 100%;
-    height: 100%;
-  }
-
-  @keyframes pulse-glow {
-    0%, 100% { 
-      opacity: 0.6;
-      filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.3));
-    }
-    50% { 
-      opacity: 1;
-      filter: drop-shadow(0 0 20px #ffd700);
-    }
-  }
-
-  .gate-text {
-    font-family: 'Staatliches', 'Cardo', 'Garamond', 'Georgia', serif;
-    font-size: clamp(1.1rem, 3.5vw, 1.6rem);
-    color: #f5f6fb;
-    margin-bottom: var(--space-lg);
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    text-shadow: 0 0 18px rgba(255, 215, 0, 0.35), 0 0 4px rgba(0, 0, 0, 0.8);
-  }
-
-  .gate-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-sm);
-    max-width: 260px;
-    margin: 0 auto;
-  }
-
-  .gate-btn {
-    padding: var(--space-md) var(--space-lg);
-    font-family: 'Staatliches', 'Cardo', 'Garamond', 'Georgia', serif;
-    font-size: 1rem;
-    letter-spacing: 0.12em;
-    border-radius: 999px;
-    cursor: pointer;
-    transition: all var(--transition-fast);
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-    user-select: none;
-    text-transform: uppercase;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
-  }
-
-  .gate-btn-primary {
-    background: linear-gradient(135deg, #ffd700, #ffbf00);
-    color: #0a0a0a;
-    border: 2px solid #ffd700;
-  }
-
-  .gate-btn-primary:hover,
-  .gate-btn-primary:active {
-    background: linear-gradient(135deg, #ffed4a, #ffd000);
-    border-color: #ffed4a;
-    transform: translateY(-1px) scale(1.02);
-  }
-
-  .gate-btn-secondary {
-    background: rgba(255, 215, 0, 0.05);
-    color: #d1d5db;
-    border: 1px solid rgba(255, 215, 0, 0.35);
-  }
-
-  .gate-btn-secondary:hover,
-  .gate-btn-secondary:active {
-    color: #ffd700;
-    border-color: #ffd700;
-    background: rgba(255, 215, 0, 0.12);
-    transform: translateY(-1px) scale(1.02);
-  }
-
-  /* Audio Controller */
-  .audio-controller {
-    position: fixed;
-    bottom: var(--space-md);
-    right: var(--space-md);
-    z-index: var(--z-audio);
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-  }
-
-  .audio-controller.hidden {
-    opacity: 0;
-    visibility: hidden;
-  }
-
-  .audio-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 48px;
-    height: 48px;
-    padding: 0;
-    background: var(--color-bg-secondary);
-    border: 1px solid var(--color-accent-dim);
-    border-radius: 50%;
-    color: var(--color-accent);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-  }
-
-  .audio-toggle:hover {
-    background: var(--color-bg-tertiary);
-    border-color: var(--color-accent);
-    transform: scale(1.05);
-  }
-
-  .audio-toggle svg {
-    width: 24px;
-    height: 24px;
-  }
-
-  .audio-toggle .icon-sound-off {
-    display: none;
-  }
-
-  .audio-toggle.muted .icon-sound-on {
-    display: none;
-  }
-
-  .audio-toggle.muted .icon-sound-off {
-    display: block;
-  }
-</style>
-
-<script define:vars={{ ambientVolume, effectVolume }}>
   class AudioController {
+    gate: HTMLElement | null;
+    enableBtn: HTMLElement | null;
+    skipBtn: HTMLElement | null;
+    controller: HTMLElement | null;
+    actionBtn: HTMLElement | null;
+    iconSoundOn: HTMLElement | null;
+    iconSoundOff: HTMLElement | null;
+    iconScrollTop: HTMLElement | null;
+    ambientAudio: HTMLAudioElement | null;
+    ambientAudio2: HTMLAudioElement | null;
+    foundAudio: HTMLAudioElement | null;
+    isMuted: boolean;
+    isRevealed: boolean;
+    isReady: boolean;
+    isUnlocking: boolean;
+    hasFoundLogo: boolean;
+    crossfadeTimeout: any;
+    crossfadePending: boolean;
+    ambientVolume: number;
+    effectVolume: number;
+
     constructor() {
+      // Get props from data attributes
+      const settings = document.getElementById('audio-settings');
+      this.ambientVolume = Number(settings?.dataset.ambient || 0.3);
+      this.effectVolume = Number(settings?.dataset.effect || 0.5);
+
       this.gate = document.getElementById('audio-gate');
       this.enableBtn = document.getElementById('audio-enable');
       this.skipBtn = document.getElementById('audio-skip');
       this.controller = document.getElementById('audio-controller');
-      this.toggleBtn = document.getElementById('audio-toggle');
-      this.ambientAudio = document.getElementById('ambient-audio');
-      this.ambientAudio2 = document.getElementById('ambient-audio-2');
-      this.foundAudio = document.getElementById('found-audio');
+      this.actionBtn = document.getElementById('action-btn');
+      
+      this.iconSoundOn = document.getElementById('icon-sound-on');
+      this.iconSoundOff = document.getElementById('icon-sound-off');
+      this.iconScrollTop = document.getElementById('icon-scroll-top');
+
+      this.ambientAudio = document.getElementById('ambient-audio') as HTMLAudioElement;
+      this.ambientAudio2 = document.getElementById('ambient-audio-2') as HTMLAudioElement;
+      this.foundAudio = document.getElementById('found-audio') as HTMLAudioElement;
       
       this.isMuted = true;
+      this.isRevealed = false;
+      
       this.isReady = false;
       this.isUnlocking = false;
       this.hasFoundLogo = false;
-      this.crossfadeTimeout = null; // Debounce crossfade
+      this.crossfadeTimeout = null;
       this.crossfadePending = false;
       
-      this.ambientAudio.volume = ambientVolume;
-      this.ambientAudio2.volume = 0;
-      this.foundAudio.volume = effectVolume;
+      // Initialize volumes
+      if(this.ambientAudio) this.ambientAudio.volume = this.ambientVolume;
+      if(this.ambientAudio2) this.ambientAudio2.volume = 0;
+      if(this.foundAudio) this.foundAudio.volume = this.effectVolume;
       
       this.init();
     }
 
     init() {
+      if (!this.enableBtn || !this.skipBtn) return;
       this.bindEvents();
       this.setupCrossfade();
+      
+      // Subscribe to store for reveal state
+      gameStore.subscribe(state => {
+        if (state.isRevealed && !this.isRevealed) {
+            this.setScrollMode();
+        }
+      });
+    }
+
+    bindEvents() {
+      this.enableBtn.addEventListener('click', () => this.startWithAudio());
+      this.skipBtn.addEventListener('click', () => this.startWithoutAudio());
+      
+      // Dual logic for button
+      this.actionBtn?.addEventListener('click', () => {
+         if (this.isRevealed) {
+             window.scrollTo({ top: 0, behavior: 'smooth' });
+         } else {
+             this.toggleAudio();
+         }
+      });
+      
+      document.addEventListener('logo-found', () => this.playFoundSound());
+    }
+
+    setScrollMode() {
+        this.isRevealed = true;
+        
+        // Hide sound icons, show scroll icon
+        this.iconSoundOn?.classList.add('hidden');
+        this.iconSoundOff?.classList.add('hidden');
+        this.iconScrollTop?.classList.remove('hidden');
+        
+        // Reset styles (remove muted red state if active)
+        this.actionBtn?.classList.remove('border-red-500', 'text-red-500');
+        this.actionBtn?.classList.add('text-[#ffd700]');
+        
+        // Ensure button is visible if it wasn't
+        this.controller?.classList.remove('opacity-0', 'translate-y-10');
+        this.controller?.classList.remove('hidden');
+    }
+
+    updateAudioIcons() {
+        if (this.isRevealed) return; // Don't mess with icons if in scroll mode
+
+        if (this.isMuted) {
+            this.iconSoundOn?.classList.add('hidden');
+            this.iconSoundOff?.classList.remove('hidden');
+            this.actionBtn?.classList.add('border-red-500', 'text-red-500');
+            this.actionBtn?.classList.remove('text-[#ffd700]');
+        } else {
+            this.iconSoundOn?.classList.remove('hidden');
+            this.iconSoundOff?.classList.add('hidden');
+            this.actionBtn?.classList.remove('border-red-500', 'text-red-500');
+            this.actionBtn?.classList.add('text-[#ffd700]');
+        }
+    }
+
+    startWithAudio() {
+      if (!this.foundAudio || !this.ambientAudio2) return;
+      
+      this.isMuted = false;
+      this.isUnlocking = true;
+      this.hideGate();
+      
+      const originalFoundVolume = this.effectVolume;
+      this.foundAudio.volume = 0;
+      this.ambientAudio2.volume = 0;
+      
+      let unlockCount = 0;
+      const checkUnlockComplete = () => {
+        unlockCount++;
+        if (unlockCount >= 2) {
+          this.isUnlocking = false;
+          this.isReady = true;
+        }
+      };
+      
+      // Pre-load/unlock audio context
+      this.foundAudio.play().then(() => {
+        if(this.foundAudio) {
+            this.foundAudio.pause();
+            this.foundAudio.currentTime = 0;
+            this.foundAudio.volume = originalFoundVolume;
+        }
+        checkUnlockComplete();
+      }).catch(() => checkUnlockComplete());
+      
+      this.ambientAudio2.play().then(() => {
+        if (this.ambientAudio2) {
+            this.ambientAudio2.pause();
+            this.ambientAudio2.currentTime = 0;
+        }
+        checkUnlockComplete();
+      }).catch(() => checkUnlockComplete());
+      
+      this.playAmbient();
+      this.updateAudioIcons();
+    }
+
+    startWithoutAudio() {
+      this.isMuted = true;
+      this.isReady = true;
+      this.hideGate();
+      this.updateAudioIcons();
+    }
+
+    hideGate() {
+      this.gate?.classList.add('opacity-0', 'pointer-events-none');
+      setTimeout(() => {
+          this.gate?.classList.add('hidden');
+          // Show controller
+          this.controller?.classList.remove('opacity-0', 'translate-y-10');
+      }, 500);
+    }
+
+    toggleAudio() {
+      this.isMuted = !this.isMuted;
+      this.updateAudioIcons();
+      
+      if (this.isMuted) {
+        this.ambientAudio?.pause();
+        this.ambientAudio2?.pause();
+      } else {
+        this.playAmbient();
+      }
+    }
+
+    playAmbient() {
+      if (!this.ambientAudio) return;
+      this.ambientAudio.volume = this.ambientVolume;
+      this.ambientAudio.play().catch(() => {});
+    }
+
+    playFoundSound() {
+      if (this.isMuted || !this.isReady || this.isUnlocking || this.hasFoundLogo || !this.ambientAudio || !this.ambientAudio2 || !this.foundAudio) return;
+      
+      this.hasFoundLogo = true;
+      
+      this.ambientAudio.pause();
+      this.ambientAudio.currentTime = 0;
+      this.foundAudio.currentTime = 0;
+      this.foundAudio.play().catch(() => {});
     }
 
     setupCrossfade() {
-      // Debounce: controlla il crossfade solo ogni 200ms per mobile
+      if (!this.ambientAudio || !this.ambientAudio2) return;
+
       this.ambientAudio.addEventListener('timeupdate', () => {
-        if (this.crossfadePending) return; // Skip if already pending
-        
+        if (this.crossfadePending || !this.ambientAudio || !this.ambientAudio2) return;
         const timeLeft = this.ambientAudio.duration - this.ambientAudio.currentTime;
         if (timeLeft <= 1 && timeLeft > 0 && !this.isMuted && this.ambientAudio2.paused) {
           this.crossfadePending = true;
           clearTimeout(this.crossfadeTimeout);
           this.crossfadeTimeout = setTimeout(() => {
-            this.startCrossfade(this.ambientAudio, this.ambientAudio2);
+            if(this.ambientAudio && this.ambientAudio2) 
+                this.startCrossfade(this.ambientAudio, this.ambientAudio2);
             this.crossfadePending = false;
-          }, 100); // Debounce delay
+          }, 100);
         }
       });
       
       this.ambientAudio2.addEventListener('timeupdate', () => {
-        if (this.crossfadePending) return;
-        
+        if (this.crossfadePending || !this.ambientAudio || !this.ambientAudio2) return;
         const timeLeft = this.ambientAudio2.duration - this.ambientAudio2.currentTime;
         if (timeLeft <= 1 && timeLeft > 0 && !this.isMuted && this.ambientAudio.paused) {
           this.crossfadePending = true;
           clearTimeout(this.crossfadeTimeout);
           this.crossfadeTimeout = setTimeout(() => {
-            this.startCrossfade(this.ambientAudio2, this.ambientAudio);
+            if (this.ambientAudio2 && this.ambientAudio)
+                this.startCrossfade(this.ambientAudio2, this.ambientAudio);
             this.crossfadePending = false;
           }, 100);
         }
       });
     }
 
-    startCrossfade(fromAudio, toAudio) {
+    startCrossfade(fromAudio: HTMLAudioElement, toAudio: HTMLAudioElement) {
       toAudio.currentTime = 0;
       toAudio.volume = 0;
       toAudio.play().catch(() => {});
@@ -330,115 +385,27 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
           fromAudio.pause();
         }
         
-        if (toAudio.volume < ambientVolume - fadeStep) {
+        if (toAudio.volume < this.ambientVolume - fadeStep) {
           toAudio.volume += fadeStep;
         } else {
-          toAudio.volume = ambientVolume;
+          toAudio.volume = this.ambientVolume;
           clearInterval(fade);
         }
       }, fadeInterval);
     }
-
-    bindEvents() {
-      this.enableBtn.addEventListener('click', () => this.startWithAudio());
-      this.skipBtn.addEventListener('click', () => this.startWithoutAudio());
-      this.toggleBtn.addEventListener('click', () => this.toggle());
-      
-      document.addEventListener('logo-found', () => this.playFoundSound());
-    }
-
-    startWithAudio() {
-      this.isMuted = false;
-      this.isUnlocking = true;
-      this.hideGate();
-      
-      const originalFoundVolume = effectVolume;
-      
-      this.foundAudio.volume = 0;
-      this.ambientAudio2.volume = 0;
-      
-      let unlockCount = 0;
-      const checkUnlockComplete = () => {
-        unlockCount++;
-        if (unlockCount >= 2) {
-          this.isUnlocking = false;
-          this.isReady = true;
-        }
-      };
-      
-      this.foundAudio.play().then(() => {
-        this.foundAudio.pause();
-        this.foundAudio.currentTime = 0;
-        this.foundAudio.volume = originalFoundVolume;
-        checkUnlockComplete();
-      }).catch(() => {
-        this.foundAudio.volume = originalFoundVolume;
-        checkUnlockComplete();
-      });
-      
-      this.ambientAudio2.play().then(() => {
-        this.ambientAudio2.pause();
-        this.ambientAudio2.currentTime = 0;
-        checkUnlockComplete();
-      }).catch(() => {
-        checkUnlockComplete();
-      });
-      
-      this.playAmbient();
-      this.updateUI();
-    }
-
-    startWithoutAudio() {
-      this.isMuted = true;
-      this.isReady = true;
-      this.hideGate();
-      this.updateUI();
-    }
-
-    hideGate() {
-      this.gate.classList.add('hidden');
-      this.controller.classList.remove('hidden');
-    }
-
-    toggle() {
-      this.isMuted = !this.isMuted;
-      this.updateUI();
-      
-      if (this.isMuted) {
-        this.ambientAudio.pause();
-        this.ambientAudio2.pause();
-      } else {
-        this.playAmbient();
-      }
-    }
-
-    updateUI() {
-      this.toggleBtn.classList.toggle('muted', this.isMuted);
-    }
-
-    playAmbient() {
-      this.ambientAudio.volume = ambientVolume;
-      this.ambientAudio.play().catch(() => {});
-    }
-
-    playFoundSound() {
-      if (this.isMuted || !this.isReady || this.isUnlocking || this.hasFoundLogo) return;
-      
-      this.hasFoundLogo = true;
-      
-      this.ambientAudio.pause();
-      this.ambientAudio.currentTime = 0;
-      this.ambientAudio.volume = ambientVolume;
-      this.ambientAudio2.pause();
-      this.ambientAudio2.currentTime = 0;
-      this.ambientAudio2.volume = 0;
-      
-      this.foundAudio.currentTime = 0;
-      this.foundAudio.play().catch(() => {});
-    }
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  // Clean listeners to avoid duplication on page swap if framework handles it
+  const init = () => {
     new AudioController();
-  });
+  };
+
+  document.addEventListener('astro:page-load', init);
+  document.addEventListener('DOMContentLoaded', init);
 </script>
+
+<style>
+  /* Optional Text Shadow utility if not in global */
+  .text-shadow-sm { text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+</style>
+
