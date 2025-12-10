@@ -11,7 +11,7 @@ const skills = [
 ];
 ---
 
-<section id="arsenal" class="py-32 px-4 w-full relative on-scroll">
+<section id="arsenal" class="py-20 md:py-32 px-4 w-full relative on-scroll">
   <div class="container mx-auto max-w-6xl">
     
     <DualContent>
@@ -22,7 +22,7 @@ const skills = [
             <p class="text-gray-400 max-w-2xl mx-auto" data-i18n="arsenal.subtitle">A curated stack of modern technologies for building heavy-duty applications.</p>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
             {skills.map(skill => (
                 <div class="group relative bg-[#111] border border-white/5 rounded-2xl p-8 hover:bg-[#161616] transition-all duration-300 hover:transform hover:-translate-y-1 hover:shadow-xl hover:shadow-white/5">
                     <div class="flex items-start justify-between mb-8">

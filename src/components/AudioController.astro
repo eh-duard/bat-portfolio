@@ -28,7 +28,7 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
   <div class="absolute inset-0 bg-[url('/bat-portfolio/scanlines.svg')] opacity-30 pointer-events-none z-0"></div>
   <div class="absolute inset-0 bg-[url('/bat-portfolio/grid.svg')] opacity-20 pointer-events-none z-0 mask-image-gradient"></div>
   
-  <div class="relative z-20 text-center p-12 bg-[#050505]/95 border border-white/10 backdrop-blur-2xl rounded-lg shadow-[0_0_80px_rgba(0,0,0,0.9)] max-w-md w-full mx-4 animate-fade-in-up overflow-hidden group">
+  <div class="relative z-20 text-center p-6 md:p-12 bg-[#050505]/95 border border-white/10 backdrop-blur-2xl rounded-lg shadow-[0_0_80px_rgba(0,0,0,0.9)] max-w-sm md:max-w-md w-[90%] md:w-full mx-auto animate-fade-in-up overflow-hidden group">
     
     <!-- Decorative Tech Corners -->
     <div class="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#ffd700] opacity-80"></div>
@@ -40,7 +40,7 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
     <div class="absolute inset-x-0 h-[2px] bg-[#ffd700]/30 top-0 animate-scanline"></div>
 
     <!-- Icon -->
-    <div class="relative w-24 h-24 mx-auto mb-12 text-[#ffd700] flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+    <div class="relative w-20 h-20 md:w-24 md:h-24 mx-auto mb-8 md:mb-12 text-[#ffd700] flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
        <div class="absolute inset-0 bg-[#ffd700] blur-[50px] opacity-20 animate-pulse-slow"></div>
        
        <!-- Rotating Ring -->
@@ -50,19 +50,19 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
        </svg>
 
        <!-- Static Icon (Scaled Down) -->
-       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-12 h-12 drop-shadow-[0_0_15px_rgba(255,215,0,0.8)] relative z-10">
+       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-10 h-10 md:w-12 md:h-12 drop-shadow-[0_0_15px_rgba(255,215,0,0.8)] relative z-10">
          <path d="M11 5L6 9H2v6h4l5 4V5z" fill="currentColor" fill-opacity="0.2"/>
          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
        </svg>
     </div>
 
     <!-- Title -->
-    <h2 class="font-display text-3xl text-white mb-3 tracking-[0.25em] uppercase drop-shadow-md" data-i18n="audio.system">
+    <h2 class="font-display text-2xl md:text-3xl text-white mb-3 tracking-[0.25em] uppercase drop-shadow-md" data-i18n="audio.system">
       System Audio
     </h2>
     <div class="w-12 h-0.5 bg-[#ffd700] mx-auto mb-8 opacity-70"></div>
 
-    <p class="font-mono text-xs text-gray-400 mb-12 leading-relaxed max-w-xs mx-auto tracking-wide">
+    <p class="font-mono text-xs text-gray-400 mb-8 md:mb-12 leading-relaxed max-w-xs mx-auto tracking-wide">
       <span data-i18n="audio.init">INITIALIZING AUDITORY INTERFACE...</span><br>
       <span class="text-[#ffd700]/60" data-i18n="audio.immersion">RECOMMENDED FOR IMMERSION</span>
     </p>
