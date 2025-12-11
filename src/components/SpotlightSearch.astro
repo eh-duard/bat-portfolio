@@ -95,8 +95,8 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
   <div class="bat-logo-container" id="bat-logo-container">
     <div class="bat-logo-spotlight" id="bat-logo-spotlight"></div>
     <div class="bat-logo-aura" id="bat-logo-aura"></div>
-    <div class="bat-logo" id="bat-logo">
-      <img src={`${baseUrl}images/bat-logo.svg`} alt="Bat Signal" loading="eager" id="bat-logo-img" filter="url(#directionalGlow)" />
+    <div class="bat-logo" id="bat-logo" style="user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;">
+      <img src={`${baseUrl}images/bat-logo.svg`} alt="Bat Signal" loading="eager" id="bat-logo-img" filter="url(#directionalGlow)" style="pointer-events: none;" />
     </div>
   </div>
   
