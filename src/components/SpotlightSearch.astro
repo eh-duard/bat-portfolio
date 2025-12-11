@@ -1302,22 +1302,18 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
     }
 
     private async captureSkylineShape() {
-      // OTTIMIZZAZIONE CRITICA: Su mobile, evitare analisi immagine pesante che causa crash/OOM
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      // OTTIMIZZAZIONE: Analizza una versione ridotta della skyline per risparmiare memoria (evita OOM su mobile)
+      // ma mantiene la funzionalità di rilevamento edifici.
+      const analysisScale = 0.1; 
       
-      if (isMobile) {
-        this.generateFallbackWindows();
-        return;
-      }
-
       const skylineElement = this.skylineElement;
       // Crea un canvas temporaneo per "fotografare" la skyline
       const tempCanvas = document.createElement('canvas');
       const tempCtx = tempCanvas.getContext('2d')!;
       
-      // Usa le dimensioni esatte del canvas finale
-      tempCanvas.width = this.canvas.width;
-      tempCanvas.height = this.canvas.height;
+      // Usa dimensioni ridotte per l'analisi
+      tempCanvas.width = Math.ceil(this.canvas.width * analysisScale);
+      tempCanvas.height = Math.ceil(this.canvas.height * analysisScale);
       
       // Ottieni l'immagine SVG dalla mask
       const style = window.getComputedStyle(skylineElement);
@@ -1337,21 +1333,19 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
       await new Promise<void>((resolve, reject) => {
         img.onload = () => {
           // Calcola quante volte l'SVG si ripete per coprire la larghezza
-          const skylineHeight = this.canvas.height;
+          // Nota: Usiamo l'altezza "virtuale" scalata per mantenere l'aspect ratio
+          const skylineHeight = this.canvas.height * analysisScale;
           const aspectRatio = img.width / img.height;
           const svgWidth = skylineHeight * aspectRatio;
           
-          console.log('SVG original size:', img.width, 'x', img.height);
-          console.log('Calculated SVG width for repeat:', svgWidth);
-          
-          // Disegna l'SVG ripetuto
-          const repeats = Math.ceil(this.canvas.width / svgWidth) + 1;
+          // Disegna l'SVG ripetuto scalato
+          const repeats = Math.ceil(tempCanvas.width / svgWidth) + 1;
           for (let i = 0; i < repeats; i++) {
             tempCtx.drawImage(img, i * svgWidth, 0, svgWidth, skylineHeight);
           }
           
           this.skylineImageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
-          console.log('Skyline shape captured with repeats:', repeats);
+          console.log('Skyline shape captured (optimized scale):', analysisScale);
           resolve();
         };
         img.onerror = () => {
@@ -1367,15 +1361,22 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
     private isPixelSolid(x: number, y: number): boolean {
       if (!this.skylineImageData) return false;
       
+      // Mappa le coordinate dello schermo allo spazio dell'image data (gestendo la scala ridotta)
+      const scaleX = this.skylineImageData.width / this.canvas.width;
+      const scaleY = this.skylineImageData.height / this.canvas.height;
+      
+      const checkX = Math.floor(x * scaleX);
+      const checkY = Math.floor(y * scaleY);
+      
       const width = this.skylineImageData.width;
       const height = this.skylineImageData.height;
       
-      if (x < 0 || x >= width || y < 0 || y >= height) return false;
+      if (checkX < 0 || checkX >= width || checkY < 0 || checkY >= height) return false;
       
-      const idx = (Math.floor(y) * width + Math.floor(x)) * 4;
+      const idx = (checkY * width + checkX) * 4;
       const alpha = this.skylineImageData.data[idx + 3];
       
-      return alpha > 128; // Soglia più alta per essere sicuri che sia solido
+      return alpha > 100; // Soglia di opacità per considerare il pixel "edificio"
     }
 
     private generateWindows() {
