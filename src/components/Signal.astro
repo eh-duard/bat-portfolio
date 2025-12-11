@@ -60,6 +60,7 @@ import DualContent from './DualContent.astro';
 <script>
   // Mobile Scroll Interaction for Bat Signal Beam
   document.addEventListener('DOMContentLoaded', () => {
+    // Detect mobile/touch
     const isMobile = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
     
     if (isMobile) {
@@ -68,26 +69,21 @@ import DualContent from './DualContent.astro';
 
       if (beam && signalUnit) {
         // Optimize transition for scroll responsiveness on mobile
-        beam.style.transition = 'opacity 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        beam.style.transition = 'opacity 0.1s linear'; // Faster response
+        beam.style.willChange = 'opacity';
         
         const observer = new IntersectionObserver((entries) => {
           entries.forEach(entry => {
-            // Map visibility ratio to opacity
-            // When 0% visible -> 0 opacity
-            // When 100% visible -> 1 opacity
             const ratio = entry.intersectionRatio;
             
-            // Boost opacity slightly so it's visible earlier
-            // E.g. starts appearing explicitly at 0.1 ratio
-            let opacity = 0;
-            if (ratio > 0.1) {
-                opacity = (ratio - 0.1) / 0.9;
-            }
+            // Curve: Turns on quickly once visible (e.g. at 50% visibility it's almost fully bright)
+            // Turns off as it leaves the screen.
+            let opacity = ratio * 1.5; 
             
             beam.style.opacity = Math.min(Math.max(opacity, 0), 1).toString();
           });
         }, {
-          threshold: Array.from({ length: 50 }, (_, i) => i / 50) // 50 steps for smooth transparency
+          threshold: Array.from({ length: 20 }, (_, i) => i / 20) // 20 steps
         });
 
         observer.observe(signalUnit);
