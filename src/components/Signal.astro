@@ -38,7 +38,7 @@ import DualContent from './DualContent.astro';
                  </svg>
             </div>
             <!-- Beam -->
-            <div class="absolute bottom-[50%] left-1/2 -translate-x-1/2 w-full h-[150vh] bg-gradient-to-t from-[rgba(255,215,0,0.15)] to-transparent opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-1000 pointer-events-none z-[-1]" style="clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);"></div>
+            <div id="bat-signal-beam" class="absolute bottom-[50%] left-1/2 -translate-x-1/2 w-full h-[150vh] bg-gradient-to-t from-[rgba(255,215,0,0.15)] to-transparent opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-1000 pointer-events-none z-[-1] signal-beam" style="clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);"></div>
         </div>
 
         <h2 class="text-4xl md:text-5xl font-display text-[#ffd700] mb-6 uppercase tracking-widest text-shadow" data-i18n="signal.batTitle">Light The Signal</h2>
@@ -56,4 +56,43 @@ import DualContent from './DualContent.astro';
     </div>
   </DualContent>
 </section>
+
+<script>
+  // Mobile Scroll Interaction for Bat Signal Beam
+  document.addEventListener('DOMContentLoaded', () => {
+    const isMobile = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    
+    if (isMobile) {
+      const beam = document.getElementById('bat-signal-beam');
+      const signalUnit = beam?.parentElement; // The rounded-full container
+
+      if (beam && signalUnit) {
+        // Optimize transition for scroll responsiveness on mobile
+        beam.style.transition = 'opacity 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            // Map visibility ratio to opacity
+            // When 0% visible -> 0 opacity
+            // When 100% visible -> 1 opacity
+            const ratio = entry.intersectionRatio;
+            
+            // Boost opacity slightly so it's visible earlier
+            // E.g. starts appearing explicitly at 0.1 ratio
+            let opacity = 0;
+            if (ratio > 0.1) {
+                opacity = (ratio - 0.1) / 0.9;
+            }
+            
+            beam.style.opacity = Math.min(Math.max(opacity, 0), 1).toString();
+          });
+        }, {
+          threshold: Array.from({ length: 50 }, (_, i) => i / 50) // 50 steps for smooth transparency
+        });
+
+        observer.observe(signalUnit);
+      }
+    }
+  });
+</script>
 
