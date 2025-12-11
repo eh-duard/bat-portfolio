@@ -40,3 +40,14 @@ if (typeof document !== 'undefined') {
   const currentMode = modeStore.get();
   document.documentElement.setAttribute('data-mode', currentMode);
 }
+
+// Debug helpers
+if (typeof window !== 'undefined') {
+  (window as any).debugBat = {
+    setMode,
+    setFound,
+    revealPortfolio,
+    stores: { gameStore, modeStore }
+  };
+  console.log('🦇 Bat-Portfolio Debug Tools Loaded. Use window.debugBat');
+}

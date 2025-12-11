@@ -1619,6 +1619,12 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
       (window as any).batmanGame = this;
     }
 
+    // Public method for debugging/bypassing
+    public autoWin() {
+      console.log('🦇 Auto-winning game via debug command...');
+      this.triggerFound();
+    }
+
     private detectLowEndDevice(): boolean {
       // Detecta dispositivi low-end basato su memoria e core disponibili
       const memory = (navigator as any).deviceMemory;
