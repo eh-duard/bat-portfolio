@@ -37,7 +37,7 @@ const projects = [
 ];
 ---
 
-<section id="projects" class="py-20 md:py-32 px-4 w-full relative on-scroll">
+<section id="projects" class="py-20 md:py-32 px-4 w-full relative on-scroll overflow-hidden">
   <div class="container mx-auto max-w-7xl">
     
     <DualContent>
@@ -50,10 +50,10 @@ const projects = [
         
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {projects.map(project => (
-                <div class="group bg-[#0a0a0a] rounded-3xl overflow-hidden border border-white/5 hover:border-white/10 transition-all duration-500 hover:shadow-2xl hover:shadow-purple-900/10 flex flex-col h-full">
+                <div class="group bg-[#0a0a0a] rounded-3xl overflow-hidden border border-white/20 md:border-white/5 md:hover:border-white/10 transition-all duration-500 shadow-2xl shadow-purple-900/10 md:shadow-none md:hover:shadow-2xl md:hover:shadow-purple-900/10 flex flex-col h-full">
                     
                     <!-- Code Snippet Header / Preview -->
-                    <div class="relative bg-[#111] p-6 border-b border-white/5 min-h-[200px] flex flex-col font-mono text-xs">
+                    <div class="relative bg-[#111] p-4 md:p-6 border-b border-white/5 min-h-[200px] flex flex-col font-mono text-xs">
                         <div class="flex gap-2 mb-4">
                             <div class="w-3 h-3 rounded-full bg-red-500/20 text-red-500 flex items-center justify-center"></div>
                             <div class="w-3 h-3 rounded-full bg-yellow-500/20 text-yellow-500"></div>
@@ -66,9 +66,9 @@ const projects = [
                         <div class="absolute inset-0 bg-gradient-to-t from-[#111] to-transparent opacity-50"></div>
                     </div>
 
-                    <div class="p-8 flex flex-col flex-1 space-y-4">
+                    <div class="p-5 md:p-8 flex flex-col flex-1 space-y-4">
                         <div>
-                            <h3 class="text-xl font-bold text-white mb-2 group-hover:text-purple-400 transition-colors">{project.title}</h3>
+                            <h3 class="text-xl font-bold text-purple-400 md:text-white mb-2 md:group-hover:text-purple-400 transition-colors break-words">{project.title}</h3>
                             <p class="text-gray-400 text-sm leading-relaxed">{project.desc}</p>
                         </div>
                         
@@ -76,7 +76,7 @@ const projects = [
 
                         <div class="flex flex-wrap gap-2 pt-4 border-t border-white/5">
                             {project.tech.map(t => (
-                                <span class="px-3 py-1 text-[10px] uppercase tracking-wider font-medium bg-white/5 text-gray-400 rounded-full border border-white/5 group-hover:border-white/20 transition-colors">{t}</span>
+                                <span class="px-3 py-1 text-[10px] uppercase tracking-wider font-medium bg-white/5 text-gray-400 rounded-full border border-white/20 md:border-white/5 md:group-hover:border-white/20 transition-colors">{t}</span>
                             ))}
                         </div>
                     </div>
@@ -95,7 +95,7 @@ const projects = [
                     <!-- Timeline Node -->
                     <div class="absolute -left-[9px] top-0 w-4 h-4 bg-[#ffd700] border-2 border-[#ffd700] md:bg-[#0a0a0a] md:border-[#333] group-hover:border-[#ffd700] group-hover:bg-[#ffd700] transition-all duration-500 rotate-45"></div>
                     
-                    <div class="bg-[#0c0c0c] border border-[#222] p-8 relative overflow-hidden group-hover:border-[#ffd700]/30 transition-all">
+                    <div class="bg-[#0c0c0c] border border-[#222] p-5 md:p-8 relative overflow-hidden group-hover:border-[#ffd700]/30 transition-all">
                         <!-- Holographic Grid -->
                         <div class="absolute inset-0 bg-[url('/bat-portfolio/grid.svg')] opacity-5 pointer-events-none"></div>
 
@@ -107,7 +107,7 @@ const projects = [
                                     <span data-i18n="mission.sector">// SECTOR 7G</span>
                                 </div>
                                 
-                                <h3 class="text-3xl font-display text-white md:text-gray-200 group-hover:text-white transition-colors tracking-wide">{project.caseFile}</h3>
+                                <h3 class="text-3xl font-display text-white md:text-gray-200 group-hover:text-white transition-colors tracking-wide break-words">{project.caseFile}</h3>
                                 
                                 <p class="text-[#888] font-mono text-sm leading-7">
                                     <span class="text-[#ffd700]">></span> <span data-i18n="mission.subject">SUBJECT:</span> {project.title}<br/>
