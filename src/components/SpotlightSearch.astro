@@ -1576,6 +1576,7 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
     private skylineImageLoaded = false;
     private isMobileDevice: boolean = false;
     private isLowEndDevice: boolean = false;
+    private isDragging: boolean = false; // Track drag state to prevent accidental clicks
 
     private logoPosition: { x: number; y: number } = { x: 0, y: 0 };
     private isFound: boolean = false;
@@ -1797,12 +1798,24 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
 
+      // Zone sicurezza UI (Toggles, Audio, etc)
+      // Top Left: Lang Toggle / Mode Toggle
+      const safeZoneTopLeft = { x: 0, y: 0, width: 140, height: 100 };
+      // Top Right: Archive / Other Toggles
+      const safeZoneTopRight = { x: viewportWidth - 140, y: 0, width: 140, height: 100 };
+      // Bottom Right: Audio Controller
+      const safeZoneBottomRight = { x: viewportWidth - 120, y: viewportHeight - 120, width: 120, height: 120 };
+
       // Zone dove NON posizionare il logo (testo, hint, etc)
       const exclusionZones = [
         // Testo "CERCAMI" al centro (45% della height)
         { x: viewportWidth * 0.2, y: viewportHeight * 0.35, width: viewportWidth * 0.6, height: viewportHeight * 0.25 },
         // Bottom hint "Trascina il dito"
-        { x: 0, y: viewportHeight * 0.85, width: viewportWidth, height: viewportHeight * 0.15 }
+        { x: 0, y: viewportHeight * 0.85, width: viewportWidth, height: viewportHeight * 0.15 },
+        // UI Safe Zones
+        safeZoneTopLeft,
+        safeZoneTopRight,
+        safeZoneBottomRight
       ];
 
       let x: number, y: number;
@@ -1872,29 +1885,40 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
 
     private handleTouchStart(e: TouchEvent) {
       if (this.isFound) return;
+      this.isDragging = false; // Reset drag state
+      
       const audioGate = document.getElementById('audio-gate');
       if (audioGate && !audioGate.classList.contains('hidden')) return;
 
-      e.preventDefault();
       const touch = e.touches[0];
       this.currentMouse = { x: touch.clientX, y: touch.clientY };
+      // Non chiamare preventDefault qui su start per permettere click, ma...
+      // Se vogliamo un'esperienza full immersiva, preventDefault su start blocca tutto.
+      // E.preventDefault() su start potrebbe bloccare il click?
+      // Meglio lasciarlo, e gestire il click manualmente o via touchend se necessario.
+      // Per il minigioco, vogliamo muovere la luce subito.
+      e.preventDefault(); 
       this.updateLogic(touch.clientX, touch.clientY);
     }
 
     private handleTouchMove(e: TouchEvent) {
       if (this.isFound) return;
+      this.isDragging = true; // Mark as dragging
+      
       const audioGate = document.getElementById('audio-gate');
       if (audioGate && !audioGate.classList.contains('hidden')) return;
 
       e.preventDefault();
       const touch = e.touches[0];
       this.currentMouse = { x: touch.clientX, y: touch.clientY };
-      // Throttle touch move updates too
-      // updateLogic viene chiamato già dal loop animate
+      // Throttle touch move updates handled by animate loop
     }
 
-    private handleTouchEnd() {
-      // Maintain last position
+    private handleTouchEnd(e: TouchEvent) {
+       // Se era un drag, preveniamo il click successivo simulato
+       if (this.isDragging) {
+           e.preventDefault(); // Questo dovrebbe fermare il click simulato
+       }
     }
 
     private updateLogic(mouseX: number, mouseY: number) {
@@ -2077,6 +2101,7 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
     }
 
     private handleLogoClick() {
+      if (this.isDragging) return;
       this.triggerFound();
     }
 
