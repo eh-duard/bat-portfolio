@@ -190,8 +190,16 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
     }
 
     init() {
-      if (!this.enableBtn || !this.skipBtn) return;
-      this.bindEvents();
+      // Always bind scroll button, even if audio gate is gone
+      this.bindScrollButton();
+      
+      if (!this.enableBtn || !this.skipBtn) {
+        // Audio gate already dismissed, just setup scroll detection
+        this.setupScrollDetection();
+        return;
+      }
+      
+      this.bindAudioEvents();
       this.setupCrossfade();
       
       // Subscribe to store for reveal state
@@ -203,6 +211,29 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
 
       // Fallback: detect scroll past spotlight to enable scroll mode
       this.setupScrollDetection();
+    }
+
+    bindScrollButton() {
+      // This should always work regardless of audio gate state
+      this.actionBtn?.addEventListener('click', (e) => {
+         e.preventDefault();
+         e.stopPropagation();
+         console.log('🦇 Scroll button clicked, isRevealed:', this.isRevealed);
+         
+         // Always try to scroll to top when this button is visible with scroll icon
+         if (this.isRevealed || this.iconScrollTop?.classList.contains('hidden') === false) {
+             console.log('🦇 Scrolling to top');
+             window.scrollTo({ top: 0, behavior: 'smooth' });
+         } else {
+             this.toggleAudio();
+         }
+      });
+    }
+
+    bindAudioEvents() {
+      this.enableBtn?.addEventListener('click', () => this.startWithAudio());
+      this.skipBtn?.addEventListener('click', () => this.startWithoutAudio());
+      document.addEventListener('logo-found', () => this.playFoundSound());
     }
 
     setupScrollDetection() {
@@ -239,22 +270,8 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
     }
 
     bindEvents() {
-      this.enableBtn.addEventListener('click', () => this.startWithAudio());
-      this.skipBtn.addEventListener('click', () => this.startWithoutAudio());
-      
-      // Scroll to top - always scroll when in revealed mode
-      this.actionBtn?.addEventListener('click', (e) => {
-         e.preventDefault();
-         e.stopPropagation();
-         
-         if (this.isRevealed) {
-             window.scrollTo({ top: 0, behavior: 'smooth' });
-         } else {
-             this.toggleAudio();
-         }
-      });
-      
-      document.addEventListener('logo-found', () => this.playFoundSound());
+      // Legacy - now split into bindScrollButton and bindAudioEvents
+      this.bindAudioEvents();
     }
 
     setScrollMode() {
