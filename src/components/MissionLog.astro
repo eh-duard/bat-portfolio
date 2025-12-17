@@ -3,36 +3,37 @@ import DualContent from './DualContent.astro';
 
 const projects = [
   { 
-    title: 'E-Commerce Platform', 
-    desc: 'Full stack online store with Stripe payment integration.',
-    tech: ['Next.js', 'Stripe', 'PostgreSQL'],
-    caseFile: 'FILE #892: "THE MARKETPLACE"',
-    codeSnippet: `const checkout = await stripe.paymentIntents.create({
-  amount: cart.total,
-  currency: 'usd',
-  automatic_payment_methods: { enabled: true },
+    title: 'LMS Platform', 
+    desc: 'Learning Management System with AI-powered integrations for personalized user experiences.',
+    tech: ['React', 'Node.js', 'MongoDB'],
+    caseFile: 'FILE #001: "E-LOGOS"',
+    codeSnippet: `const aiRecommendation = await ml.predict({
+  userId: user.id,
+  learningPath: course.modules,
+  progress: user.completedLessons
 });`
   },
   { 
-    title: 'Task Management App', 
-    desc: 'Real-time collaboration tool for remote teams.',
-    tech: ['React', 'Firebase', 'Tailwind'],
-    caseFile: 'FILE #104: "OPERATION SYNC"',
-    codeSnippet: `useEffect(() => {
-  const unsubscribe = onSnapshot(doc(db, "tasks"), (doc) => {
-    setTasks(doc.data().items);
-  });
-  return () => unsubscribe();
-}, []);`
+    title: 'License Management Portal', 
+    desc: 'Secure platform for purchasing and managing software licenses with automated workflows.',
+    tech: ['React', 'Express', 'MariaDB'],
+    caseFile: 'FILE #002: "LICENSE HUB"',
+    codeSnippet: `app.post('/api/license/activate', async (req, res) => {
+  const license = await License.verify(req.body.key);
+  await license.assignTo(req.user.orgId);
+  return res.json({ status: 'activated' });
+});`
   },
   { 
-    title: 'AI Image Generator', 
-    desc: 'SaaS application using Stable Diffusion API.',
-    tech: ['SvelteKit', 'Python', 'FastAPI'],
-    caseFile: 'FILE #771: "SYNTHETIC VISIONS"',
-    codeSnippet: `def generate_image(prompt: str):
-    image = pipeline(prompt).images[0]
-    return {"url": upload_to_s3(image)}`
+    title: 'MongoDB Reporting Tool', 
+    desc: 'Custom reporting system that transforms MongoDB schemas into readable key-value visualizations.',
+    tech: ['Node-RED', 'MongoDB', 'Express'],
+    caseFile: 'FILE #003: "DATA LENS"',
+    codeSnippet: `const schemaToTable = (doc) => {
+  return Object.entries(flatten(doc))
+    .map(([key, val]) => ({ field: key, value: val }))
+    .filter(row => row.value !== null);
+};`
   }
 ];
 ---

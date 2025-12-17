@@ -23,7 +23,7 @@ export const ui = {
         'about.text': 'Full Stack Developer focused on clean architecture, performance optimization, and intuitive user experiences. I build applications that are both technically solid and visually refined.',
         'about.years': 'Years Exp',
         'about.projects': 'Projects',
-        'about.commits': 'Commits',
+        'about.companies': 'Companies',
         'about.record': 'Profile: CLASSIFIED',
         'about.nomatch': 'Access Restricted',
         'about.origin': 'BACKGROUND',
@@ -69,9 +69,9 @@ export const ui = {
         'audio.skip': 'Skip',
 
         // Minigame (Spotlight)
-        'game.search': 'Search',
-        'game.found': 'Found!',
-        'game.hint': 'Drag to explore',
+        'game.search': 'Find Me',
+        'game.found': 'You Found Me!',
+        'game.hint': 'Drag to search',
     },
     it: {
         // Hero
@@ -90,7 +90,7 @@ export const ui = {
         'about.text': 'Full Stack Developer focalizzato su architetture pulite, ottimizzazione delle performance e user experience intuitive. Costruisco applicazioni tecnicamente solide e visivamente curate.',
         'about.years': 'Anni Exp',
         'about.projects': 'Progetti',
-        'about.commits': 'Commit',
+        'about.companies': 'Aziende',
         'about.record': 'Profilo: RISERVATO',
         'about.nomatch': 'Accesso Limitato',
         'about.origin': 'BACKGROUND',
@@ -136,8 +136,8 @@ export const ui = {
         'audio.skip': 'Salta',
 
         // Minigame (Spotlight)
-        'game.search': 'Cerca',
-        'game.found': 'Trovato!',
-        'game.hint': 'Trascina per esplorare',
+        'game.search': 'Cercami',
+        'game.found': 'Mi hai trovato!',
+        'game.hint': 'Trascina il dito per cercare',
     },
 };
