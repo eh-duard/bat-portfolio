@@ -84,11 +84,12 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
 </div>
 
 <!-- Audio Toggle / Scroll To Top Button -->
-<div id="audio-controller" class="fixed bottom-6 right-6 z-[500] transition-all duration-300 opacity-0 translate-y-10">
+<div id="audio-controller" class="fixed bottom-6 right-6 z-[500] transition-all duration-300 opacity-0 translate-y-10 pointer-events-none">
   <button 
     id="action-btn"
-    class="group relative w-12 h-12 rounded-full border border-[#ffd700] flex items-center justify-center transition-all duration-300 hover:bg-[#ffd700] hover:scale-110 hover:shadow-[0_0_20px_rgba(255,215,0,0.4)] text-[#ffd700] hover:text-black"
+    class="group relative w-12 h-12 rounded-full border border-[#ffd700] flex items-center justify-center transition-all duration-300 hover:bg-[#ffd700] hover:scale-110 hover:shadow-[0_0_20px_rgba(255,215,0,0.4)] text-[#ffd700] hover:text-black pointer-events-auto cursor-pointer"
     aria-label="Toggle Audio / Scroll to Top"
+    type="button"
   >
     <!-- Sound On Icon -->
     <svg id="icon-sound-on" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -234,15 +235,18 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
       this.actionBtn?.classList.add('border-[#ffd700]', 'text-[#ffd700]');
       
       // Show the controller
-      this.controller?.classList.remove('opacity-0', 'translate-y-10', 'hidden');
+      this.controller?.classList.remove('opacity-0', 'translate-y-10', 'hidden', 'pointer-events-none');
     }
 
     bindEvents() {
       this.enableBtn.addEventListener('click', () => this.startWithAudio());
       this.skipBtn.addEventListener('click', () => this.startWithoutAudio());
       
-      // Dual logic for button
-      this.actionBtn?.addEventListener('click', () => {
+      // Scroll to top - always scroll when in revealed mode
+      this.actionBtn?.addEventListener('click', (e) => {
+         e.preventDefault();
+         e.stopPropagation();
+         
          if (this.isRevealed) {
              window.scrollTo({ top: 0, behavior: 'smooth' });
          } else {
