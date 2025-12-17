@@ -205,32 +205,36 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
     }
 
     setupScrollDetection() {
-      const spotlightContainer = document.getElementById('spotlight-container');
+      // Simple approach: always show scroll button after portfolio is revealed
+      // Listen for the gameStore reveal event which is the primary trigger
       
-      // Always show controller after a delay when gate closes
-      // The scroll mode will be determined by scroll position
+      // Also listen for scroll to show button when user scrolls down
+      let scrollTimeout: any = null;
       window.addEventListener('scroll', () => {
-        if (!this.isRevealed && window.scrollY > 200) {
-          this.setScrollMode();
-        }
-      }, { passive: true });
-
-      // If no spotlight or spotlight is hidden, enable scroll mode
-      if (!spotlightContainer || spotlightContainer.classList.contains('hidden')) {
-        this.setScrollMode();
-        return;
-      }
-
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          // When spotlight is no longer visible (scrolled past), enable scroll mode
-          if (!entry.isIntersecting && !this.isRevealed) {
-            this.setScrollMode();
+        if (scrollTimeout) clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+          if (window.scrollY > 100) {
+            this.showScrollButton();
           }
-        });
-      }, { threshold: 0 });
+        }, 100);
+      }, { passive: true });
+    }
 
-      observer.observe(spotlightContainer);
+    showScrollButton() {
+      if (this.isRevealed) return; // Already in scroll mode
+      this.isRevealed = true;
+      
+      // Hide sound icons, show scroll icon
+      this.iconSoundOn?.classList.add('hidden');
+      this.iconSoundOff?.classList.add('hidden');
+      this.iconScrollTop?.classList.remove('hidden');
+      
+      // Reset styles
+      this.actionBtn?.classList.remove('border-red-500', 'text-red-500');
+      this.actionBtn?.classList.add('border-[#ffd700]', 'text-[#ffd700]');
+      
+      // Show the controller
+      this.controller?.classList.remove('opacity-0', 'translate-y-10', 'hidden');
     }
 
     bindEvents() {
@@ -250,20 +254,7 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
     }
 
     setScrollMode() {
-        this.isRevealed = true;
-        
-        // Hide sound icons, show scroll icon
-        this.iconSoundOn?.classList.add('hidden');
-        this.iconSoundOff?.classList.add('hidden');
-        this.iconScrollTop?.classList.remove('hidden');
-        
-        // Reset styles (remove muted red state if active)
-        this.actionBtn?.classList.remove('border-red-500', 'text-red-500');
-        this.actionBtn?.classList.add('text-[#ffd700]');
-        
-        // Ensure button is visible if it wasn't
-        this.controller?.classList.remove('opacity-0', 'translate-y-10');
-        this.controller?.classList.remove('hidden');
+        this.showScrollButton();
     }
 
     updateAudioIcons() {
