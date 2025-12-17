@@ -206,9 +206,18 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
 
     setupScrollDetection() {
       const spotlightContainer = document.getElementById('spotlight-container');
-      if (!spotlightContainer) {
-        // No spotlight, enable scroll mode immediately after gate closes
-        setTimeout(() => this.setScrollMode(), 1000);
+      
+      // Always show controller after a delay when gate closes
+      // The scroll mode will be determined by scroll position
+      window.addEventListener('scroll', () => {
+        if (!this.isRevealed && window.scrollY > 200) {
+          this.setScrollMode();
+        }
+      }, { passive: true });
+
+      // If no spotlight or spotlight is hidden, enable scroll mode
+      if (!spotlightContainer || spotlightContainer.classList.contains('hidden')) {
+        this.setScrollMode();
         return;
       }
 
