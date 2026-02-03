@@ -225,7 +225,10 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
          
          if (isScrollMode) {
              console.log('🦇 Scrolling to top');
+             // Try multiple methods to ensure scroll works
              window.scrollTo({ top: 0, behavior: 'smooth' });
+             document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+             document.body.scrollTo({ top: 0, behavior: 'smooth' });
          } else {
              console.log('🦇 Toggling audio');
              this.toggleAudio();
