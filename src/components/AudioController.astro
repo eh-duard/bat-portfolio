@@ -218,13 +218,16 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
       this.actionBtn?.addEventListener('click', (e) => {
          e.preventDefault();
          e.stopPropagation();
-         console.log('🦇 Scroll button clicked, isRevealed:', this.isRevealed);
          
-         // Always try to scroll to top when this button is visible with scroll icon
-         if (this.isRevealed || this.iconScrollTop?.classList.contains('hidden') === false) {
+         // Check if scroll icon is visible (not hidden)
+         const isScrollMode = !this.iconScrollTop?.classList.contains('hidden');
+         console.log('🦇 Button clicked - Scroll mode:', isScrollMode);
+         
+         if (isScrollMode) {
              console.log('🦇 Scrolling to top');
              window.scrollTo({ top: 0, behavior: 'smooth' });
          } else {
+             console.log('🦇 Toggling audio');
              this.toggleAudio();
          }
       });
