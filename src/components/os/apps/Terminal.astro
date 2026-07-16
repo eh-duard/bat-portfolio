@@ -1,12 +1,12 @@
 ---
 import content from '../../../data/content.json';
+import { apps } from '../../../data/apps';
 const c = {
   name: content.identity.name,
   role: content.identity.role.it,
   email: content.contact.email,
   github: content.contact.github,
-  projects: content.projects.map((p) => ({ code: p.codename, title: p.title })),
-  skills: content.skills.map((s) => s.name),
+  appIds: apps.map((a) => a.id),
 };
 ---
 
@@ -28,8 +28,7 @@ const c = {
     const input = document.getElementById('term-in');
     if (!scroll || !out || !form || !input) return;
 
-    const A = ''; // non usato: manteniamo output HTML semplice
-    const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     const line = (html = '') => { out.innerHTML += html + '\n'; scroll.scrollTop = scroll.scrollHeight; };
     const k = (t) => `<span class="c-k">${esc(t)}</span>`;
     const dim = (t) => `<span class="c-d">${esc(t)}</span>`;
@@ -38,36 +37,27 @@ const c = {
     const files = {
       'about.txt': `${c.name} — ${c.role}`,
       'contact.txt': `email: ${c.email}\ngithub: ${c.github}`,
-      'projects/': null,
+      'readme.txt': 'NOX//OS · portfolio-desktop. Le app di profilo arriveranno dal CV.',
     };
 
     const commands = {
       help() {
-        line(acc('Comandi disponibili:'));
+        line(acc('Comandi:'));
         [
           ['help', 'questa lista'],
           ['whoami', 'chi sono'],
-          ['about', 'presentazione'],
-          ['skills', 'stack tecnologico'],
-          ['projects', 'progetti'],
-          ['contact', 'come raggiungermi'],
+          ['about', 'presentazione breve'],
+          ['neofetch', 'info di sistema'],
           ['ls', 'elenca i file'],
           ['cat <file>', 'mostra un file'],
-          ['neofetch', 'info di sistema'],
-          ['open <app>', 'apri una app (es. open projects)'],
+          ['open <app>', 'apri una app (' + c.appIds.join(', ') + ')'],
           ['date', 'data e ora'],
-          ['clear', 'pulisci lo schermo'],
-        ].forEach(([cmd, d]) => line('  ' + k(cmd.padEnd(14)) + dim(d)));
+          ['clear', 'pulisci'],
+        ].forEach(([cmd, d]) => line('  ' + k(String(cmd).padEnd(14)) + dim(d)));
       },
       whoami() { line(c.name); },
-      about() { line(`${acc(c.name)}`); line(dim(c.role)); },
-      skills() { c.skills.forEach((s) => line('  ' + k('▸') + ' ' + esc(s))); },
-      projects() {
-        c.projects.forEach((p, i) => line('  ' + acc(`[${i + 1}] `) + esc(p.title) + '  ' + dim(p.code)));
-        line(dim('  usa "open projects" per la vista completa'));
-      },
-      contact() { line('email  ' + acc(c.email)); line('github ' + acc(c.github)); },
-      ls() { Object.keys(files).forEach((f) => line((f.endsWith('/') ? acc(f) : k(f)))); },
+      about() { line(acc(c.name)); line(dim(c.role)); },
+      ls() { Object.keys(files).forEach((f) => line(k(f))); },
       cat(arg) {
         if (!arg) return line(dim('uso: cat <file>'));
         if (files[arg] == null) return line('cat: ' + esc(arg) + ': file non trovato');
@@ -76,58 +66,52 @@ const c = {
       date() { line(new Date().toString()); },
       echo(arg) { line(esc(arg || '')); },
       clear() { out.innerHTML = ''; },
+      open(arg) {
+        if (!arg || !c.appIds.includes(arg)) return line(dim('uso: open <' + c.appIds.join('|') + '>'));
+        line(dim('apro ' + arg + '…'));
+        window.batOS?.open(arg);
+      },
       neofetch() {
         const art = [
           '        _.,,,,,._        ',
-          '     .d\'\'      ``b.     ',
-          '   .p\'    NOX     `q.   ',
-          '  .d\'   //  OS  \\\\   `b. ',
-          '  ::   ((  ▲▲  ))   ::  ',
-          '  `p.   \\\\      //   .q\'  ',
-          '   `q.    `----\'    .p\'   ',
-          '     `b.          .d\'     ',
-          '        `\'\'----\'\'`        ',
+          "     .d''      ``b.     ",
+          "   .p'    NOX     `q.   ",
+          "  .d'   //  OS  \\\\   `b. ",
+          '  ::   ((  ^^  ))   ::  ',
+          "  `p.   \\\\      //   .q'  ",
+          "   `q.    `----'    .p'   ",
+          "     `b.          .d'     ",
+          "        `''----''`        ",
         ];
         const info = [
-          [acc('visitor'), '@', acc('nox')],
-          ['os', 'NOX//OS (Astro build)'],
-          ['host', 'portfolio-workstation'],
-          ['shell', 'noxsh 1.0'],
-          ['theme', 'Graphite / Signal-Orange'],
-          ['packages', String(c.projects.length + c.skills.length) + ' (curated)'],
-          ['role', c.role],
+          acc('visitor') + '@' + acc('nox'),
+          k('os       ') + 'NOX//OS (Astro static build)',
+          k('host     ') + 'portfolio-workstation',
+          k('shell    ') + 'noxsh 1.0',
+          k('wm       ') + 'nox-wm (vanilla TS)',
+          k('theme    ') + 'Graphite / Signal-Orange',
+          k('apps     ') + c.appIds.length + ' (' + c.appIds.join(', ') + ')',
+          k('role     ') + c.role,
         ];
         const rows = Math.max(art.length, info.length);
         for (let i = 0; i < rows; i++) {
-          const left = (art[i] || '').padEnd(26);
-          let right = '';
-          if (info[i]) right = Array.isArray(info[i]) && info[i].length === 3
-            ? info[i].join('')
-            : k(String(info[i][0]).padEnd(9)) + esc(String(info[i][1]));
-          line('<span class="c-a">' + esc(left) + '</span>' + right);
+          const left = '<span class="c-a">' + esc((art[i] || '').padEnd(26)) + '</span>';
+          line(left + (info[i] || ''));
         }
-      },
-      open(arg) {
-        const ids = ['terminal','projects','about','skills','experience','notes','game','contact','settings'];
-        if (!arg || !ids.includes(arg)) return line(dim('uso: open <' + ids.join('|') + '>'));
-        line(dim('apro ' + arg + '…'));
-        window.batOS?.open(arg);
       },
     };
 
     function run(raw) {
-      const trimmed = raw.trim();
-      line('<span class="c-p">visitor@nox:~$</span> ' + esc(trimmed));
-      if (!trimmed) return;
-      const [cmd, ...rest] = trimmed.split(/\s+/);
+      const t = raw.trim();
+      line('<span class="c-p">visitor@nox:~$</span> ' + esc(t));
+      if (!t) return;
+      const [cmd, ...rest] = t.split(/\s+/);
       const fn = commands[cmd];
       if (fn) fn(rest.join(' '));
       else line('noxsh: comando non trovato: ' + esc(cmd) + dim('  — prova "help"'));
     }
 
-    // history
-    const hist = [];
-    let hi = -1;
+    const hist = []; let hi = -1;
     input.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowUp') { e.preventDefault(); if (hi < hist.length - 1) input.value = hist[++hi] || ''; }
       else if (e.key === 'ArrowDown') { e.preventDefault(); if (hi > 0) input.value = hist[--hi] || ''; else { hi = -1; input.value = ''; } }
@@ -135,15 +119,11 @@ const c = {
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       const v = input.value;
-      if (v.trim()) { hist.unshift(v.trim()); }
-      hi = -1;
-      run(v);
-      input.value = '';
+      if (v.trim()) hist.unshift(v.trim());
+      hi = -1; run(v); input.value = '';
     });
-    // focus quando si clicca nel terminale
     scroll.addEventListener('pointerup', () => { if (!window.getSelection()?.toString()) input.focus(); });
 
-    // banner iniziale (una volta per finestra)
     line(acc('NOX//OS') + dim('  —  noxsh 1.0'));
     line(dim('scrivi ') + k('help') + dim(' per iniziare, o ') + k('neofetch'));
     line('');
