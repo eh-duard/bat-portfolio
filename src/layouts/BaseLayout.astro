@@ -7,41 +7,35 @@ import '@fontsource/space-grotesk/600.css';
 import '@fontsource/space-grotesk/700.css';
 import '@fontsource/jetbrains-mono/400.css';
 import '@fontsource/jetbrains-mono/500.css';
-import '@fontsource-variable/cinzel';
 
 interface Props {
   title?: string;
   description?: string;
 }
 const {
-  title = 'BAT//OS — Portfolio',
-  description = 'Un portfolio a forma di sistema operativo. Doppia modalita\': sviluppatore e Gotham.',
+  title = 'NOX//OS — Portfolio',
+  description = 'Un portfolio che si comporta come un desktop Linux. Terminale, finestre, note, mini-giochi.',
 } = Astro.props;
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
 
 <!doctype html>
-<html lang="it" data-mode="batman">
+<html lang="it">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5" />
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
-    <meta name="theme-color" content="#060709" />
+    <meta name="theme-color" content="#0d0e12" />
     <title>{title}</title>
     <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
 
-    <!-- Applica mode/lang salvati prima del paint per evitare flash -->
     <script is:inline>
-      (function () {
-        try {
-          var m = localStorage.getItem('batos-mode');
-          document.documentElement.setAttribute('data-mode', m === 'dev' ? 'dev' : 'batman');
-          var l = localStorage.getItem('batos-lang');
-          document.documentElement.setAttribute('lang', l === 'en' ? 'en' : 'it');
-        } catch (e) {}
-      })();
+      try {
+        var l = localStorage.getItem('nox-lang');
+        document.documentElement.setAttribute('lang', l === 'en' ? 'en' : 'it');
+      } catch (e) {}
     </script>
   </head>
   <body>

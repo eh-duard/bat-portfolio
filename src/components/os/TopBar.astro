@@ -1,0 +1,70 @@
+---
+import { Icon } from 'astro-icon/components';
+import { OS_NAME } from '../../data/apps';
+---
+
+<header class="topbar">
+  <button class="tb-btn tb-activities" data-toggle-startmenu aria-haspopup="true">
+    <Icon name="lucide:layout-grid" />
+    <span class="tb-os">{OS_NAME}</span>
+  </button>
+
+  <button class="tb-clock tb-btn" data-toggle-startmenu>
+    <span id="os-date"></span>
+    <span id="os-clock">--:--</span>
+  </button>
+
+  <div class="tb-right">
+    <div class="tb-seg" role="group" aria-label="Lingua">
+      <button data-set-lang="it" class="tb-seg__b">IT</button>
+      <button data-set-lang="en" class="tb-seg__b">EN</button>
+    </div>
+    <div class="tb-sys tb-btn" title="Sistema">
+      <Icon name="lucide:wifi" />
+      <Icon name="lucide:volume-2" />
+      <Icon name="lucide:battery-medium" />
+    </div>
+  </div>
+</header>
+
+<style>
+  .topbar {
+    position: fixed; top: 0; left: 0; right: 0; height: var(--topbar-h); z-index: 6000;
+    display: flex; align-items: center; justify-content: space-between; padding: 0 0.4rem;
+    background: rgba(8,9,12,0.72); backdrop-filter: blur(16px) saturate(1.1);
+    border-bottom: 1px solid var(--line-soft);
+    font-size: 0.75rem; user-select: none;
+  }
+  .tb-btn {
+    display: inline-flex; align-items: center; gap: 0.4rem; height: 22px; padding: 0 0.55rem;
+    border-radius: 6px; color: var(--text-dim); transition: background 0.15s, color 0.15s;
+  }
+  .tb-btn :global(svg) { font-size: 15px; }
+  .tb-btn:hover { background: rgba(255,255,255,0.07); color: var(--text); }
+
+  .tb-activities { font-weight: 600; }
+  .tb-os { letter-spacing: 0.06em; color: var(--text); }
+  .tb-activities:hover .tb-os { color: var(--accent); }
+
+  .tb-clock {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    gap: 0.55rem; font-variant-numeric: tabular-nums;
+  }
+  #os-date { color: var(--text-mute); }
+  #os-clock { color: var(--text); font-weight: 600; }
+
+  .tb-right { display: flex; align-items: center; gap: 0.3rem; }
+  .tb-seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  .tb-seg__b { padding: 0.05rem 0.4rem; font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.06em; color: var(--text-mute); transition: background 0.15s, color 0.15s; }
+  .tb-seg__b + .tb-seg__b { border-left: 1px solid var(--line); }
+  .tb-seg__b:hover { color: var(--text); }
+  .tb-seg__b.on { background: var(--accent); color: #120a06; }
+
+  .tb-sys { gap: 0.3rem; }
+  .tb-sys :global(svg) { font-size: 14px; }
+
+  @media (max-width: 640px) {
+    .tb-os { display: none; }
+    .tb-clock { font-size: 0.72rem; }
+  }
+</style>

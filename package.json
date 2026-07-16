@@ -12,8 +12,11 @@
     "@fontsource-variable/cinzel": "^5.2.8",
     "@fontsource/jetbrains-mono": "^5.2.8",
     "@fontsource/space-grotesk": "^5.2.10",
+    "@iconify-json/logos": "^1.2.11",
+    "@iconify-json/lucide": "^1.2.117",
     "@tailwindcss/vite": "^4.1.17",
     "astro": "^5.0.0",
+    "astro-icon": "^1.1.5",
     "nanostores": "^1.1.0",
     "tailwindcss": "^4.1.17"
   },

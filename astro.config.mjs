@@ -1,18 +1,13 @@
 import { defineConfig } from 'astro/config';
 
 import tailwindcss from '@tailwindcss/vite';
+import icon from 'astro-icon';
 
 export default defineConfig({
   site: 'https://eh-duard.github.io',
   base: '/bat-portfolio',
 
-  i18n: {
-    locales: ['it', 'en'],
-    defaultLocale: 'it',
-    routing: {
-      prefixDefaultLocale: false
-    }
-  },
+  integrations: [icon()],
 
   vite: {
     plugins: [tailwindcss()]

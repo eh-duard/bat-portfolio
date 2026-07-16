@@ -1,0 +1,74 @@
+---
+import { Icon } from 'astro-icon/components';
+---
+
+<div class="set">
+  <section class="set__group">
+    <h3 class="set__h"><Icon name="lucide:image" /> Sfondo</h3>
+    <div class="set__walls" id="set-walls">
+      <button class="wallpick" data-wall="0" style="--p:linear-gradient(150deg,#141821,#0b0d12 60%,#05070b)"></button>
+      <button class="wallpick" data-wall="1" style="--p:radial-gradient(120% 90% at 20% 0%,#2a1c14,#0d0e12 55%)"></button>
+      <button class="wallpick" data-wall="2" style="--p:linear-gradient(160deg,#0e1a1a,#0a0f14 60%,#070a0d)"></button>
+      <button class="wallpick" data-wall="3" style="--p:radial-gradient(120% 100% at 70% 10%,#1a1730,#0b0c12 55%)"></button>
+    </div>
+  </section>
+
+  <section class="set__group">
+    <h3 class="set__h"><Icon name="lucide:languages" /> Lingua</h3>
+    <div class="set__row">
+      <button class="set__opt" data-set-lang="it">Italiano</button>
+      <button class="set__opt" data-set-lang="en">English</button>
+    </div>
+  </section>
+
+  <section class="set__group">
+    <h3 class="set__h"><Icon name="lucide:database" /> Dati locali</h3>
+    <p class="set__desc">Note, pin del dock e preferenze sono salvati solo nel tuo browser.</p>
+    <button class="set__reset" id="set-reset"><Icon name="lucide:rotate-ccw" /> Ripristina impostazioni</button>
+  </section>
+
+  <p class="set__about">NOX//OS · build statica Astro · nessun tracker, nessun server.</p>
+</div>
+
+<style>
+  .set { display: flex; flex-direction: column; gap: 1.4rem; }
+  .set__group { display: flex; flex-direction: column; gap: 0.7rem; }
+  .set__h { display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin: 0; }
+  .set__h :global(svg) { color: var(--accent); font-size: 16px; }
+
+  .set__walls { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.6rem; }
+  .wallpick { height: 54px; border-radius: 9px; border: 2px solid var(--line); background: var(--p); background-size: cover; transition: border-color 0.15s, transform 0.15s; }
+  .wallpick:hover { transform: translateY(-2px); }
+  .wallpick.active { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+  .set__row { display: flex; gap: 0.5rem; }
+  .set__opt { padding: 0.5rem 0.9rem; border: 1px solid var(--line); border-radius: 8px; color: var(--text-dim); font-size: 0.82rem; transition: all 0.15s; }
+  .set__opt:hover { color: var(--text); }
+  .set__opt.on { background: var(--accent); border-color: var(--accent); color: #120a06; }
+
+  .set__desc { font-size: 0.78rem; color: var(--text-mute); margin: 0; }
+  .set__reset { align-self: flex-start; display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 0.8rem; border: 1px solid var(--line); border-radius: 8px; color: var(--text-dim); font-size: 0.78rem; transition: all 0.15s; }
+  .set__reset:hover { background: var(--danger); border-color: var(--danger); color: #fff; }
+  .set__about { font-size: 0.68rem; color: var(--text-mute); margin: auto 0 0; }
+
+  @media (max-width: 560px) { .set__walls { grid-template-columns: repeat(2, 1fr); } }
+</style>
+
+<script>
+  import { setWall, wallStore } from '../../../stores/os';
+  const walls = document.getElementById('set-walls');
+  walls?.querySelectorAll<HTMLElement>('.wallpick').forEach((b) => {
+    b.addEventListener('click', () => setWall(Number(b.dataset.wall)));
+  });
+  const sync = () => {
+    const i = wallStore.get();
+    walls?.querySelectorAll<HTMLElement>('.wallpick').forEach((b) => b.classList.toggle('active', Number(b.dataset.wall) === i));
+  };
+  wallStore.subscribe(sync);
+  document.getElementById('set-reset')?.addEventListener('click', () => {
+    if (confirm('Ripristinare tutte le impostazioni e le note?')) {
+      ['nox-lang', 'nox-pins', 'nox-wall', 'nox-notes', 'nox-booted'].forEach((k) => localStorage.removeItem(k));
+      location.reload();
+    }
+  });
+</script>

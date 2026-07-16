@@ -1,0 +1,72 @@
+---
+import { Icon } from 'astro-icon/components';
+---
+
+<div class="game" data-flush>
+  <div class="game__stage" id="game-stage">
+    <div class="game__light" id="game-light"></div>
+    <button class="game__bat" id="game-bat" aria-label="pipistrello"><Icon name="lucide:bird" /></button>
+    <div class="game__hud">
+      <span id="game-msg">Muovi il faro. Trova il pipistrello nel buio e cliccalo.</span>
+    </div>
+    <div class="game__win" id="game-win" hidden>
+      <Icon name="lucide:party-popper" />
+      <p>Trovato.</p>
+      <button id="game-again">Rigioca</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .game { height: 100%; }
+  .game__stage { position: relative; height: 100%; overflow: hidden; background: #05070b; cursor: crosshair; }
+  .game__light {
+    position: absolute; width: 260px; height: 260px; border-radius: 50%; pointer-events: none;
+    transform: translate(-50%, -50%); left: 50%; top: 50%;
+    background: radial-gradient(circle, rgba(244,183,64,0.16), rgba(244,183,64,0.05) 45%, transparent 70%);
+    mix-blend-mode: screen; transition: opacity 0.2s;
+  }
+  .game__bat { position: absolute; font-size: 34px; color: #12151b; transition: color 0.1s, transform 0.15s; }
+  .game__bat:hover { transform: scale(1.15); }
+  .game__stage.lit .game__bat { color: #e9c15a; filter: drop-shadow(0 0 10px rgba(233,193,90,0.6)); }
+  .game__hud { position: absolute; bottom: 1rem; left: 0; right: 0; text-align: center; font-size: 0.78rem; color: var(--text-mute); pointer-events: none; }
+  .game__win { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 0.6rem; background: rgba(5,7,11,0.9); backdrop-filter: blur(4px); }
+  .game__win :global(svg) { font-size: 44px; color: var(--accent); }
+  .game__win p { margin: 0; font-size: 1.3rem; font-weight: 600; }
+  .game__win button { margin-top: 0.5rem; padding: 0.5rem 1.1rem; border: 1px solid var(--accent); border-radius: 8px; color: var(--accent); transition: background 0.15s, color 0.15s; }
+  .game__win button:hover { background: var(--accent); color: #120a06; }
+</style>
+
+<script is:inline>
+  (function () {
+    const stage = document.getElementById('game-stage');
+    const light = document.getElementById('game-light');
+    const bat = document.getElementById('game-bat');
+    const win = document.getElementById('game-win');
+    const msg = document.getElementById('game-msg');
+    if (!stage || !light || !bat || !win) return;
+
+    function place() {
+      const r = stage.getBoundingClientRect();
+      const x = 40 + Math.random() * Math.max(60, r.width - 120);
+      const y = 40 + Math.random() * Math.max(60, r.height - 140);
+      bat.style.left = x + 'px'; bat.style.top = y + 'px';
+      win.hidden = true; stage.classList.remove('lit');
+      if (msg) msg.textContent = 'Muovi il faro. Trova il pipistrello nel buio e cliccalo.';
+    }
+    stage.addEventListener('pointermove', (e) => {
+      const r = stage.getBoundingClientRect();
+      const x = e.clientX - r.left, y = e.clientY - r.top;
+      light.style.left = x + 'px'; light.style.top = y + 'px';
+      const bx = bat.offsetLeft, by = bat.offsetTop;
+      const near = Math.hypot(x - bx, y - by) < 120;
+      stage.classList.toggle('lit', near);
+    });
+    bat.addEventListener('click', (e) => { e.stopPropagation(); win.hidden = false; });
+    document.getElementById('game-again').addEventListener('click', place);
+    // posiziona quando la finestra diventa visibile
+    const io = new IntersectionObserver((en) => { if (en[0].isIntersecting) place(); });
+    io.observe(stage);
+    place();
+  })();
+</script>

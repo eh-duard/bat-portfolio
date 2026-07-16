@@ -1,44 +1,53 @@
 ---
 import '../../styles/os.css';
-import MenuBar from './MenuBar.astro';
-import DesktopIcons from './DesktopIcons.astro';
+import { Icon } from 'astro-icon/components';
+import TopBar from './TopBar.astro';
 import Dock from './Dock.astro';
-import { icon } from '../../data/icons';
+import StartMenu from './StartMenu.astro';
+import { apps } from '../../data/apps';
+
+const deskApps = apps.filter((a) => a.desktop);
 ---
 
-<div id="desktop">
-  <div class="wall wall--gotham" aria-hidden="true"></div>
-  <div class="wall wall--dev" aria-hidden="true"></div>
+<div id="desktop" data-wall="0">
+  <div class="wall wall--grad" aria-hidden="true"></div>
+  <div class="wall-glow" aria-hidden="true"></div>
+  <div class="wall-dots" aria-hidden="true"></div>
 
-  <MenuBar />
+  <TopBar />
+  <Dock />
 
   <div id="desktop-area">
-    <DesktopIcons />
-    <!-- Le finestre delle app vengono montate qui -->
+    {deskApps.length > 0 && (
+      <div class="desk-icons">
+        {deskApps.map((app) => (
+          <button class="desk-ico" data-desktop-icon={app.id} style={`--tint:${app.color}`} tabindex="0">
+            <span class="tile"><Icon name={app.icon} /></span>
+            <span data-app-label={app.id}>{app.label.it}</span>
+          </button>
+        ))}
+      </div>
+    )}
     <slot />
   </div>
 
-  <Dock />
-</div>
+  <StartMenu />
 
-<!-- Boot sequence -->
-<div id="boot" role="dialog" aria-label="Avvio sistema">
-  <div class="boot__inner">
-    <div class="boot__logo" set:html={icon('bat')}></div>
-    <div class="boot__title">BAT//OS</div>
-    <div class="boot__log">
-      <span><b>&gt;</b> mount /dev/gotham ......... ok</span>
-      <span><b>&gt;</b> init grid, fog, searchlights</span>
-      <span><b>&gt;</b> load profile module ....... ok</span>
-      <span><b>&gt;</b> arming arsenal ............ ok</span>
-      <span><b>&gt;</b> sistema pronto. benvenuto.</span>
+  <div id="boot" role="dialog" aria-label="Avvio">
+    <div class="boot__inner">
+      <div class="boot__logo"><Icon name="lucide:hexagon" /></div>
+      <div class="boot__name">NOX//OS</div>
+      <div class="boot__log">
+        <span><b>&gt;</b> kernel noxsh caricato</span>
+        <span><b>&gt;</b> mount /home/visitor … ok</span>
+        <span><b>&gt;</b> avvio compositore grafico</span>
+        <span><b>&gt;</b> montaggio progetti e stack</span>
+        <span><b>&gt;</b> pronto. clicca per entrare.</span>
+      </div>
+      <div class="boot__bar"></div>
     </div>
-    <div class="boot__hint">tocca per entrare</div>
   </div>
 </div>
-
-<div class="noise-layer" aria-hidden="true"></div>
-<div class="vignette-layer" aria-hidden="true"></div>
 
 <script>
   import '../../scripts/os-manager.ts';

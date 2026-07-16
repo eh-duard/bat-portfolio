@@ -1,0 +1,166 @@
+---
+import content from '../../../data/content.json';
+const c = {
+  name: content.identity.name,
+  role: content.identity.role.it,
+  email: content.contact.email,
+  github: content.contact.github,
+  projects: content.projects.map((p) => ({ code: p.codename, title: p.title })),
+  skills: content.skills.map((s) => s.name),
+};
+---
+
+<div class="term" data-flush>
+  <div class="term__scroll" id="term-scroll">
+    <pre class="term__out" id="term-out"></pre>
+    <form class="term__line" id="term-form" autocomplete="off">
+      <label class="term__prompt" for="term-in">visitor@nox<span class="q">:</span>~<span class="q">$</span></label>
+      <input id="term-in" class="term__in" type="text" spellcheck="false" autocapitalize="off" aria-label="comando" />
+    </form>
+  </div>
+</div>
+
+<script define:vars={{ c }}>
+  (function () {
+    const scroll = document.getElementById('term-scroll');
+    const out = document.getElementById('term-out');
+    const form = document.getElementById('term-form');
+    const input = document.getElementById('term-in');
+    if (!scroll || !out || !form || !input) return;
+
+    const A = ''; // non usato: manteniamo output HTML semplice
+    const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const line = (html = '') => { out.innerHTML += html + '\n'; scroll.scrollTop = scroll.scrollHeight; };
+    const k = (t) => `<span class="c-k">${esc(t)}</span>`;
+    const dim = (t) => `<span class="c-d">${esc(t)}</span>`;
+    const acc = (t) => `<span class="c-a">${esc(t)}</span>`;
+
+    const files = {
+      'about.txt': `${c.name} — ${c.role}`,
+      'contact.txt': `email: ${c.email}\ngithub: ${c.github}`,
+      'projects/': null,
+    };
+
+    const commands = {
+      help() {
+        line(acc('Comandi disponibili:'));
+        [
+          ['help', 'questa lista'],
+          ['whoami', 'chi sono'],
+          ['about', 'presentazione'],
+          ['skills', 'stack tecnologico'],
+          ['projects', 'progetti'],
+          ['contact', 'come raggiungermi'],
+          ['ls', 'elenca i file'],
+          ['cat <file>', 'mostra un file'],
+          ['neofetch', 'info di sistema'],
+          ['open <app>', 'apri una app (es. open projects)'],
+          ['date', 'data e ora'],
+          ['clear', 'pulisci lo schermo'],
+        ].forEach(([cmd, d]) => line('  ' + k(cmd.padEnd(14)) + dim(d)));
+      },
+      whoami() { line(c.name); },
+      about() { line(`${acc(c.name)}`); line(dim(c.role)); },
+      skills() { c.skills.forEach((s) => line('  ' + k('▸') + ' ' + esc(s))); },
+      projects() {
+        c.projects.forEach((p, i) => line('  ' + acc(`[${i + 1}] `) + esc(p.title) + '  ' + dim(p.code)));
+        line(dim('  usa "open projects" per la vista completa'));
+      },
+      contact() { line('email  ' + acc(c.email)); line('github ' + acc(c.github)); },
+      ls() { Object.keys(files).forEach((f) => line((f.endsWith('/') ? acc(f) : k(f)))); },
+      cat(arg) {
+        if (!arg) return line(dim('uso: cat <file>'));
+        if (files[arg] == null) return line('cat: ' + esc(arg) + ': file non trovato');
+        line(esc(files[arg]));
+      },
+      date() { line(new Date().toString()); },
+      echo(arg) { line(esc(arg || '')); },
+      clear() { out.innerHTML = ''; },
+      neofetch() {
+        const art = [
+          '        _.,,,,,._        ',
+          '     .d\'\'      ``b.     ',
+          '   .p\'    NOX     `q.   ',
+          '  .d\'   //  OS  \\\\   `b. ',
+          '  ::   ((  ▲▲  ))   ::  ',
+          '  `p.   \\\\      //   .q\'  ',
+          '   `q.    `----\'    .p\'   ',
+          '     `b.          .d\'     ',
+          '        `\'\'----\'\'`        ',
+        ];
+        const info = [
+          [acc('visitor'), '@', acc('nox')],
+          ['os', 'NOX//OS (Astro build)'],
+          ['host', 'portfolio-workstation'],
+          ['shell', 'noxsh 1.0'],
+          ['theme', 'Graphite / Signal-Orange'],
+          ['packages', String(c.projects.length + c.skills.length) + ' (curated)'],
+          ['role', c.role],
+        ];
+        const rows = Math.max(art.length, info.length);
+        for (let i = 0; i < rows; i++) {
+          const left = (art[i] || '').padEnd(26);
+          let right = '';
+          if (info[i]) right = Array.isArray(info[i]) && info[i].length === 3
+            ? info[i].join('')
+            : k(String(info[i][0]).padEnd(9)) + esc(String(info[i][1]));
+          line('<span class="c-a">' + esc(left) + '</span>' + right);
+        }
+      },
+      open(arg) {
+        const ids = ['terminal','projects','about','skills','experience','notes','game','contact','settings'];
+        if (!arg || !ids.includes(arg)) return line(dim('uso: open <' + ids.join('|') + '>'));
+        line(dim('apro ' + arg + '…'));
+        window.batOS?.open(arg);
+      },
+    };
+
+    function run(raw) {
+      const trimmed = raw.trim();
+      line('<span class="c-p">visitor@nox:~$</span> ' + esc(trimmed));
+      if (!trimmed) return;
+      const [cmd, ...rest] = trimmed.split(/\s+/);
+      const fn = commands[cmd];
+      if (fn) fn(rest.join(' '));
+      else line('noxsh: comando non trovato: ' + esc(cmd) + dim('  — prova "help"'));
+    }
+
+    // history
+    const hist = [];
+    let hi = -1;
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowUp') { e.preventDefault(); if (hi < hist.length - 1) input.value = hist[++hi] || ''; }
+      else if (e.key === 'ArrowDown') { e.preventDefault(); if (hi > 0) input.value = hist[--hi] || ''; else { hi = -1; input.value = ''; } }
+    });
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const v = input.value;
+      if (v.trim()) { hist.unshift(v.trim()); }
+      hi = -1;
+      run(v);
+      input.value = '';
+    });
+    // focus quando si clicca nel terminale
+    scroll.addEventListener('pointerup', () => { if (!window.getSelection()?.toString()) input.focus(); });
+
+    // banner iniziale (una volta per finestra)
+    line(acc('NOX//OS') + dim('  —  noxsh 1.0'));
+    line(dim('scrivi ') + k('help') + dim(' per iniziare, o ') + k('neofetch'));
+    line('');
+    setTimeout(() => input.focus(), 50);
+  })();
+</script>
+
+<style>
+  .term { height: 100%; background: #0b0c10; color: #cfd3da; }
+  .term__scroll { height: 100%; overflow: auto; padding: 0.9rem 1rem; font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.55; cursor: text; }
+  .term__out { margin: 0; white-space: pre-wrap; word-break: break-word; }
+  .term__line { display: flex; align-items: center; gap: 0.5rem; }
+  .term__prompt { color: var(--accent); white-space: nowrap; }
+  .term__prompt .q { color: var(--text-mute); }
+  .term__in { flex: 1; background: transparent; border: none; outline: none; color: #eef1f5; font-family: var(--font-mono); font-size: 0.82rem; caret-color: var(--accent); }
+  .term :global(.c-k) { color: #f4b740; }
+  .term :global(.c-a) { color: var(--accent); }
+  .term :global(.c-d) { color: #6b7280; }
+  .term :global(.c-p) { color: #52c07a; }
+</style>

@@ -1,30 +1,76 @@
 ---
-import { apps, appLabel } from '../../data/apps';
-import { icon } from '../../data/icons';
+import { Icon } from 'astro-icon/components';
+import { appById } from '../../data/apps';
 
-interface Props {
-  id: string;
-  icon?: string;
-}
-const { id, icon: iconKey } = Astro.props;
-const app = apps.find((a) => a.id === id)!;
-// SSR: etichetta di default (batman / it); os-manager la aggiorna a runtime.
-const initialLabel = appLabel(app, 'batman', 'it');
-const iconSvg = icon(iconKey ?? app.icon);
+interface Props { id: string; }
+const { id } = Astro.props;
+const app = appById(id)!;
 ---
 
-<article id={`win-${id}`} class="win" data-app={id} role="dialog" aria-label={initialLabel} aria-hidden="true" hidden>
+<article id={`win-${id}`} class="win" data-app={id} role="dialog" aria-label={app.label.it} aria-hidden="true" hidden>
   <header class="win__bar" data-drag>
-    <div class="win__traffic" aria-hidden="true">
-      <button class="tl tl--close" data-action="close" aria-label="Chiudi" title="Chiudi"></button>
-      <button class="tl tl--min" data-action="min" aria-label="Riduci" title="Riduci"></button>
-      <button class="tl tl--max" data-action="max" aria-label="Espandi" title="Espandi"></button>
-    </div>
-    <span class="win__ico" set:html={iconSvg}></span>
-    <span class="win__title" data-app-label={id}>{initialLabel}</span>
-    <button class="win__back" data-action="close" aria-label="Torna alla home">‹</button>
+    <span class="win__ico" style={`color:${app.color}`}><Icon name={app.icon} /></span>
+    <span class="win__title" data-app-label={id}>{app.label.it}</span>
+    <span class="win__spacer"></span>
+    <span class="win__ctrl">
+      <button class="wc wc--min" data-action="min" aria-label="Riduci"><Icon name="lucide:minus" /></button>
+      <button class="wc wc--max" data-action="max" aria-label="Espandi"><Icon name="lucide:square" /></button>
+      <button class="wc wc--close" data-action="close" aria-label="Chiudi"><Icon name="lucide:x" /></button>
+    </span>
   </header>
   <div class="win__body">
     <slot />
   </div>
 </article>
+
+<style>
+  .win {
+    position: absolute; display: flex; flex-direction: column;
+    min-width: 280px; min-height: 180px;
+    background: var(--bg-panel);
+    border: 1px solid var(--line); border-radius: var(--radius);
+    box-shadow: var(--shadow); overflow: hidden;
+    opacity: 0; transform: scale(0.96) translateY(10px);
+    transition: opacity 0.24s ease, transform 0.28s cubic-bezier(0.2,0.9,0.25,1), box-shadow 0.2s;
+    will-change: transform, opacity;
+  }
+  .win.is-open { opacity: 1; transform: none; }
+  .win.is-min { opacity: 0; transform: scale(0.88) translateY(60px); }
+  .win.is-active { box-shadow: var(--shadow-lg); border-color: color-mix(in srgb, var(--accent) 32%, var(--line)); }
+  .win.is-dragging { transition: none; cursor: grabbing; user-select: none; }
+  .win--max { left: 0 !important; top: 0 !important; width: 100% !important; height: 100% !important; border-radius: 0; }
+
+  .win__bar {
+    display: flex; align-items: center; gap: 0.6rem; height: 40px; flex: none;
+    padding: 0 0.5rem 0 0.85rem; cursor: grab;
+    background: var(--bg-header); border-bottom: 1px solid var(--line-soft);
+    user-select: none;
+  }
+  .win__bar:active { cursor: grabbing; }
+  .win__ico { font-size: 17px; display: inline-flex; }
+  .win__title { font-size: 0.82rem; font-weight: 600; letter-spacing: 0.01em; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .win__spacer { flex: 1; }
+
+  .win__ctrl { display: flex; gap: 0.3rem; }
+  .wc {
+    width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%;
+    background: var(--bg-elev); color: var(--text-dim); font-size: 15px;
+    transition: background 0.15s, color 0.15s, transform 0.15s;
+  }
+  .wc:hover { background: #33383f; color: var(--text); }
+  .wc--close:hover { background: var(--danger); color: #fff; }
+  .wc:active { transform: scale(0.9); }
+
+  .win__body { flex: 1; overflow: auto; padding: 1.2rem 1.3rem 1.4rem; }
+  .win__body.is-flush { padding: 0; }
+
+  /* Phone: finestre a schermo intero */
+  .win--sheet {
+    position: fixed !important; inset: var(--topbar-h) 0 0 0 !important;
+    width: auto !important; height: auto !important; border-radius: 0; border: none;
+    transform: translateY(100%);
+  }
+  .win--sheet.is-open { transform: none; }
+  .win--sheet.is-min { transform: translateY(100%); }
+  .win--sheet .wc--min, .win--sheet .wc--max { display: none; }
+</style>

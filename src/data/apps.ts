@@ -1,85 +1,78 @@
-// Registro delle "app" dell'OS. Ogni sezione del portfolio e' un'app/finestra.
-// I nomi cambiano con la modalita' (dev / batman) e con la lingua (it / en).
+// Registro delle app dell'OS. Nessuna modalita' doppia: tema unico.
+// icon = nome Iconify (set lucide/logos), risolto self-hosted al build da astro-icon.
 
 export type Lang = 'it' | 'en';
-export type Mode = 'dev' | 'batman';
 
 export interface AppDef {
   id: string;
-  icon: string; // chiave in icons.ts
-  /** nome mostrato: [modalita'][lingua] */
-  label: Record<Mode, Record<Lang, string>>;
-  /** larghezza x altezza iniziale della finestra su desktop (px) */
+  label: Record<Lang, string>;
+  icon: string;
+  color: string; // tinta della tile (icona in stile app da distro)
   size: { w: number; h: number };
-  /** posizione iniziale a cascata su desktop (px dal top-left dell'area) */
   spawn: { x: number; y: number };
-  /** true = fa parte dei preferiti nel dock/home telefono */
-  dock: boolean;
+  pinned: boolean;   // presente nel dock di default
+  desktop?: boolean; // icona anche sul desktop
 }
 
 export const apps: AppDef[] = [
   {
-    id: 'bio',
-    icon: 'id',
-    label: {
-      dev: { it: 'Profilo', en: 'Profile' },
-      batman: { it: 'Dossier', en: 'Dossier' },
-    },
-    size: { w: 560, h: 440 },
-    spawn: { x: 120, y: 90 },
-    dock: true,
-  },
-  {
-    id: 'experience',
-    icon: 'briefcase',
-    label: {
-      dev: { it: 'Esperienze', en: 'Experience' },
-      batman: { it: 'Casi Risolti', en: 'Solved Cases' },
-    },
-    size: { w: 600, h: 480 },
-    spawn: { x: 200, y: 130 },
-    dock: true,
+    id: 'terminal',
+    label: { it: 'Terminale', en: 'Terminal' },
+    icon: 'lucide:square-terminal', color: '#f2703a',
+    size: { w: 640, h: 420 }, spawn: { x: 150, y: 80 }, pinned: true, desktop: false,
   },
   {
     id: 'projects',
-    icon: 'grid',
-    label: {
-      dev: { it: 'Progetti', en: 'Projects' },
-      batman: { it: 'Archivio', en: 'Archive' },
-    },
-    size: { w: 680, h: 500 },
-    spawn: { x: 280, y: 100 },
-    dock: true,
+    label: { it: 'Progetti', en: 'Projects' },
+    icon: 'lucide:folder-git-2', color: '#5b8def',
+    size: { w: 720, h: 500 }, spawn: { x: 250, y: 110 }, pinned: true, desktop: true,
+  },
+  {
+    id: 'about',
+    label: { it: 'Profilo', en: 'About' },
+    icon: 'lucide:user-round', color: '#46c6b0',
+    size: { w: 600, h: 460 }, spawn: { x: 200, y: 100 }, pinned: true,
   },
   {
     id: 'skills',
-    icon: 'chip',
-    label: {
-      dev: { it: 'Competenze', en: 'Skills' },
-      batman: { it: 'Arsenale', en: 'Arsenal' },
-    },
-    size: { w: 600, h: 460 },
-    spawn: { x: 160, y: 170 },
-    dock: true,
+    label: { it: 'Stack', en: 'Stack' },
+    icon: 'lucide:cpu', color: '#52c07a',
+    size: { w: 620, h: 470 }, spawn: { x: 220, y: 130 }, pinned: true,
+  },
+  {
+    id: 'experience',
+    label: { it: 'Esperienze', en: 'Experience' },
+    icon: 'lucide:briefcase-business', color: '#8b7cf0',
+    size: { w: 620, h: 480 }, spawn: { x: 180, y: 90 }, pinned: false,
+  },
+  {
+    id: 'notes',
+    label: { it: 'Note', en: 'Notes' },
+    icon: 'lucide:notebook-pen', color: '#e8b04b',
+    size: { w: 560, h: 440 }, spawn: { x: 300, y: 140 }, pinned: true,
+  },
+  {
+    id: 'game',
+    label: { it: 'Bat-Signal', en: 'Bat-Signal' },
+    icon: 'lucide:gamepad-2', color: '#ec5f8a',
+    size: { w: 600, h: 460 }, spawn: { x: 260, y: 90 }, pinned: true,
   },
   {
     id: 'contact',
-    icon: 'signal',
-    label: {
-      dev: { it: 'Contatti', en: 'Contact' },
-      batman: { it: 'Bat-Segnale', en: 'Bat-Signal' },
-    },
-    size: { w: 520, h: 420 },
-    spawn: { x: 340, y: 150 },
-    dock: true,
+    label: { it: 'Contatti', en: 'Contact' },
+    icon: 'lucide:send', color: '#e5674f',
+    size: { w: 520, h: 430 }, spawn: { x: 320, y: 150 }, pinned: false,
+  },
+  {
+    id: 'settings',
+    label: { it: 'Impostazioni', en: 'Settings' },
+    icon: 'lucide:settings', color: '#8a94a6',
+    size: { w: 520, h: 420 }, spawn: { x: 280, y: 120 }, pinned: false,
   },
 ];
 
-export const osName: Record<Mode, string> = {
-  dev: 'DEV//OS',
-  batman: 'GOTHAM//OS',
-};
+export const OS_NAME = 'NOX//OS';
 
-export function appLabel(app: AppDef, mode: Mode, lang: Lang): string {
-  return app.label[mode][lang];
+export function appById(id: string): AppDef | undefined {
+  return apps.find((a) => a.id === id);
 }
