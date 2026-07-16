@@ -4,14 +4,17 @@ import { Icon } from 'astro-icon/components';
 
 <div class="game" data-flush>
   <div class="game__stage" id="game-stage">
-    <div class="game__light" id="game-light"></div>
-    <button class="game__bat" id="game-bat" aria-label="pipistrello"><Icon name="lucide:bird" /></button>
+    <div class="game__field" id="game-field">
+      <button class="game__bat" id="game-bat" aria-label="pipistrello"><Icon name="mdi:bat" /></button>
+    </div>
+    <div class="game__dark" id="game-dark"></div>
     <div class="game__hud">
-      <span id="game-msg">Muovi il faro. Trova il pipistrello nel buio e cliccalo.</span>
+      <span class="game__timer font-mono" id="game-timer">00.0</span>
+      <span id="game-msg">Muovi la torcia. Trova il pipistrello nel buio.</span>
     </div>
     <div class="game__win" id="game-win" hidden>
-      <Icon name="lucide:party-popper" />
-      <p>Trovato.</p>
+      <span class="game__winbat"><Icon name="mdi:bat" /></span>
+      <p>Trovato in <b id="game-time">–</b></p>
       <button id="game-again">Rigioca</button>
     </div>
   </div>
@@ -19,53 +22,75 @@ import { Icon } from 'astro-icon/components';
 
 <style>
   .game { height: 100%; }
-  .game__stage { position: relative; height: 100%; overflow: hidden; background: #05070b; cursor: crosshair; }
-  .game__light {
-    position: absolute; width: 260px; height: 260px; border-radius: 50%; pointer-events: none;
-    transform: translate(-50%, -50%); left: 50%; top: 50%;
-    background: radial-gradient(circle, rgba(244,183,64,0.16), rgba(244,183,64,0.05) 45%, transparent 70%);
-    mix-blend-mode: screen; transition: opacity 0.2s;
+  .game__stage { position: relative; height: 100%; overflow: hidden; background: radial-gradient(120% 90% at 50% -10%, #14121b, #08070b 70%); cursor: none; }
+  .game__field { position: absolute; inset: 0; }
+  .game__bat { position: absolute; font-size: 40px; color: #e9c15a; filter: drop-shadow(0 0 12px rgba(233,193,90,0.5)); transition: transform 0.15s; }
+  .game__bat:hover { transform: scale(1.12); }
+
+  /* torcia: overlay scuro con foro morbido che segue il cursore */
+  .game__dark {
+    position: absolute; inset: 0; pointer-events: none; z-index: 3;
+    --x: 50%; --y: 50%;
+    background: radial-gradient(circle 120px at var(--x) var(--y),
+      transparent 0, transparent 62px, rgba(6,6,10,0.82) 118px, rgba(6,6,10,0.97) 100%);
   }
-  .game__bat { position: absolute; font-size: 34px; color: #12151b; transition: color 0.1s, transform 0.15s; }
-  .game__bat:hover { transform: scale(1.15); }
-  .game__stage.lit .game__bat { color: #e9c15a; filter: drop-shadow(0 0 10px rgba(233,193,90,0.6)); }
-  .game__hud { position: absolute; bottom: 1rem; left: 0; right: 0; text-align: center; font-size: 0.78rem; color: var(--text-mute); pointer-events: none; }
-  .game__win { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 0.6rem; background: rgba(5,7,11,0.9); backdrop-filter: blur(4px); }
-  .game__win :global(svg) { font-size: 44px; color: var(--accent); }
-  .game__win p { margin: 0; font-size: 1.3rem; font-weight: 600; }
-  .game__win button { margin-top: 0.5rem; padding: 0.5rem 1.1rem; border: 1px solid var(--accent); border-radius: 8px; color: var(--accent); transition: background 0.15s, color 0.15s; }
+
+  .game__hud { position: absolute; bottom: 1rem; left: 0; right: 0; z-index: 4; text-align: center; font-size: 0.78rem; color: var(--text-mute); pointer-events: none; display: flex; flex-direction: column; gap: 0.3rem; }
+  .game__timer { color: var(--accent); font-size: 1rem; letter-spacing: 0.06em; }
+
+  .game__win { position: absolute; inset: 0; z-index: 5; display: grid; place-content: center; justify-items: center; gap: 0.7rem; background: rgba(6,7,11,0.92); backdrop-filter: blur(4px); animation: winIn 0.3s ease; }
+  @keyframes winIn { from { opacity: 0; } to { opacity: 1; } }
+  .game__winbat { font-size: 60px; color: var(--accent); filter: drop-shadow(0 0 16px var(--accent)); animation: batPop 0.5s cubic-bezier(0.2,1.4,0.4,1); }
+  @keyframes batPop { from { transform: scale(0.2) rotate(-20deg); } to { transform: none; } }
+  .game__win p { margin: 0; font-size: 1.2rem; }
+  .game__win b { color: var(--accent); }
+  .game__win button { margin-top: 0.4rem; padding: 0.5rem 1.2rem; border: 1px solid var(--accent); border-radius: 8px; color: var(--accent); transition: background 0.15s, color 0.15s; }
   .game__win button:hover { background: var(--accent); color: #120a06; }
 </style>
 
 <script is:inline>
   (function () {
     const stage = document.getElementById('game-stage');
-    const light = document.getElementById('game-light');
+    const dark = document.getElementById('game-dark');
     const bat = document.getElementById('game-bat');
     const win = document.getElementById('game-win');
     const msg = document.getElementById('game-msg');
-    if (!stage || !light || !bat || !win) return;
+    const timerEl = document.getElementById('game-timer');
+    const timeEl = document.getElementById('game-time');
+    if (!stage || !dark || !bat || !win) return;
 
+    let start = 0, raf = 0, playing = false;
+
+    function tick() {
+      if (!playing) return;
+      const s = (performance.now() - start) / 1000;
+      if (timerEl) timerEl.textContent = s.toFixed(1).padStart(4, '0');
+      raf = requestAnimationFrame(tick);
+    }
     function place() {
       const r = stage.getBoundingClientRect();
-      const x = 40 + Math.random() * Math.max(60, r.width - 120);
-      const y = 40 + Math.random() * Math.max(60, r.height - 140);
+      const x = 50 + Math.random() * Math.max(60, r.width - 120);
+      const y = 50 + Math.random() * Math.max(60, r.height - 160);
       bat.style.left = x + 'px'; bat.style.top = y + 'px';
-      win.hidden = true; stage.classList.remove('lit');
-      if (msg) msg.textContent = 'Muovi il faro. Trova il pipistrello nel buio e cliccalo.';
+      win.hidden = true;
+      if (msg) msg.textContent = 'Muovi la torcia. Trova il pipistrello nel buio.';
+      start = performance.now(); playing = true;
+      cancelAnimationFrame(raf); raf = requestAnimationFrame(tick);
     }
     stage.addEventListener('pointermove', (e) => {
       const r = stage.getBoundingClientRect();
-      const x = e.clientX - r.left, y = e.clientY - r.top;
-      light.style.left = x + 'px'; light.style.top = y + 'px';
-      const bx = bat.offsetLeft, by = bat.offsetTop;
-      const near = Math.hypot(x - bx, y - by) < 120;
-      stage.classList.toggle('lit', near);
+      dark.style.setProperty('--x', (e.clientX - r.left) + 'px');
+      dark.style.setProperty('--y', (e.clientY - r.top) + 'px');
     });
-    bat.addEventListener('click', (e) => { e.stopPropagation(); win.hidden = false; });
+    bat.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!playing) return;
+      playing = false; cancelAnimationFrame(raf);
+      if (timeEl) timeEl.textContent = ((performance.now() - start) / 1000).toFixed(1) + 's';
+      win.hidden = false;
+    });
     document.getElementById('game-again').addEventListener('click', place);
-    // posiziona quando la finestra diventa visibile
-    const io = new IntersectionObserver((en) => { if (en[0].isIntersecting) place(); });
+    const io = new IntersectionObserver((en) => { if (en[0].isIntersecting && !playing) place(); });
     io.observe(stage);
     place();
   })();

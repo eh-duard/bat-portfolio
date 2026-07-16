@@ -1,53 +1,48 @@
 # Crediti asset & licenze
 
-Tutti gli asset grafici del progetto sono **originali** (creati per questo portfolio) oppure
-provengono da fonti a licenza libera genuina. Nessun logo ufficiale o personaggio DC Comics /
-Warner Bros. e' riprodotto: l'estetica e' ispirata al genere "gothic noir / vigilante urbano",
-non ai marchi registrati.
+Nessun logo ufficiale o personaggio DC Comics / Warner Bros. e' riprodotto. L'estetica
+e' "gothic noir / bat", non il marchio registrato Batman.
 
-## Grafica originale (CC0 — pubblico dominio, autore: questo progetto)
+## Icone — Iconify via `astro-icon` (self-hosted al build)
 
-| File | Descrizione | Licenza |
-|------|-------------|---------|
-| `public/wallpaper-gotham.svg` | Skyline gotico stilizzato con luna velata e fascio di ricerca | CC0 |
-| `public/wallpaper-dev.svg` | Sfondo "blueprint" tecnico con griglia e contorni topografici | CC0 |
-| `public/noise.svg` | Texture rumore (feTurbulence) per effetto cemento/metallo | CC0 |
-| `public/favicon.svg` | Silhouette di pipistrello stilizzata, disegnata a mano | CC0 |
-| `src/data/icons.ts` | Set di icone line-art dell'OS (profilo, valigetta, chip, ecc.) | CC0 |
+| Set | Uso | Licenza |
+|-----|-----|---------|
+| `lucide` (`@iconify-json/lucide`) | UI dell'OS: dock, finestre, top bar, app | ISC |
+| `mdi` (`@iconify-json/mdi`) | Pipistrello del gioco e favicon | Apache-2.0 |
+| `logos` (`@iconify-json/logos`) | Loghi tecnologici (uso futuro nelle app di profilo) | vari (marchi dei rispettivi proprietari, uso nominativo) |
 
-> La silhouette del pipistrello e' un disegno geometrico originale: **non** e' l'emblema
-> registrato di Batman/DC. E' un pipistrello generico, come quelli usati liberamente in
-> contesti a tema Halloween/gotico.
+Le icone sono incluse al build: nessuna richiesta a CDN esterni a runtime.
+`public/favicon.svg` e' generato dall'icona `mdi:bat` (non disegnato a mano).
 
-## Font (self-hosted via Fontsource)
+## Font — self-hosted via Fontsource
 
 | Famiglia | Uso | Licenza |
 |----------|-----|---------|
-| Space Grotesk | UI dell'OS, titoli finestre, label | SIL Open Font License 1.1 |
-| JetBrains Mono | Terminale, metadati, timestamp, codice | SIL Open Font License 1.1 |
-| Cinzel (Variable) | Titoli gotici in modalita' Batman | SIL Open Font License 1.1 |
+| Space Grotesk | UI, titoli, label | SIL Open Font License 1.1 |
+| JetBrains Mono | Terminale, timestamp, metadati | SIL Open Font License 1.1 |
 
-Installati come pacchetti npm `@fontsource/*` — nessuna richiesta a CDN esterni a runtime.
+## Wallpaper
 
-## Audio (eredita' dal progetto precedente)
+| File | Fonte | Licenza | Note |
+|------|-------|---------|------|
+| `public/wallpaper.jpg` | Unsplash (foto di un pipistrello al crepuscolo) | Unsplash License (uso gratuito, anche commerciale, senza attribuzione) | E' un **pipistrello reale**, non l'emblema DC. |
 
-| File | Note |
-|------|------|
-| `public/sounds/ambient.mp3` | Ambient loop. Attualmente non usato dalla nuova UI. |
-| `public/sounds/found.mp3` | SFX. Attualmente non usato. |
+> **Slot personalizzabile:** per cambiare sfondo basta sostituire `public/wallpaper.jpg`
+> con qualsiasi immagine (stesso nome). Le alternative a gradiente sono in Impostazioni.
+> Nota: non inserire nel repo pubblico immagini coperte da copyright (fotogrammi di film,
+> Lego Batman, tavole a fumetti) se il repo e' pubblicato: sarebbe redistribuzione di IP altrui.
 
-> Se questi file verranno riutilizzati, verificare/annotare qui la fonte e la licenza originale
-> prima della pubblicazione. In dubbio, sostituire con audio CC0 (es. Freesound CC0, Pixabay).
-
-## Foto profilo
+## Foto personali
 
 | File | Note |
 |------|------|
-| `public/images/propic.png` | Foto personale dell'autore. Uso consentito dal proprietario. |
-| `public/images/avatar.png` | Foto personale dell'autore. Uso consentito dal proprietario. |
+| `public/images/propic.png` | Foto dell'autore. In attesa delle app di profilo (dal CV LinkedIn). |
+| `public/images/avatar.png` | Foto dell'autore. Come sopra. |
 
-## Rimossi per motivi di copyright/marchio
+## Rimossi
 
 | File | Motivo |
 |------|--------|
-| `public/images/bat-logo.svg` (rimosso) | Riproduceva l'emblema del pipistrello in stile marchio DC. Sostituito da `favicon.svg` originale. |
+| `public/images/bat-logo.svg` | Riproduceva l'emblema DC. |
+| icone/wallpaper SVG fatti a mano | Sostituiti da icone di libreria e foto reale. |
+| audio `public/sounds/*` | Non usati dalla nuova UI e a licenza non verificata. |
