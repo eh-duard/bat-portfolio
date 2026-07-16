@@ -1,0 +1,10 @@
+---
+// Valore singolo (non bilingue). I token {{...}} diventano chip ".ph".
+interface Props {
+  value: string;
+  class?: string;
+}
+const { value, class: cls = '' } = Astro.props;
+const isPh = /^\s*\{\{.*\}\}\s*$/.test(String(value));
+---
+{isPh ? <span class:list={['ph', cls]}>{value}</span> : <span class={cls}>{value}</span>}

@@ -1,0 +1,82 @@
+---
+import content from '../../../data/content.json';
+import T from '../T.astro';
+import V from '../V.astro';
+
+const { experience } = content;
+---
+
+<div class="exp">
+  <p class="eyebrow font-mono">
+    <span class="dev-only">// storico ruoli</span>
+    <span class="bat-only">CASI ARCHIVIATI · GCPD</span>
+  </p>
+
+  <ol class="timeline">
+    {experience.map((job, i) => (
+      <li class="entry">
+        <span class="node"></span>
+        <div class="card">
+          <div class="card__top font-mono">
+            <span class="idx">{String(i + 1).padStart(2, '0')}</span>
+            <span class="period"><V value={job.period} /></span>
+          </div>
+          <h3 class="role"><T it={job.role.it} en={job.role.en} /></h3>
+          <p class="company"><span class="at">@</span> <V value={job.company} /></p>
+          <p class="desc"><T it={job.desc.it} en={job.desc.en} /></p>
+          <ul class="tags font-mono">
+            {job.tags.map((t) => <li><V value={t} /></li>)}
+          </ul>
+        </div>
+      </li>
+    ))}
+  </ol>
+</div>
+
+<style>
+  .exp { padding: 0.2rem; }
+  .eyebrow { font-size: 0.68rem; letter-spacing: 0.18em; color: var(--accent); text-transform: uppercase; margin: 0 0 1.4rem; }
+
+  .timeline { list-style: none; margin: 0; padding: 0 0 0 1.4rem; position: relative; }
+  .timeline::before {
+    content: ''; position: absolute; left: 4px; top: 4px; bottom: 4px; width: 1px;
+    background: linear-gradient(var(--accent), var(--line) 60%, transparent);
+    opacity: 0.6;
+  }
+
+  .entry { position: relative; padding-bottom: 1.1rem; }
+  .node {
+    position: absolute; left: -1.4rem; top: 0.65rem; width: 9px; height: 9px;
+    background: var(--bg); border: 1px solid var(--accent); transform: rotate(45deg);
+    transition: background 0.25s;
+  }
+  .entry:hover .node { background: var(--accent); box-shadow: var(--glow); }
+
+  .card {
+    border: 1px solid var(--line); border-left: 2px solid var(--line);
+    background: var(--bg-2); padding: 0.9rem 1.1rem; border-radius: var(--radius-sm);
+    transition: border-color 0.25s, transform 0.25s;
+  }
+  .entry:hover .card { border-left-color: var(--accent); transform: translateX(2px); }
+
+  .card__top { display: flex; justify-content: space-between; align-items: center; font-size: 0.68rem; color: var(--text-mute); margin-bottom: 0.5rem; }
+  .idx { color: var(--accent); letter-spacing: 0.1em; }
+  .period { letter-spacing: 0.06em; }
+
+  .role { margin: 0; font-size: 1.05rem; font-weight: 600; }
+  html[data-mode='batman'] .role { font-family: var(--font-display); letter-spacing: 0.02em; }
+  .company { margin: 0.1rem 0 0.6rem; color: var(--text-dim); font-size: 0.85rem; }
+  .at { color: var(--accent); }
+  .desc { margin: 0 0 0.75rem; color: var(--text-dim); font-size: 0.86rem; line-height: 1.55; }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 0.35rem; list-style: none; margin: 0; padding: 0; }
+  .tags li {
+    font-size: 0.62rem; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 0.15rem 0.5rem; border: 1px solid var(--line); color: var(--text-mute);
+    border-radius: 2px;
+  }
+
+  .dev-only { display: inline; } .bat-only { display: none; }
+  html[data-mode='batman'] .dev-only { display: none; }
+  html[data-mode='batman'] .bat-only { display: inline; }
+</style>
