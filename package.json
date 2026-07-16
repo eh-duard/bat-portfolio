@@ -9,6 +9,9 @@
   },
   "dependencies": {
     "@astrojs/check": "^0.9.6",
+    "@fontsource-variable/cinzel": "^5.2.8",
+    "@fontsource/jetbrains-mono": "^5.2.8",
+    "@fontsource/space-grotesk": "^5.2.10",
     "@tailwindcss/vite": "^4.1.17",
     "astro": "^5.0.0",
     "nanostores": "^1.1.0",

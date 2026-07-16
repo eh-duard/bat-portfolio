@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" width="1600" height="900">
+  <defs>
+    <linearGradient id="devbg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0e1116"/>
+      <stop offset="1" stop-color="#0a0c10"/>
+    </linearGradient>
+    <radialGradient id="devglow" cx="0.28" cy="0.22" r="0.6">
+      <stop offset="0" stop-color="#1d3a3a" stop-opacity="0.4"/>
+      <stop offset="1" stop-color="#1d3a3a" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="fine" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#1a2029" stroke-width="1"/>
+    </pattern>
+    <pattern id="coarse" width="200" height="200" patternUnits="userSpaceOnUse">
+      <path d="M200 0H0V200" fill="none" stroke="#222b36" stroke-width="1.4"/>
+    </pattern>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#devbg)"/>
+  <rect width="1600" height="900" fill="url(#fine)"/>
+  <rect width="1600" height="900" fill="url(#coarse)"/>
+  <rect width="1600" height="900" fill="url(#devglow)"/>
+
+  <!-- contorni topografici sottili -->
+  <g fill="none" stroke="#243642" stroke-width="1.2" opacity="0.5">
+    <path d="M-50 300 C 300 180, 700 420, 1100 260 S 1700 380, 1700 380"/>
+    <path d="M-50 380 C 300 260, 700 500, 1100 340 S 1700 460, 1700 460"/>
+    <path d="M-50 620 C 350 520, 750 720, 1150 560 S 1700 660, 1700 660"/>
+    <path d="M-50 700 C 350 600, 750 800, 1150 640 S 1700 740, 1700 740"/>
+  </g>
+
+  <!-- nodi/vertici -->
+  <g fill="#3a8f7e" opacity="0.55">
+    <circle cx="300" cy="215" r="3"/><circle cx="1100" cy="300" r="3"/>
+    <circle cx="750" cy="655" r="3"/><circle cx="1150" cy="600" r="3"/>
+    <circle cx="480" cy="480" r="3"/>
+  </g>
+</svg>

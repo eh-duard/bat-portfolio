@@ -1,0 +1,90 @@
+{
+  "_meta": {
+    "note": "Unica fonte di verita' dei contenuti. Sostituisci i token {{...}} con i dati reali dal PDF LinkedIn. I testi bilingue usano { it, en }. La lista completa dei placeholder e' in PLACEHOLDERS.md.",
+    "status": "template",
+    "avatarSource": "images/propic.png"
+  },
+
+  "identity": {
+    "name": "{{NOME_COGNOME}}",
+    "handle": "{{HANDLE}}",
+    "role": { "it": "{{RUOLO_ATTUALE}}", "en": "{{CURRENT_ROLE}}" },
+    "tagline": { "it": "{{TAGLINE_BREVE}}", "en": "{{SHORT_TAGLINE}}" },
+    "bio": {
+      "it": "{{BIO_BREVE}}",
+      "en": "{{SHORT_BIO}}"
+    },
+    "location": { "it": "{{CITTA}}", "en": "{{CITY}}" },
+    "availability": { "it": "{{DISPONIBILITA}}", "en": "{{AVAILABILITY}}" }
+  },
+
+  "stats": [
+    { "value": "{{STAT_1_VALORE}}", "label": { "it": "{{STAT_1_LABEL}}", "en": "{{STAT_1_LABEL_EN}}" } },
+    { "value": "{{STAT_2_VALORE}}", "label": { "it": "{{STAT_2_LABEL}}", "en": "{{STAT_2_LABEL_EN}}" } },
+    { "value": "{{STAT_3_VALORE}}", "label": { "it": "{{STAT_3_LABEL}}", "en": "{{STAT_3_LABEL_EN}}" } }
+  ],
+
+  "experience": [
+    {
+      "role": { "it": "{{ESPERIENZA_1_RUOLO}}", "en": "{{EXPERIENCE_1_ROLE}}" },
+      "company": "{{ESPERIENZA_1_AZIENDA}}",
+      "period": "{{ESPERIENZA_1_PERIODO}}",
+      "desc": { "it": "{{ESPERIENZA_1_DESCRIZIONE}}", "en": "{{EXPERIENCE_1_DESCRIPTION}}" },
+      "tags": ["{{ESP_1_TAG_1}}", "{{ESP_1_TAG_2}}"]
+    },
+    {
+      "role": { "it": "{{ESPERIENZA_2_RUOLO}}", "en": "{{EXPERIENCE_2_ROLE}}" },
+      "company": "{{ESPERIENZA_2_AZIENDA}}",
+      "period": "{{ESPERIENZA_2_PERIODO}}",
+      "desc": { "it": "{{ESPERIENZA_2_DESCRIZIONE}}", "en": "{{EXPERIENCE_2_DESCRIPTION}}" },
+      "tags": ["{{ESP_2_TAG_1}}", "{{ESP_2_TAG_2}}"]
+    },
+    {
+      "role": { "it": "{{ESPERIENZA_3_RUOLO}}", "en": "{{EXPERIENCE_3_ROLE}}" },
+      "company": "{{ESPERIENZA_3_AZIENDA}}",
+      "period": "{{ESPERIENZA_3_PERIODO}}",
+      "desc": { "it": "{{ESPERIENZA_3_DESCRIZIONE}}", "en": "{{EXPERIENCE_3_DESCRIPTION}}" },
+      "tags": ["{{ESP_3_TAG_1}}", "{{ESP_3_TAG_2}}"]
+    }
+  ],
+
+  "skills": [
+    { "name": "{{SKILL_1_NOME}}", "codename": { "it": "{{SKILL_1_CATEGORIA}}", "en": "{{SKILL_1_CATEGORY}}" }, "level": 90, "tag": "MK-I" },
+    { "name": "{{SKILL_2_NOME}}", "codename": { "it": "{{SKILL_2_CATEGORIA}}", "en": "{{SKILL_2_CATEGORY}}" }, "level": 85, "tag": "MK-II" },
+    { "name": "{{SKILL_3_NOME}}", "codename": { "it": "{{SKILL_3_CATEGORIA}}", "en": "{{SKILL_3_CATEGORY}}" }, "level": 88, "tag": "MK-III" },
+    { "name": "{{SKILL_4_NOME}}", "codename": { "it": "{{SKILL_4_CATEGORIA}}", "en": "{{SKILL_4_CATEGORY}}" }, "level": 80, "tag": "MK-IV" },
+    { "name": "{{SKILL_5_NOME}}", "codename": { "it": "{{SKILL_5_CATEGORIA}}", "en": "{{SKILL_5_CATEGORY}}" }, "level": 92, "tag": "MK-V" },
+    { "name": "{{SKILL_6_NOME}}", "codename": { "it": "{{SKILL_6_CATEGORIA}}", "en": "{{SKILL_6_CATEGORY}}" }, "level": 78, "tag": "MK-VI" }
+  ],
+
+  "projects": [
+    {
+      "codename": "{{PROGETTO_1_CODENAME}}",
+      "title": "{{PROGETTO_1_TITOLO}}",
+      "desc": { "it": "{{PROGETTO_1_DESCRIZIONE}}", "en": "{{PROJECT_1_DESCRIPTION}}" },
+      "tech": ["{{PROG_1_TECH_1}}", "{{PROG_1_TECH_2}}", "{{PROG_1_TECH_3}}"],
+      "url": "{{PROGETTO_1_URL}}"
+    },
+    {
+      "codename": "{{PROGETTO_2_CODENAME}}",
+      "title": "{{PROGETTO_2_TITOLO}}",
+      "desc": { "it": "{{PROGETTO_2_DESCRIZIONE}}", "en": "{{PROJECT_2_DESCRIPTION}}" },
+      "tech": ["{{PROG_2_TECH_1}}", "{{PROG_2_TECH_2}}", "{{PROG_2_TECH_3}}"],
+      "url": "{{PROGETTO_2_URL}}"
+    },
+    {
+      "codename": "{{PROGETTO_3_CODENAME}}",
+      "title": "{{PROGETTO_3_TITOLO}}",
+      "desc": { "it": "{{PROGETTO_3_DESCRIZIONE}}", "en": "{{PROJECT_3_DESCRIPTION}}" },
+      "tech": ["{{PROG_3_TECH_1}}", "{{PROG_3_TECH_2}}", "{{PROG_3_TECH_3}}"],
+      "url": "{{PROGETTO_3_URL}}"
+    }
+  ],
+
+  "contact": {
+    "email": "{{CONTATTI_EMAIL}}",
+    "github": "{{GITHUB_URL}}",
+    "linkedin": "{{LINKEDIN_URL}}",
+    "cta": { "it": "{{CONTATTI_CTA}}", "en": "{{CONTACT_CTA}}" }
+  }
+}
