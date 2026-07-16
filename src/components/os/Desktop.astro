@@ -1,0 +1,45 @@
+---
+import '../../styles/os.css';
+import MenuBar from './MenuBar.astro';
+import DesktopIcons from './DesktopIcons.astro';
+import Dock from './Dock.astro';
+import { icon } from '../../data/icons';
+---
+
+<div id="desktop">
+  <div class="wall wall--gotham" aria-hidden="true"></div>
+  <div class="wall wall--dev" aria-hidden="true"></div>
+
+  <MenuBar />
+
+  <div id="desktop-area">
+    <DesktopIcons />
+    <!-- Le finestre delle app vengono montate qui -->
+    <slot />
+  </div>
+
+  <Dock />
+</div>
+
+<!-- Boot sequence -->
+<div id="boot" role="dialog" aria-label="Avvio sistema">
+  <div class="boot__inner">
+    <div class="boot__logo" set:html={icon('bat')}></div>
+    <div class="boot__title">BAT//OS</div>
+    <div class="boot__log">
+      <span><b>&gt;</b> mount /dev/gotham ......... ok</span>
+      <span><b>&gt;</b> init grid, fog, searchlights</span>
+      <span><b>&gt;</b> load profile module ....... ok</span>
+      <span><b>&gt;</b> arming arsenal ............ ok</span>
+      <span><b>&gt;</b> sistema pronto. benvenuto.</span>
+    </div>
+    <div class="boot__hint">tocca per entrare</div>
+  </div>
+</div>
+
+<div class="noise-layer" aria-hidden="true"></div>
+<div class="vignette-layer" aria-hidden="true"></div>
+
+<script>
+  import '../../scripts/os-manager.ts';
+</script>

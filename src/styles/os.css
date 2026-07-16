@@ -1,0 +1,110 @@
+/* ================================================================= *
+ *  BAT//OS - chrome: desktop, wallpaper, finestre, boot
+ * ================================================================= */
+
+#desktop { position: fixed; inset: 0; overflow: hidden; }
+
+/* ---- Wallpaper: due layer in cross-fade guidati da data-mode ---- */
+.wall {
+  position: absolute; inset: 0; background-size: cover; background-position: center;
+  transition: opacity 0.7s ease; z-index: 0;
+}
+.wall--gotham { background-image: url('/bat-portfolio/wallpaper-gotham.svg'); opacity: 1; }
+.wall--dev { background-image: url('/bat-portfolio/wallpaper-dev.svg'); opacity: 0; }
+html:not([data-mode='batman']) .wall--gotham { opacity: 0; }
+html:not([data-mode='batman']) .wall--dev { opacity: 1; }
+
+/* Area utile (sotto la menubar) dove vivono icone e finestre */
+#desktop-area { position: absolute; top: 34px; left: 0; right: 0; bottom: 0; z-index: 1; }
+
+/* ================================================================= *
+ *  Finestre
+ * ================================================================= */
+.win {
+  position: absolute; display: flex; flex-direction: column;
+  background: color-mix(in srgb, var(--bg-2) 96%, transparent);
+  backdrop-filter: blur(3px);
+  border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  opacity: 0; transform: scale(0.97) translateY(6px);
+  transition: opacity 0.22s ease, transform 0.22s cubic-bezier(0.2,0.8,0.2,1);
+  will-change: transform, opacity;
+}
+.win.is-open { opacity: 1; transform: scale(1) translateY(0); }
+.win.is-min { opacity: 0; transform: scale(0.9) translateY(40px); }
+.win.is-active { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
+html[data-mode='batman'] .win.is-active { box-shadow: var(--shadow), var(--glow); }
+.win.is-dragging { transition: none; cursor: grabbing; user-select: none; }
+
+.win--max { left: 8px !important; top: 8px !important; width: calc(100% - 16px) !important; height: calc(100% - 16px) !important; }
+
+/* Barra titolo: metallo spazzolato */
+.win__bar {
+  display: flex; align-items: center; gap: 0.55rem; height: 34px; flex: none;
+  padding: 0 0.6rem; cursor: grab;
+  background: linear-gradient(var(--titlebar-a), var(--titlebar-b));
+  border-bottom: 1px solid var(--line-soft);
+  user-select: none;
+}
+.win__bar:active { cursor: grabbing; }
+
+.win__traffic { display: flex; gap: 0.4rem; }
+.tl { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.4); padding: 0; }
+.tl--close { background: #e5533f; }
+.tl--min { background: #e0b93b; }
+.tl--max { background: #4caf6d; }
+html[data-mode='batman'] .tl--close { background: #b23a2c; }
+html[data-mode='batman'] .tl--min { background: var(--accent); }
+html[data-mode='batman'] .tl--max { background: #5c7c53; }
+.tl { opacity: 0.85; transition: opacity 0.15s; }
+.win__bar:hover .tl { opacity: 1; }
+
+.win__ico { width: 15px; color: var(--accent); margin-left: 0.2rem; }
+.win__ico :global(svg), .win__ico svg { width: 15px; }
+html:not([data-mode='batman']) .win__ico { color: var(--text-dim); }
+.win__title {
+  font-size: 0.74rem; letter-spacing: 0.04em; color: var(--text-dim); font-weight: 500;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+html[data-mode='batman'] .win__title { color: var(--text); }
+.win__back { display: none; margin-left: auto; background: none; border: none; font-size: 1.4rem; line-height: 1; color: var(--text-dim); padding: 0 0.3rem; }
+
+.win__body { flex: 1; overflow: auto; padding: 1.1rem 1.2rem 1.3rem; }
+
+/* ---- Phone: le finestre diventano fogli a schermo intero ---- */
+.win--sheet {
+  position: fixed !important; inset: 34px 0 0 0 !important;
+  width: auto !important; height: auto !important;
+  border-radius: 0; border-left: none; border-right: none;
+  transform: translateY(100%);
+}
+.win--sheet.is-open { transform: translateY(0); }
+.win--sheet.is-min { transform: translateY(100%); }
+.win--sheet .win__traffic { display: none; }
+.win--sheet .win__back { display: block; }
+.win--sheet .win__bar { cursor: default; }
+
+/* ================================================================= *
+ *  Boot sequence
+ * ================================================================= */
+#boot {
+  position: fixed; inset: 0; z-index: 9500; display: grid; place-items: center;
+  background: var(--bg); cursor: pointer;
+  transition: opacity 0.6s ease;
+}
+#boot.done { opacity: 0; pointer-events: none; }
+.boot__inner { width: min(90vw, 460px); font-family: var(--font-mono); }
+.boot__logo { width: 64px; color: var(--accent); margin: 0 auto 1.4rem; filter: drop-shadow(0 0 14px var(--accent-soft)); }
+.boot__logo svg { width: 64px; }
+.boot__title { text-align: center; font-family: var(--font-display); letter-spacing: 0.3em; color: var(--accent); font-size: 1.1rem; margin-bottom: 1.6rem; }
+.boot__log { font-size: 0.72rem; color: var(--text-dim); line-height: 1.9; }
+.boot__log b { color: var(--accent); font-weight: 400; }
+.boot__log span { display: block; opacity: 0; animation: bootline 0.35s ease forwards; }
+.boot__log span:nth-child(1) { animation-delay: 0.1s; }
+.boot__log span:nth-child(2) { animation-delay: 0.5s; }
+.boot__log span:nth-child(3) { animation-delay: 0.9s; }
+.boot__log span:nth-child(4) { animation-delay: 1.3s; }
+.boot__log span:nth-child(5) { animation-delay: 1.7s; }
+@keyframes bootline { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+.boot__hint { text-align: center; margin-top: 1.6rem; font-size: 0.62rem; letter-spacing: 0.2em; color: var(--text-mute); animation: pulse 1.6s ease-in-out infinite; }

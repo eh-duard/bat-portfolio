@@ -1,0 +1,30 @@
+---
+import { apps, appLabel } from '../../data/apps';
+import { icon } from '../../data/icons';
+
+interface Props {
+  id: string;
+  icon?: string;
+}
+const { id, icon: iconKey } = Astro.props;
+const app = apps.find((a) => a.id === id)!;
+// SSR: etichetta di default (batman / it); os-manager la aggiorna a runtime.
+const initialLabel = appLabel(app, 'batman', 'it');
+const iconSvg = icon(iconKey ?? app.icon);
+---
+
+<article id={`win-${id}`} class="win" data-app={id} role="dialog" aria-label={initialLabel} aria-hidden="true" hidden>
+  <header class="win__bar" data-drag>
+    <div class="win__traffic" aria-hidden="true">
+      <button class="tl tl--close" data-action="close" aria-label="Chiudi" title="Chiudi"></button>
+      <button class="tl tl--min" data-action="min" aria-label="Riduci" title="Riduci"></button>
+      <button class="tl tl--max" data-action="max" aria-label="Espandi" title="Espandi"></button>
+    </div>
+    <span class="win__ico" set:html={iconSvg}></span>
+    <span class="win__title" data-app-label={id}>{initialLabel}</span>
+    <button class="win__back" data-action="close" aria-label="Torna alla home">‹</button>
+  </header>
+  <div class="win__body">
+    <slot />
+  </div>
+</article>

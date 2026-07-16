@@ -1,0 +1,80 @@
+---
+import { osName } from '../../data/apps';
+import { icon } from '../../data/icons';
+---
+
+<header class="menubar" role="menubar">
+  <div class="menubar__left">
+    <span class="glyph" set:html={icon('bat')}></span>
+    <span class="osname" data-os-name>{osName.batman}</span>
+    <span class="sep">/</span>
+    <span class="crumb font-mono">
+      <span class="dev-only">~/portfolio</span>
+      <span class="bat-only">gotham · main</span>
+    </span>
+  </div>
+
+  <div class="menubar__right font-mono">
+    <div class="seg" role="group" aria-label="Lingua">
+      <button data-set-lang="it" class="seg__btn">IT</button>
+      <button data-set-lang="en" class="seg__btn">EN</button>
+    </div>
+
+    <div class="seg seg--mode" role="group" aria-label="Modalita'">
+      <button data-set-mode="dev" class="seg__btn" title="Modalita' sviluppatore">
+        <span set:html={icon('code')}></span> DEV
+      </button>
+      <button data-set-mode="batman" class="seg__btn" title="Modalita' Gotham">
+        <span set:html={icon('bat')}></span> BAT
+      </button>
+    </div>
+
+    <time id="os-clock" class="clock">--:--</time>
+  </div>
+</header>
+
+<style>
+  .menubar {
+    position: fixed; top: 0; left: 0; right: 0; height: 34px; z-index: 6000;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 0.7rem; gap: 1rem;
+    background: color-mix(in srgb, var(--bg) 78%, transparent);
+    backdrop-filter: blur(14px) saturate(1.1);
+    border-bottom: 1px solid var(--line);
+    font-size: 0.72rem; user-select: none;
+  }
+  .menubar__left { display: flex; align-items: center; gap: 0.55rem; min-width: 0; }
+  .glyph { width: 17px; color: var(--accent); flex: none; }
+  .glyph :global(svg) { width: 17px; }
+  .osname { font-weight: 600; letter-spacing: 0.06em; }
+  html[data-mode='batman'] .osname { font-family: var(--font-display); color: var(--accent); }
+  .sep { color: var(--text-mute); }
+  .crumb { color: var(--text-mute); font-size: 0.66rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .menubar__right { display: flex; align-items: center; gap: 0.6rem; }
+
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--radius-sm); overflow: hidden; }
+  .seg__btn {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    background: transparent; border: none; padding: 0.2rem 0.5rem;
+    font-family: var(--font-mono); font-size: 0.64rem; letter-spacing: 0.08em;
+    color: var(--text-mute); transition: background 0.2s, color 0.2s;
+  }
+  .seg__btn :global(svg) { width: 12px; }
+  .seg__btn + .seg__btn { border-left: 1px solid var(--line); }
+  .seg__btn:hover { color: var(--text); }
+  .seg__btn.on { background: var(--accent); color: #06070a; }
+  html:not([data-mode='batman']) .seg__btn.on { color: #06120c; }
+
+  .clock { color: var(--text-dim); letter-spacing: 0.05em; min-width: 3.2em; text-align: right; }
+
+  .dev-only { display: inline; } .bat-only { display: none; }
+  html[data-mode='batman'] .dev-only { display: none; }
+  html[data-mode='batman'] .bat-only { display: inline; }
+
+  @media (max-width: 640px) {
+    .crumb, .sep { display: none; }
+    .seg__btn { padding: 0.2rem 0.4rem; }
+    .menubar { gap: 0.5rem; }
+  }
+</style>
