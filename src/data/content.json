@@ -1,7 +1,5 @@
 {
   "_meta": {
-    "note": "Unica fonte di verita' dei contenuti. Sostituisci i token {{...}} con i dati reali dal PDF LinkedIn. I testi bilingue usano { it, en }. La lista completa dei placeholder e' in PLACEHOLDERS.md.",
-    "status": "template",
     "avatarSource": "images/propic.png"
   },
 
