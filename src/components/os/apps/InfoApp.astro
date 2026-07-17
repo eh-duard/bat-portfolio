@@ -1,0 +1,80 @@
+---
+import { Icon } from 'astro-icon/components';
+import { OS_NAME } from '../../../data/apps';
+
+const stack = [
+  { name: 'Astro', icon: 'logos:astro-icon', note: 'sito statico, zero JS inutile' },
+  { name: 'TypeScript', icon: 'logos:typescript-icon', note: 'window manager tipizzato' },
+  { name: 'Tailwind', icon: 'logos:tailwindcss-icon', note: 'base + token custom' },
+  { name: 'nanostores', icon: 'lucide:database', note: 'stato reattivo, leggerissimo' },
+  { name: 'Iconify', icon: 'lucide:shapes', note: 'icone self-hosted al build' },
+];
+
+const features = [
+  ['lucide:app-window', 'Window manager', 'finestre trascinabili, minimizza / espandi / chiudi, focus e z-order'],
+  ['lucide:panel-left', 'Dock + start menu', 'app pinnabili (persistite), ricerca app, menu tasto destro sul desktop'],
+  ['lucide:square-terminal', 'Terminale vero', 'shell noxsh interattiva: help, neofetch, open, ls/cat, cronologia'],
+  ['lucide:notebook-pen', 'Note in locale', 'editor che salva file di testo nel localStorage + export .txt'],
+  ['lucide:gamepad-2', 'Mini-gioco', 'il Bat-Signal: trova il pipistrello nel buio con il faro'],
+  ['lucide:smartphone', 'Responsive', 'desktop, tablet e telefono: stesso OS che si adatta'],
+];
+---
+
+<div class="info">
+  <header class="info__hero">
+    <span class="info__logo"><Icon name="mdi:bat" /></span>
+    <div>
+      <h2>{OS_NAME}</h2>
+      <p>Un portfolio che si comporta come un desktop. Le “app” di profilo (progetti, esperienze, skill) arriveranno dal CV; qui trovi com'è fatto.</p>
+    </div>
+  </header>
+
+  <section class="info__block">
+    <h3><Icon name="lucide:layers" /> Stack</h3>
+    <ul class="stack">
+      {stack.map((s) => (
+        <li><span class="ico"><Icon name={s.icon} /></span><b>{s.name}</b><i>{s.note}</i></li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="info__block">
+    <h3><Icon name="lucide:sparkles" /> Cosa sa fare</h3>
+    <ul class="feat">
+      {features.map(([icon, title, desc]) => (
+        <li><span class="ico"><Icon name={icon} /></span><div><b>{title}</b><span>{desc}</span></div></li>
+      ))}
+    </ul>
+  </section>
+
+  <footer class="info__foot font-mono">
+    build statica · nessun tracker, nessun backend · dati solo nel tuo browser
+  </footer>
+</div>
+
+<style>
+  .info { display: flex; flex-direction: column; gap: 1.3rem; }
+  .info__hero { display: flex; gap: 1rem; align-items: flex-start; }
+  .info__logo { flex: none; width: 48px; height: 48px; display: grid; place-items: center; border-radius: 12px; font-size: 28px; color: var(--accent); background: var(--accent-soft); border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line)); }
+  .info__hero h2 { margin: 0 0 0.25rem; font-size: 1.35rem; letter-spacing: 0.02em; }
+  .info__hero p { margin: 0; color: var(--text-dim); font-size: 0.86rem; line-height: 1.55; }
+
+  .info__block h3 { display: flex; align-items: center; gap: 0.45rem; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-dim); margin: 0 0 0.7rem; }
+  .info__block h3 :global(svg) { color: var(--accent); font-size: 15px; }
+
+  .stack { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .stack li { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.7rem; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); font-size: 0.8rem; }
+  .stack .ico { font-size: 16px; display: inline-flex; }
+  .stack b { font-weight: 600; }
+  .stack i { color: var(--text-mute); font-style: normal; font-size: 0.72rem; }
+
+  .feat { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+  .feat li { display: flex; gap: 0.6rem; padding: 0.7rem 0.8rem; border: 1px solid var(--line); border-radius: 9px; background: var(--bg); }
+  .feat .ico { font-size: 18px; color: var(--accent); flex: none; }
+  .feat b { display: block; font-size: 0.82rem; margin-bottom: 0.15rem; }
+  .feat span { display: block; font-size: 0.72rem; color: var(--text-dim); line-height: 1.4; }
+
+  .info__foot { font-size: 0.68rem; color: var(--text-mute); border-top: 1px solid var(--line-soft); padding-top: 0.8rem; }
+
+  @media (max-width: 560px) { .feat { grid-template-columns: 1fr; } }
+</style>

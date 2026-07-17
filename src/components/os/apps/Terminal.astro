@@ -1,12 +1,14 @@
 ---
 import content from '../../../data/content.json';
-import { apps } from '../../../data/apps';
+import { apps, OS_NAME, OS_HOST } from '../../../data/apps';
 const c = {
   name: content.identity.name,
   role: content.identity.role.it,
   email: content.contact.email,
   github: content.contact.github,
   appIds: apps.map((a) => a.id),
+  os: OS_NAME,
+  host: OS_HOST,
 };
 ---
 
@@ -14,7 +16,7 @@ const c = {
   <div class="term__scroll" id="term-scroll">
     <pre class="term__out" id="term-out"></pre>
     <form class="term__line" id="term-form" autocomplete="off">
-      <label class="term__prompt" for="term-in">visitor@nox<span class="q">:</span>~<span class="q">$</span></label>
+      <label class="term__prompt" for="term-in">visitor@{OS_HOST}<span class="q">:</span>~<span class="q">$</span></label>
       <input id="term-in" class="term__in" type="text" spellcheck="false" autocapitalize="off" aria-label="comando" />
     </form>
   </div>
@@ -75,7 +77,7 @@ const c = {
         const art = [
           '        _.,,,,,._        ',
           "     .d''      ``b.     ",
-          "   .p'    NOX     `q.   ",
+          "   .p'    BAT     `q.   ",
           "  .d'   //  OS  \\\\   `b. ",
           '  ::   ((  ^^  ))   ::  ',
           "  `p.   \\\\      //   .q'  ",
@@ -84,8 +86,8 @@ const c = {
           "        `''----''`        ",
         ];
         const info = [
-          acc('visitor') + '@' + acc('nox'),
-          k('os       ') + 'NOX//OS (Astro static build)',
+          acc('visitor') + '@' + acc(c.host),
+          k('os       ') + c.os + ' (Astro static build)',
           k('host     ') + 'portfolio-workstation',
           k('shell    ') + 'noxsh 1.0',
           k('wm       ') + 'nox-wm (vanilla TS)',
@@ -103,7 +105,7 @@ const c = {
 
     function run(raw) {
       const t = raw.trim();
-      line('<span class="c-p">visitor@nox:~$</span> ' + esc(t));
+      line('<span class="c-p">visitor@' + c.host + ':~$</span> ' + esc(t));
       if (!t) return;
       const [cmd, ...rest] = t.split(/\s+/);
       const fn = commands[cmd];
@@ -124,7 +126,7 @@ const c = {
     });
     scroll.addEventListener('pointerup', () => { if (!window.getSelection()?.toString()) input.focus(); });
 
-    line(acc('NOX//OS') + dim('  —  noxsh 1.0'));
+    line(acc(c.os) + dim('  —  noxsh 1.0'));
     line(dim('scrivi ') + k('help') + dim(' per iniziare, o ') + k('neofetch'));
     line('');
     setTimeout(() => input.focus(), 50);

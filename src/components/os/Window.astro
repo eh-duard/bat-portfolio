@@ -21,6 +21,15 @@ const app = appById(id)!;
   <div class="win__body">
     <slot />
   </div>
+
+  <span class="rz rz-n"  data-resize="n"></span>
+  <span class="rz rz-s"  data-resize="s"></span>
+  <span class="rz rz-e"  data-resize="e"></span>
+  <span class="rz rz-w"  data-resize="w"></span>
+  <span class="rz rz-ne" data-resize="ne"></span>
+  <span class="rz rz-nw" data-resize="nw"></span>
+  <span class="rz rz-se" data-resize="se"></span>
+  <span class="rz rz-sw" data-resize="sw"></span>
 </article>
 
 <style>
@@ -61,8 +70,20 @@ const app = appById(id)!;
   .wc--close:hover { background: var(--danger); color: #fff; }
   .wc:active { transform: scale(0.9); }
 
-  .win__body { flex: 1; overflow: auto; padding: 1.2rem 1.3rem 1.4rem; }
+  .win__body { flex: 1; overflow: auto; padding: 1.2rem 1.3rem 1.4rem; position: relative; }
   .win__body.is-flush { padding: 0; }
+
+  /* maniglie di ridimensionamento */
+  .rz { position: absolute; z-index: 5; touch-action: none; }
+  .rz-n { top: -3px; left: 8px; right: 8px; height: 7px; cursor: ns-resize; }
+  .rz-s { bottom: -3px; left: 8px; right: 8px; height: 7px; cursor: ns-resize; }
+  .rz-e { right: -3px; top: 8px; bottom: 8px; width: 7px; cursor: ew-resize; }
+  .rz-w { left: -3px; top: 8px; bottom: 8px; width: 7px; cursor: ew-resize; }
+  .rz-ne { top: -4px; right: -4px; width: 14px; height: 14px; cursor: nesw-resize; }
+  .rz-nw { top: -4px; left: -4px; width: 14px; height: 14px; cursor: nwse-resize; }
+  .rz-se { bottom: -4px; right: -4px; width: 14px; height: 14px; cursor: nwse-resize; }
+  .rz-sw { bottom: -4px; left: -4px; width: 14px; height: 14px; cursor: nesw-resize; }
+  .win--max .rz, .win--sheet .rz { display: none; }
 
   /* Phone: finestre a schermo intero */
   .win--sheet {

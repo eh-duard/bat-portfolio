@@ -36,14 +36,21 @@ export const apps: AppDef[] = [
     size: { w: 560, h: 440 }, spawn: { x: 300, y: 140 }, pinned: true,
   },
   {
+    id: 'info',
+    label: { it: 'Info', en: 'About' },
+    icon: 'lucide:badge-info', color: '#58b6e6',
+    size: { w: 600, h: 500 }, spawn: { x: 240, y: 110 }, pinned: true, desktop: true,
+  },
+  {
     id: 'settings',
     label: { it: 'Impostazioni', en: 'Settings' },
     icon: 'lucide:settings', color: '#8a94a6',
-    size: { w: 540, h: 440 }, spawn: { x: 220, y: 120 }, pinned: true,
+    size: { w: 540, h: 460 }, spawn: { x: 220, y: 120 }, pinned: true,
   },
 ];
 
-export const OS_NAME = 'NOX//OS';
+export const OS_NAME = 'BAT-DESK';
+export const OS_HOST = 'batdesk';
 
 export function appById(id: string): AppDef | undefined {
   return apps.find((a) => a.id === id);

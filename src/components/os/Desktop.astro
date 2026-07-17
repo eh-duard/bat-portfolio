@@ -4,7 +4,7 @@ import { Icon } from 'astro-icon/components';
 import TopBar from './TopBar.astro';
 import Dock from './Dock.astro';
 import StartMenu from './StartMenu.astro';
-import { apps } from '../../data/apps';
+import { apps, OS_NAME } from '../../data/apps';
 
 const deskApps = apps.filter((a) => a.desktop);
 ---
@@ -37,13 +37,13 @@ const deskApps = apps.filter((a) => a.desktop);
 
   <div id="boot" role="dialog" aria-label="Avvio">
     <div class="boot__inner">
-      <div class="boot__logo"><Icon name="lucide:hexagon" /></div>
-      <div class="boot__name">NOX//OS</div>
+      <div class="boot__logo"><Icon name="mdi:bat" /></div>
+      <div class="boot__name">{OS_NAME}</div>
       <div class="boot__log">
         <span><b>&gt;</b> kernel noxsh caricato</span>
         <span><b>&gt;</b> mount /home/visitor … ok</span>
         <span><b>&gt;</b> avvio compositore grafico</span>
-        <span><b>&gt;</b> montaggio progetti e stack</span>
+        <span><b>&gt;</b> accensione del segnale</span>
         <span><b>&gt;</b> pronto. clicca per entrare.</span>
       </div>
       <div class="boot__bar"></div>

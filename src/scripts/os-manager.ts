@@ -78,10 +78,12 @@ function open(id: string) {
   requestAnimationFrame(() => el.classList.add('is-open'));
   focus(id);
   closeStartMenu();
+  if (id === 'game') (window as any).__batGame?.start();
   if (layout() === 'phone') document.body.classList.add('has-sheet');
 }
 function close(id: string) {
   const el = win(id); if (!el) return;
+  if (id === 'game') (window as any).__batGame?.close();
   el.classList.remove('is-open', 'is-active'); running.delete(id);
   const done = () => { el.hidden = true; el.setAttribute('aria-hidden', 'true'); };
   setTimeout(done, 300);
@@ -90,6 +92,7 @@ function close(id: string) {
 }
 function minimize(id: string) {
   const el = win(id); if (!el) return;
+  if (id === 'game') (window as any).__batGame?.close();
   el.classList.add('is-min'); el.classList.remove('is-active');
   setTimeout(() => { if (el.classList.contains('is-min')) el.hidden = true; }, 260);
   if (layout() === 'phone') document.body.classList.remove('has-sheet');
@@ -148,6 +151,41 @@ function initDrag(el: HTMLElement) {
   });
 }
 
+/* ---------------- resize ---------------- */
+function initResize(el: HTMLElement) {
+  const MINW = 300, MINH = 180;
+  $$('[data-resize]', el).forEach((h) => {
+    h.addEventListener('pointerdown', (e) => {
+      const pe = e as PointerEvent;
+      if (layout() === 'phone' || el.classList.contains('win--max')) return;
+      pe.preventDefault(); pe.stopPropagation();
+      const dir = (h as HTMLElement).dataset.resize!;
+      const a = area(); const r = el.getBoundingClientRect();
+      const sx = pe.clientX, sy = pe.clientY;
+      const x0 = r.left - a.left, y0 = r.top - a.top, w0 = r.width, h0 = r.height;
+      focus(el.id.replace('win-', ''));
+      h.setPointerCapture(pe.pointerId); el.classList.add('is-dragging');
+      const move = (ev: PointerEvent) => {
+        const dx = ev.clientX - sx, dy = ev.clientY - sy;
+        let x = x0, y = y0, w = w0, ht = h0;
+        if (dir.includes('e')) w = Math.min(a.width - x0, Math.max(MINW, w0 + dx));
+        if (dir.includes('s')) ht = Math.min(a.height - y0, Math.max(MINH, h0 + dy));
+        if (dir.includes('w')) { w = Math.max(MINW, Math.min(w0 + x0, w0 - dx)); x = x0 + (w0 - w); }
+        if (dir.includes('n')) { ht = Math.max(MINH, Math.min(h0 + y0, h0 - dy)); y = y0 + (h0 - ht); }
+        el.style.width = `${w}px`; el.style.height = `${ht}px`;
+        el.style.left = `${Math.max(0, x)}px`; el.style.top = `${Math.max(0, y)}px`;
+      };
+      const up = (ev: PointerEvent) => {
+        h.releasePointerCapture(ev.pointerId); el.classList.remove('is-dragging');
+        h.removeEventListener('pointermove', move as EventListener);
+        h.removeEventListener('pointerup', up as EventListener);
+      };
+      h.addEventListener('pointermove', move as EventListener);
+      h.addEventListener('pointerup', up as EventListener);
+    });
+  });
+}
+
 /* ---------------- start menu ---------------- */
 function openStartMenu() {
   const sm = $('#startmenu'); if (!sm) return;
@@ -187,6 +225,7 @@ function hideMenu() { $('#ctxmenu')?.remove(); }
 function bind() {
   $$('.win').forEach((el) => {
     initDrag(el);
+    initResize(el);
     el.addEventListener('pointerdown', () => focus(el.id.replace('win-', '')), true);
     $$('[data-action]', el).forEach((btn) => btn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -260,15 +299,14 @@ function bind() {
 function applyWall() { document.getElementById('desktop')?.setAttribute('data-wall', String(wallStore.get())); }
 
 /* ---------------- clock ---------------- */
-function clock() {
-  const c = $('#os-clock'), d = $('#os-date'); if (!c) return;
-  const tick = () => {
-    const loc = langStore.get() === 'it' ? 'it-IT' : 'en-GB';
-    c.textContent = new Date().toLocaleTimeString(loc, { hour: '2-digit', minute: '2-digit' });
-    if (d) d.textContent = new Date().toLocaleDateString(loc, { weekday: 'short', day: '2-digit', month: 'short' });
-  };
-  tick(); setInterval(tick, 15000);
+function updateClock() {
+  const c = $('#os-clock'), d = $('#os-date');
+  if (!c) return;
+  const loc = langStore.get() === 'it' ? 'it-IT' : 'en-GB';
+  c.textContent = new Date().toLocaleTimeString(loc, { hour: '2-digit', minute: '2-digit' });
+  if (d) d.textContent = new Date().toLocaleDateString(loc, { weekday: 'short', day: '2-digit', month: 'short' });
 }
+function clock() { updateClock(); setInterval(updateClock, 15000); }
 
 /* ---------------- boot ---------------- */
 function boot() {
@@ -285,7 +323,7 @@ function init() {
   document.documentElement.setAttribute('lang', langStore.get());
   bind(); refreshLabels(); syncDock(); applyWall(); clock(); boot();
 
-  langStore.subscribe(() => { refreshLabels(); });
+  langStore.subscribe(() => { refreshLabels(); updateClock(); });
   pinsStore.subscribe(() => syncDock());
   wallStore.subscribe(() => applyWall());
 

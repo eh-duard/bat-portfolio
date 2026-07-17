@@ -3,16 +3,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Desktop from '../components/os/Desktop.astro';
 import Window from '../components/os/Window.astro';
 import Terminal from '../components/os/apps/Terminal.astro';
-import Game from '../components/os/apps/Game.astro';
 import Notes from '../components/os/apps/Notes.astro';
+import InfoApp from '../components/os/apps/InfoApp.astro';
 import Settings from '../components/os/apps/Settings.astro';
+import SpotlightSearch from '../components/SpotlightSearch.astro';
 ---
 
 <BaseLayout>
   <Desktop>
     <Window id="terminal"><Terminal /></Window>
-    <Window id="game"><Game /></Window>
+    <Window id="game"><SpotlightSearch /></Window>
     <Window id="notes"><Notes /></Window>
+    <Window id="info"><InfoApp /></Window>
     <Window id="settings"><Settings /></Window>
   </Desktop>
 </BaseLayout>
