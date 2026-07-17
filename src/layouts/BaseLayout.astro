@@ -35,6 +35,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       try {
         var l = localStorage.getItem('nox-lang');
         document.documentElement.setAttribute('lang', l === 'en' ? 'en' : 'it');
+        var t = localStorage.getItem('batdesk-theme');
+        document.documentElement.setAttribute('data-theme', t === 'light' ? 'light' : 'dark');
       } catch (e) {}
     </script>
   </head>

@@ -6,6 +6,25 @@ export type Lang = 'it' | 'en';
 const LS_LANG = 'nox-lang';
 const LS_PINS = 'nox-pins';
 const LS_WALL = 'nox-wall';
+const LS_THEME = 'batdesk-theme';
+
+export type Theme = 'dark' | 'light';
+
+function readTheme(): Theme {
+  if (typeof localStorage === 'undefined') return 'dark';
+  return localStorage.getItem(LS_THEME) === 'light' ? 'light' : 'dark';
+}
+export const themeStore = atom<Theme>(readTheme());
+export function setTheme(t: Theme) {
+  themeStore.set(t);
+  if (typeof document !== 'undefined') {
+    document.documentElement.setAttribute('data-theme', t);
+    try { localStorage.setItem(LS_THEME, t); } catch {}
+  }
+}
+export function toggleTheme() {
+  setTheme(themeStore.get() === 'dark' ? 'light' : 'dark');
+}
 
 function readLang(): Lang {
   if (typeof localStorage === 'undefined') return 'it';

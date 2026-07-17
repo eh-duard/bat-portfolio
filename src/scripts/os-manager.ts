@@ -1,6 +1,7 @@
 import { apps, appById, type AppDef } from '../data/apps';
 import {
   langStore, setLang, pinsStore, togglePin, wallStore, setWall,
+  themeStore, toggleTheme,
 } from '../stores/os';
 
 type Layout = 'desktop' | 'tablet' | 'phone';
@@ -286,7 +287,7 @@ function bind() {
   // tastiera
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-      hideMenu();
+      hideMenu(); closeTray();
       const sm = $('#startmenu');
       if (sm && !sm.hidden) { closeStartMenu(); return; }
       const active = $$('.win').find((w) => w.classList.contains('is-active') && !w.hidden);
@@ -297,6 +298,54 @@ function bind() {
 
 /* ---------------- wallpaper ---------------- */
 function applyWall() { document.getElementById('desktop')?.setAttribute('data-wall', String(wallStore.get())); }
+
+/* ---------------- quick settings (tray) ---------------- */
+function reflectTray() {
+  const dark = themeStore.get() === 'dark';
+  const lab = $('.tray-theme-label'); if (lab) lab.textContent = dark ? 'Tema scuro' : 'Tema chiaro';
+}
+function reflectWifi() {
+  const off = document.body.classList.contains('wifi-off');
+  $('[data-toggle-wifi]')?.classList.toggle('off', off);
+  const lab = $('.tray-wifi-label'); if (lab) lab.textContent = off ? 'Non connesso' : 'Wi-Fi';
+}
+function closeTray() {
+  const tray = $('#tray'); if (!tray || tray.hidden) return;
+  tray.classList.add('closing');
+  setTimeout(() => { tray.hidden = true; tray.classList.remove('closing'); }, 150);
+}
+function initTray() {
+  const tray = $('#tray');
+  $$('[data-toggle-tray]').forEach((el) => el.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (!tray) return;
+    tray.hidden ? (tray.hidden = false) : closeTray();
+  }));
+  document.addEventListener('pointerdown', (e) => {
+    const t = e.target as HTMLElement;
+    if (tray && !tray.hidden && !t.closest('#tray') && !t.closest('[data-toggle-tray]')) closeTray();
+  });
+
+  $$('[data-toggle-theme]').forEach((el) => el.addEventListener('click', () => toggleTheme()));
+  $$('[data-toggle-wifi]').forEach((el) => el.addEventListener('click', () => { document.body.classList.toggle('wifi-off'); reflectWifi(); }));
+  $('#tray-mute')?.addEventListener('click', () => document.body.classList.toggle('vol-muted'));
+  const vol = $('#tray-vol') as HTMLInputElement | null, volVal = $('#tray-vol-val');
+  vol?.addEventListener('input', () => {
+    if (volVal) volVal.textContent = vol.value;
+    document.body.classList.toggle('vol-muted', Number(vol.value) === 0);
+  });
+
+  reflectWifi(); reflectTray();
+  themeStore.subscribe(() => reflectTray());
+
+  const batt = $('#tray-batt'); const nav = navigator as any;
+  if (batt && nav.getBattery) {
+    nav.getBattery().then((b: any) => {
+      const upd = () => { batt.textContent = Math.round(b.level * 100) + '%' + (b.charging ? ' ⚡' : ''); };
+      upd(); b.addEventListener('levelchange', upd); b.addEventListener('chargingchange', upd);
+    }).catch(() => { batt.textContent = '—'; });
+  } else if (batt) { batt.textContent = '100%'; }
+}
 
 /* ---------------- clock ---------------- */
 function updateClock() {
@@ -321,7 +370,7 @@ function boot() {
 /* ---------------- init ---------------- */
 function init() {
   document.documentElement.setAttribute('lang', langStore.get());
-  bind(); refreshLabels(); syncDock(); applyWall(); clock(); boot();
+  bind(); refreshLabels(); syncDock(); applyWall(); clock(); initTray(); boot();
 
   langStore.subscribe(() => { refreshLabels(); updateClock(); });
   pinsStore.subscribe(() => syncDock());

@@ -77,7 +77,24 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
   <div class="bat-signal-effect" id="bat-signal-effect"></div>
   <p class="found-text gotham-font bat-revealed" aria-hidden="true" data-i18n="game.found">{foundText}</p>
   <p class="mobile-hint gotham-font" data-i18n="game.hint">{hintText}</p>
-  
+
+  <!-- HUD: tempo + round -->
+  <div class="bg-hud" id="bg-hud">
+    <span class="bg-round" id="bg-round">Round 1</span>
+    <span class="bg-timer" id="bg-timer">0.0s</span>
+  </div>
+
+  <!-- Pannello risultato -->
+  <div class="bg-result" id="bg-result" aria-hidden="true">
+    <p class="bg-result__title" id="bg-result-title">Trovato!</p>
+    <p class="bg-result__time" id="bg-result-time">0.0s</p>
+    <p class="bg-result__best" id="bg-result-best"></p>
+    <div class="bg-result__btns">
+      <button id="bg-next">Prossimo round ›</button>
+      <button id="bg-retry">Ricomincia</button>
+    </div>
+  </div>
+
   <!-- Logo Batman con effetto Arkham -->
   <!-- SVG filter per il glow direzionale -->
   <svg style="display: none;" width="0" height="0">
@@ -848,6 +865,38 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
       display: none;
     }
   }
+
+  /* HUD tempo + round */
+  .bg-hud {
+    position: absolute; top: 10px; left: 0; right: 0; z-index: 40;
+    display: flex; justify-content: center; gap: 0.8rem; pointer-events: none;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; letter-spacing: 0.05em;
+  }
+  .bg-round { color: #b7935a; }
+  .bg-timer { color: #ffd54a; min-width: 4ch; text-align: left; }
+  .spotlight-container.found .bg-hud { opacity: 0.4; }
+
+  /* Pannello risultato */
+  .bg-result {
+    position: absolute; inset: 0; z-index: 60; display: none;
+    flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;
+    background: rgba(6,6,10,0.82); backdrop-filter: blur(3px);
+    font-family: 'JetBrains Mono', monospace; text-align: center;
+    animation: bgResultIn 0.3s ease;
+  }
+  .bg-result.show { display: flex; }
+  @keyframes bgResultIn { from { opacity: 0; } to { opacity: 1; } }
+  .bg-result__title { margin: 0; font-size: 1.4rem; color: #ffd54a; letter-spacing: 0.08em; text-shadow: 0 0 18px rgba(255,213,74,0.5); }
+  .bg-result__time { margin: 0; font-size: 2.2rem; font-weight: 700; color: #fff; }
+  .bg-result__best { margin: 0 0 0.6rem; font-size: 0.72rem; color: #8a8f99; }
+  .bg-result__btns { display: flex; gap: 0.6rem; }
+  .bg-result__btns button {
+    padding: 0.55rem 1.1rem; border-radius: 8px; font-family: inherit; font-size: 0.8rem;
+    border: 1px solid #e9c15a; background: transparent; color: #e9c15a; cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  #bg-next { background: #e9c15a; color: #120a06; }
+  .bg-result__btns button:hover { background: #e9c15a; color: #120a06; }
 </style>
 
 <script>
@@ -1654,6 +1703,16 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
       this.positionLogo();
     }
 
+    // Difficolta' progressiva: il pipistrello rimpicciolisce a ogni round.
+    public setDifficulty(round: number) {
+      const size = Math.max(72, 200 - (round - 1) * 22);
+      const el = this.batLogoContainer;
+      el.style.minWidth = '0';
+      el.style.minHeight = '0';
+      el.style.width = size + 'px';
+      el.style.height = Math.round(size * 0.72) + 'px';
+    }
+
     private detectLowEndDevice(): boolean {
       // Detecta dispositivi low-end basato su memoria e core disponibili
       const memory = (navigator as any).deviceMemory;
@@ -2073,8 +2132,9 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
     private triggerFound() {
       if (this.isFound) return;
       this.isFound = true;
-      setFound(); // Update global store
+      setFound();
       this.container.classList.add('found');
+      window.dispatchEvent(new CustomEvent('batgame:found'));
 
       // Nascondi subito la scritta "FIND ME" per evitare overlap
       this.searchText.style.opacity = '0';
@@ -2150,15 +2210,54 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
     };
   }
 
-  // Controller: il gioco vive in una finestra e parte quando la finestra si apre.
+  // Controller: gioco in finestra, a tempo, con difficolta' progressiva.
   let inst: any = null;
   let ro: ResizeObserver | null = null;
   let roPending = false;
+  let round = 1;
+  let roundStart = 0;
+  let timerInt: any = null;
+  let best: Record<string, number> = {};
+  try { best = JSON.parse(localStorage.getItem('batdesk-bat-best') || '{}'); } catch {}
+
+  const $g = (id: string) => document.getElementById(id);
+  const fmt = (s: number) => s.toFixed(1) + 's';
+  const stopTimer = () => { if (timerInt) { clearInterval(timerInt); timerInt = null; } };
+
+  function startRound(n: number) {
+    round = n;
+    $g('bg-result')?.classList.remove('show');
+    const r = $g('bg-round'); if (r) r.textContent = 'Round ' + n;
+    if (inst) { inst.setDifficulty(n); inst.restart(); inst.paused = false; }
+    roundStart = performance.now();
+    stopTimer();
+    timerInt = setInterval(() => {
+      const t = $g('bg-timer'); if (t) t.textContent = fmt((performance.now() - roundStart) / 1000);
+    }, 100);
+  }
+
+  window.addEventListener('batgame:found', () => {
+    stopTimer();
+    const time = (performance.now() - roundStart) / 1000;
+    const t = $g('bg-timer'); if (t) t.textContent = fmt(time);
+    const key = String(round);
+    const prev = best[key];
+    const isBest = prev == null || time < prev;
+    if (isBest) { best[key] = time; try { localStorage.setItem('batdesk-bat-best', JSON.stringify(best)); } catch {} }
+    const rt = $g('bg-result-time'); if (rt) rt.textContent = fmt(time);
+    const title = $g('bg-result-title'); if (title) title.textContent = 'Round ' + round + ' · trovato';
+    const be = $g('bg-result-best'); if (be) be.textContent = isBest ? '★ nuovo record' : 'record: ' + fmt(best[key]);
+    // lascia vedere la rivelazione, poi mostra il risultato
+    setTimeout(() => $g('bg-result')?.classList.add('show'), 750);
+  });
+
+  $g('bg-next')?.addEventListener('click', () => startRound(round + 1));
+  $g('bg-retry')?.addEventListener('click', () => startRound(1));
+
   (window as any).__batGame = {
     start() {
       requestAnimationFrame(() => {
         if (!inst) inst = new ArkhamSpotlightSearch();
-        else inst.restart();
         inst.paused = false;
         const c = document.getElementById('spotlight-container');
         if (c && !ro) {
@@ -2170,8 +2269,9 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/')
           ro.observe(c);
         }
         window.dispatchEvent(new Event('resize'));
+        startRound(1);
       });
     },
-    close() { if (inst) inst.paused = true; },
+    close() { stopTimer(); if (inst) inst.paused = true; },
   };
 </script>

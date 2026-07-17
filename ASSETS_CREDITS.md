@@ -25,7 +25,8 @@ Le icone sono incluse al build: nessuna richiesta a CDN esterni a runtime.
 
 | File | Fonte | Licenza | Note |
 |------|-------|---------|------|
-| `public/wallpaper.jpg` | Unsplash (foto di un pipistrello al crepuscolo) | Unsplash License (uso gratuito, anche commerciale, senza attribuzione) | E' un **pipistrello reale**, non l'emblema DC. |
+| `public/wallpaper.jpg` | Unsplash (foto di un pipistrello al crepuscolo) | Unsplash License (uso gratuito, anche commerciale, senza attribuzione) | Tema scuro. E' un **pipistrello reale**, non l'emblema DC. |
+| `public/wallpaper-light.jpg` | Unsplash (gradiente pastello soft) | Unsplash License | Tema chiaro. |
 
 > **Slot personalizzabile:** per cambiare sfondo basta sostituire `public/wallpaper.jpg`
 > con qualsiasi immagine (stesso nome). Le alternative a gradiente sono in Impostazioni.

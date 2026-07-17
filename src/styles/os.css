@@ -14,6 +14,13 @@
 #desktop[data-wall='3'] .wall--grad { background: linear-gradient(160deg, #0e1a1a, #0a0f14 60%, #070a0d); }
 #desktop[data-wall='4'] .wall--grad { background: radial-gradient(120% 100% at 70% 10%, #1a1730, #0b0c12 55%); }
 
+/* tema chiaro: sfondo pastello luminoso (foto CC0), non un bianco piatto */
+html[data-theme='light'] .wall--photo { background-image: url('/bat-portfolio/wallpaper-light.jpg') !important; opacity: 1 !important; }
+html[data-theme='light'] #desktop .wall--grad { opacity: 0 !important; }
+html[data-theme='light'] .wall-scrim { opacity: 0 !important; }
+html[data-theme='light'] .wall-glow { opacity: 0.25; }
+html[data-theme='light'] .wall-dots { display: none; }
+
 /* scrim per leggibilita' sopra la foto */
 .wall-scrim {
   position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0;

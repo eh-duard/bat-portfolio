@@ -15,6 +15,14 @@ import { Icon } from 'astro-icon/components';
   </section>
 
   <section class="set__group">
+    <h3 class="set__h"><Icon name="lucide:contrast" /> Tema</h3>
+    <div class="set__row">
+      <button class="set__opt" data-set-theme="dark"><Icon name="lucide:moon" /> Scuro</button>
+      <button class="set__opt" data-set-theme="light"><Icon name="lucide:sun" /> Chiaro</button>
+    </div>
+  </section>
+
+  <section class="set__group">
     <h3 class="set__h"><Icon name="lucide:languages" /> Lingua</h3>
     <div class="set__row">
       <button class="set__opt" data-set-lang="it">Italiano</button>
@@ -56,7 +64,16 @@ import { Icon } from 'astro-icon/components';
 </style>
 
 <script>
-  import { setWall, wallStore } from '../../../stores/os';
+  import { setWall, wallStore, setTheme, themeStore } from '../../../stores/os';
+
+  // tema
+  document.querySelectorAll<HTMLElement>('[data-set-theme]').forEach((b) => {
+    b.addEventListener('click', () => setTheme(b.dataset.setTheme as 'dark' | 'light'));
+  });
+  const syncTheme = () => document.querySelectorAll<HTMLElement>('[data-set-theme]')
+    .forEach((b) => b.classList.toggle('on', b.dataset.setTheme === themeStore.get()));
+  themeStore.subscribe(syncTheme);
+
   const walls = document.getElementById('set-walls');
   walls?.querySelectorAll<HTMLElement>('.wallpick').forEach((b) => {
     b.addEventListener('click', () => setWall(Number(b.dataset.wall)));
@@ -68,7 +85,8 @@ import { Icon } from 'astro-icon/components';
   wallStore.subscribe(sync);
   document.getElementById('set-reset')?.addEventListener('click', () => {
     if (confirm('Ripristinare tutte le impostazioni e le note?')) {
-      ['nox-lang', 'nox-pins', 'nox-wall', 'nox-notes', 'nox-booted'].forEach((k) => localStorage.removeItem(k));
+      ['nox-lang', 'nox-pins', 'nox-wall', 'nox-notes', 'batdesk-theme'].forEach((k) => localStorage.removeItem(k));
+      sessionStorage.removeItem('nox-booted');
       location.reload();
     }
   });

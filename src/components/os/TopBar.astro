@@ -19,10 +19,40 @@ import { OS_NAME } from '../../data/apps';
       <button data-set-lang="it" class="tb-seg__b">IT</button>
       <button data-set-lang="en" class="tb-seg__b">EN</button>
     </div>
-    <div class="tb-sys tb-btn" title="Sistema">
-      <Icon name="lucide:wifi" />
-      <Icon name="lucide:volume-2" />
+    <button class="tb-sys tb-btn" data-toggle-tray title="Impostazioni rapide" aria-haspopup="true">
+      <span class="ic ic-wifi"><Icon name="lucide:wifi" /></span>
+      <span class="ic ic-wifioff"><Icon name="lucide:wifi-off" /></span>
+      <span class="ic ic-vol"><Icon name="lucide:volume-2" /></span>
+      <span class="ic ic-voloff"><Icon name="lucide:volume-x" /></span>
+      <span class="ic ic-batt"><Icon name="lucide:battery-medium" /></span>
+    </button>
+  </div>
+
+  <!-- Quick settings -->
+  <div id="tray" class="tray" hidden>
+    <div class="tray__tiles">
+      <button class="tray__tile" data-toggle-theme>
+        <span class="ic ic-moon"><Icon name="lucide:moon" /></span>
+        <span class="ic ic-sun"><Icon name="lucide:sun" /></span>
+        <b class="tray-theme-label">Tema scuro</b>
+      </button>
+      <button class="tray__tile" data-toggle-wifi>
+        <span class="ic ic-wifi"><Icon name="lucide:wifi" /></span>
+        <span class="ic ic-wifioff"><Icon name="lucide:wifi-off" /></span>
+        <b class="tray-wifi-label">Wi-Fi</b>
+      </button>
+    </div>
+    <div class="tray__slider">
+      <button id="tray-mute" aria-label="Muto">
+        <span class="ic ic-vol"><Icon name="lucide:volume-2" /></span>
+        <span class="ic ic-voloff"><Icon name="lucide:volume-x" /></span>
+      </button>
+      <input type="range" id="tray-vol" min="0" max="100" value="70" aria-label="Volume" />
+      <span id="tray-vol-val" class="font-mono">70</span>
+    </div>
+    <div class="tray__batt">
       <Icon name="lucide:battery-medium" />
+      <span id="tray-batt" class="font-mono">—</span>
     </div>
   </div>
 </header>
@@ -60,11 +90,63 @@ import { OS_NAME } from '../../data/apps';
   .tb-seg__b:hover { color: var(--text); }
   .tb-seg__b.on { background: var(--accent); color: #120a06; }
 
-  .tb-sys { gap: 0.3rem; }
+  .tb-sys { gap: 0.35rem; }
   .tb-sys :global(svg) { font-size: 14px; }
 
+  /* swap icone in base allo stato */
+  .ic { display: inline-flex; align-items: center; }
+  .ic-sun, .ic-wifioff, .ic-voloff { display: none; }
+  html[data-theme='light'] .ic-moon { display: none; }
+  html[data-theme='light'] .ic-sun { display: inline-flex; }
+  body.wifi-off .tb-sys .ic-wifi, body.wifi-off .tray .ic-wifi { display: none; }
+  body.wifi-off .tb-sys .ic-wifioff, body.wifi-off .tray .ic-wifioff { display: inline-flex; }
+  body.vol-muted .tb-sys .ic-vol, body.vol-muted .tray .ic-vol { display: none; }
+  body.vol-muted .tb-sys .ic-voloff, body.vol-muted .tray .ic-voloff { display: inline-flex; }
+
+  /* Quick settings popover */
+  .tray {
+    position: fixed; top: calc(var(--topbar-h) + 6px); right: 8px; z-index: 7500;
+    width: 250px; padding: 0.7rem; border-radius: 12px;
+    background: var(--bg-elev); border: 1px solid var(--line); box-shadow: var(--shadow);
+    display: flex; flex-direction: column; gap: 0.6rem;
+    transform-origin: top right; transition: opacity 0.15s, transform 0.15s;
+  }
+  .tray[hidden] { display: none; }
+  .tray.closing { opacity: 0; transform: scale(0.96) translateY(-4px); }
+  .tray__tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+  .tray__tile {
+    display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem;
+    padding: 0.7rem; border-radius: 10px; background: var(--accent); color: #fff;
+    transition: filter 0.15s;
+  }
+  .tray__tile :global(svg) { font-size: 20px; }
+  .tray__tile b { font-size: 0.72rem; font-weight: 500; }
+  .tray__tile.off { background: var(--bg-header); color: var(--text-dim); }
+  .tray__tile:hover { filter: brightness(1.06); }
+
+  .tray__slider { display: flex; align-items: center; gap: 0.55rem; padding: 0.2rem 0.3rem; }
+  .tray__slider button { color: var(--text-dim); display: inline-flex; }
+  .tray__slider button :global(svg) { font-size: 17px; }
+  #tray-vol { flex: 1; accent-color: var(--accent); }
+  #tray-vol-val { font-size: 0.7rem; color: var(--text-mute); min-width: 2ch; text-align: right; }
+
+  .tray__batt { display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: var(--text-dim); padding: 0.2rem 0.3rem; border-top: 1px solid var(--line-soft); padding-top: 0.6rem; }
+  .tray__batt :global(svg) { font-size: 16px; color: var(--accent); }
+
+  /* tema chiaro: la barra non deve restare scura con testo scuro */
+  html[data-theme='light'] .topbar { background: rgba(247,248,250,0.86); border-bottom-color: var(--line); }
+  html[data-theme='light'] .tb-btn:hover { background: rgba(0,0,0,0.06); }
+
+  @media (max-width: 700px) { #os-date { display: none; } }
   @media (max-width: 640px) {
     .tb-os { display: none; }
-    .tb-clock { font-size: 0.72rem; }
+    .tb-clock { position: static; transform: none; font-size: 0.72rem; }
+    .tray { width: min(250px, calc(100vw - 16px)); right: 6px; }
+  }
+  @media (max-width: 380px) {
+    .tb-seg__b { padding: 0.05rem 0.32rem; font-size: 0.56rem; }
+    .tb-sys { gap: 0.22rem; }
+    .tb-btn { padding: 0 0.4rem; gap: 0.28rem; }
+    .tb-activities .tb-os { display: none; }
   }
 </style>
